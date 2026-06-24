@@ -1,8 +1,6 @@
 const CACHE = 'sanctuary-v1';
-const ASSETS = ['/'];
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)));
   self.skipWaiting();
 });
 
@@ -14,7 +12,6 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
-  // Network first for Supabase API calls
   if (e.request.url.includes('supabase.co')) return;
   e.respondWith(
     fetch(e.request).catch(() => caches.match(e.request))

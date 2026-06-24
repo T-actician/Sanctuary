@@ -7,6 +7,7 @@
   <meta name="theme-color" content="#0b1410">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <style>body{overscroll-behavior-y:contain}.content-area{overscroll-behavior-y:contain}</style>
   <meta name="apple-mobile-web-app-title" content="Sanctuary">
   <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 <title>Sanctuary</title>
@@ -3376,49 +3377,46 @@ function togglePw(id, btn) {
 
 <!-- ══ MOBILE DRAWER ══ -->
 <div id="mob-drawer">
-  <div class="mob-drawer-header">
-    <div class="mob-drawer-logo">
-      <div class="mob-drawer-logo-icon">🌿</div>
-      <div class="mob-drawer-logo-text">
-        <div class="name">Sanctuary</div>
-        <div class="sub">Your Best Friend</div>
-      </div>
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 12px 8px;border-bottom:1px solid var(--border);flex-shrink:0">
+    <div style="display:flex;align-items:center;gap:10px">
+      <div class="logo-icon">🌿</div>
+      <div class="logo-text"><div class="name">Sanctuary</div><div class="sub">Your Best Friend</div></div>
     </div>
-    <button class="mob-drawer-close" onclick="mobDrawerClose()"><i class="ti ti-x"></i></button>
+    <button onclick="mobDrawerClose()" style="background:none;border:none;color:var(--text3);font-size:22px;cursor:pointer;padding:4px;line-height:1"><i class="ti ti-x"></i></button>
   </div>
-  <nav class="mob-drawer-nav">
-    <div class="mob-drawer-label">Home</div>
-    <div class="mob-drawer-item active" data-mob-section="dashboard" onclick="mobNavGo('dashboard',this)"><i class="ti ti-layout-dashboard"></i>Dashboard</div>
-    <div class="mob-drawer-label">Create</div>
-    <div class="mob-drawer-item" data-mob-section="diary" onclick="mobNavGo('diary',this)"><i class="ti ti-book"></i>Diary</div>
-    <div class="mob-drawer-item" data-mob-section="notes" onclick="mobNavGo('notes',this)"><i class="ti ti-notes"></i>Notebook</div>
-    <div class="mob-drawer-label">Plan</div>
-    <div class="mob-drawer-item" data-mob-section="goals" onclick="mobNavGo('goals',this)"><i class="ti ti-target"></i>Daily Ambitions</div>
-    <div class="mob-drawer-item" data-mob-section="projects" onclick="mobNavGo('projects',this)"><i class="ti ti-layout-kanban"></i>Projects</div>
-    <div class="mob-drawer-label">Discover</div>
-    <div class="mob-drawer-item" data-mob-section="journey" onclick="mobNavGo('journey',this)"><i class="ti ti-route"></i>Life Journey</div>
-    <div class="mob-drawer-item" data-mob-section="gallery" onclick="mobNavGo('gallery',this)"><i class="ti ti-photo"></i>Gallery</div>
-    <div class="mob-drawer-item" data-mob-section="analytics" onclick="mobNavGo('analytics',this)"><i class="ti ti-chart-dots"></i>Analytics</div>
-    <div class="mob-drawer-label">Restore</div>
-    <div class="mob-drawer-item" data-mob-section="breaks" onclick="mobNavGo('breaks',this)"><i class="ti ti-leaf"></i>Breaks</div>
-    <div class="mob-drawer-item" data-mob-section="music" onclick="mobNavGo('music',this)"><i class="ti ti-music"></i>Music</div>
-    <div class="mob-drawer-label">Play</div>
-    <div class="mob-drawer-item" data-mob-section="watch" onclick="mobNavGo('watch',this)"><i class="ti ti-clock-hour-4"></i>Watch</div>
-    <div class="mob-drawer-item" data-mob-section="game" onclick="mobNavGo('game',this)"><i class="ti ti-device-gamepad-2"></i>Mind Game</div>
-    <div class="mob-drawer-label">Identity</div>
-    <div class="mob-drawer-item" data-mob-section="aay" onclick="mobNavGo('aay',this)"><i class="ti ti-sparkles"></i>All About You</div>
-    <div class="mob-drawer-label">More</div>
-    <div class="mob-drawer-item" data-mob-section="trash" onclick="mobNavGo('trash',this)"><i class="ti ti-trash"></i>Trash</div>
+  <nav class="nav-area" style="flex:1;overflow-y:auto">
+    <div class="nav-section-label">Home</div>
+    <div class="nav-item" data-mob-section="dashboard" onclick="mobNavGo('dashboard',this)"><i class="ti ti-layout-dashboard"></i><span>Dashboard</span></div>
+    <div class="nav-section-label">Create</div>
+    <div class="nav-item" data-mob-section="diary" onclick="mobNavGo('diary',this)"><i class="ti ti-book"></i><span>Diary</span><span class="nav-badge">Today</span></div>
+    <div class="nav-item" data-mob-section="notes" onclick="mobNavGo('notes',this)"><i class="ti ti-notes"></i><span>Notebook</span></div>
+    <div class="nav-section-label">Plan</div>
+    <div class="nav-item" data-mob-section="goals" onclick="mobNavGo('goals',this)"><i class="ti ti-target"></i><span>Daily ambitions</span></div>
+    <div class="nav-item" data-mob-section="projects" onclick="mobNavGo('projects',this)"><i class="ti ti-layout-kanban"></i><span>Projects</span></div>
+    <div class="nav-section-label">Discover</div>
+    <div class="nav-item" data-mob-section="journey" onclick="mobNavGo('journey',this)"><i class="ti ti-route"></i><span>Life journey</span></div>
+    <div class="nav-item" data-mob-section="gallery" onclick="mobNavGo('gallery',this)"><i class="ti ti-photo"></i><span>Gallery</span></div>
+    <div class="nav-item" data-mob-section="analytics" onclick="mobNavGo('analytics',this)"><i class="ti ti-chart-dots"></i><span>Analytics</span></div>
+    <div class="nav-section-label">Restore</div>
+    <div class="nav-item" data-mob-section="breaks" onclick="mobNavGo('breaks',this)"><i class="ti ti-leaf"></i><span>Breaks</span></div>
+    <div class="nav-item" data-mob-section="music" onclick="mobNavGo('music',this)"><i class="ti ti-music"></i><span>Music</span></div>
+    <div class="nav-section-label">Play</div>
+    <div class="nav-item" data-mob-section="watch" onclick="mobNavGo('watch',this)"><i class="ti ti-clock-hour-4"></i><span>Watch</span></div>
+    <div class="nav-item" data-mob-section="game" onclick="mobNavGo('game',this)"><i class="ti ti-device-gamepad-2"></i><span>Mind game</span></div>
+    <div class="nav-section-label">Identity</div>
+    <div class="nav-item" data-mob-section="aay" onclick="mobNavGo('aay',this)"><i class="ti ti-sparkles"></i><span>All about you</span></div>
+    <div class="nav-section-label">More</div>
+    <div class="nav-item" data-mob-section="trash" onclick="mobNavGo('trash',this)"><i class="ti ti-trash"></i><span>Trash</span></div>
   </nav>
-  <div class="mob-drawer-footer">
-    <div class="mob-drawer-profile" onclick="mobNavGo('aay',document.querySelector('[data-mob-section=aay]'))">
+  <div class="profile-area">
+    <div class="prof-inner" onclick="mobNavGo('aay',document.querySelector('[data-mob-section=aay]'))">
       <div class="avatar-circle" id="mob-drawer-avatar">S</div>
-      <div class="mob-drawer-profile-info">
-        <div class="name" id="mob-drawer-name">You</div>
-        <div class="streak">🔥 <span id="mob-drawer-streak">0</span> day streak</div>
+      <div>
+        <div class="prof-name" id="mob-drawer-name">You</div>
+        <div class="prof-streak">🔥 <span id="mob-drawer-streak">0</span> day streak</div>
       </div>
     </div>
-    <button class="mob-drawer-signout" onclick="authSignOut();mobDrawerClose()">
+    <button onclick="authSignOut();mobDrawerClose()" style="width:100%;margin-top:8px;padding:9px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;color:var(--text2);font-size:12px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px">
       <i class="ti ti-logout"></i> Sign out
     </button>
   </div>
@@ -3457,9 +3455,11 @@ function mobDrawerClose() {
 function mobNavGo(section, el) {
   var desktopNavEl = document.querySelector('.nav-item[data-section="' + section + '"]');
   switchSection(section, desktopNavEl);
-  document.querySelectorAll('.mob-drawer-item').forEach(function(i){i.classList.remove('active');});
-  var drawerEl = document.querySelector('.mob-drawer-item[data-mob-section="' + section + '"]');
+  // Mark drawer nav items active
+  document.querySelectorAll('#mob-drawer .nav-item').forEach(function(i){i.classList.remove('active');});
+  var drawerEl = document.querySelector('#mob-drawer .nav-item[data-mob-section="' + section + '"]');
   if (drawerEl) drawerEl.classList.add('active');
+  // Mark bottom nav active
   document.querySelectorAll('.mob-nav-btn').forEach(function(b){b.classList.remove('active');});
   var bottomEl = document.querySelector('.mob-nav-btn[data-mob-bottom="' + section + '"]');
   if (bottomEl) bottomEl.classList.add('active');
@@ -3492,7 +3492,7 @@ function mobSyncProfile() {
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function() {
-    navigator.serviceWorker.register('/sw.js').catch(function(e){ console.log('SW reg failed', e); });
+    navigator.serviceWorker.register('/sw.js').catch(function(e){ console.log('SW:', e); });
   });
 }
 </script>
