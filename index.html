@@ -391,7 +391,7 @@ select option{background:var(--bg2)}
 .trash-empty{text-align:center;color:var(--text3);font-size:13px;padding:30px 0}
 .trash-empty i{font-size:28px;display:block;margin-bottom:8px;opacity:0.4}
 
-/* Stagger animation */
+/* Stagger animation ......*/
 @keyframes riseIn{from{opacity:0;transform:translateY(14px) scale(0.985)}to{opacity:1;transform:translateY(0) scale(1)}}
 .stagger>*{animation:riseIn 0.45s cubic-bezier(.2,.7,.3,1) backwards}
 .stagger>*:nth-child(1){animation-delay:.02s}
@@ -1411,7 +1411,7 @@ function save() {
     achievements:state.achievements, growth:state.growth,
     milestones:state.milestones,
     gallery:{ memories: stripImg(state.gallery.memories), visionboard: stripImg(state.gallery.visionboard) },
-    places: state.places.map(p=>({...p, photos: (p.photos||[]).map(ph=>({blobKey: ph.blobKey}))})),
+    places: state.places.map(p=>({...p, photos: (p.photos||[]).map(ph=>({blobKey: ph.blobKey, storageUrl: ph.storageUrl}))})),
     appTheme:state.appTheme, heroTheme:state.heroTheme,
     notesLayout:state.notesLayout, alarms:state.alarms, reminders:state.reminders, pastReminders:state.pastReminders, trash:state.trash,
     miniPlayerVisible:state.miniPlayerVisible, gameBest:state.gameBest,
@@ -1476,15 +1476,20 @@ async function restoreAudioBlobs() {
       const blob = await idbGet(track.blobKey);
       if (blob) {
         track.blobUrl = URL.createObjectURL(blob);
+      } else if (track.storageUrl) {
+        // Not cached locally on this device — stream from the cloud copy instead of deleting it.
+        track.blobUrl = null;
       } else {
         track.blobUrl = null;
         dead.push(track.id);
       }
+    } else if (track.storageUrl) {
+      track.blobUrl = null;
     }
   }
   if(dead.length){
     state.music.tracks = state.music.tracks.filter(t=>!dead.includes(t.id));
-    toast(dead.length+' track'+(dead.length>1?'s were':' was')+' removed (browser cleared storage)',true);
+    toast(dead.length+' track'+(dead.length>1?'s were':' was')+' removed (no local or cloud copy found)',true);
     save();
   }
   rebuildQueue();
@@ -1512,7 +1517,9 @@ async function restorePlacesBlobs() {
   for (const p of state.places) {
     if (!p.photos) continue;
     for (const ph of p.photos) {
-      const phNeedsRestore = ph && ph.blobKey && (!ph.url || ph.url.startsWith('blob:'));
+      if (!ph) continue;
+      if (ph.storageUrl) { ph.url = ph.storageUrl; continue; }
+      const phNeedsRestore = ph.blobKey && (!ph.url || ph.url.startsWith('blob:'));
       if (phNeedsRestore) {
         const blob = await idbGet(ph.blobKey);
         if (blob) ph.url = URL.createObjectURL(blob);
@@ -2055,7 +2062,7 @@ async function handleNoteAttachment(e){
         const{data:urlData}=_supabase.storage.from('attachments').getPublicUrl(path);
         storageUrl=urlData.publicUrl;
       }
-    }catch(err){console.warn('Attachment storage upload failed',err);}
+    }catch(err){console.warn('Attachment storage upload failed',err);toast('Saved on this device, but cloud sync failed for "'+file.name+'"',true);}
   }
   const att={name:file.name,type:file.type,url:storageUrl||url,blobKey,storageUrl};
   state.noteModalAttachments.push(att);
@@ -2387,7 +2394,7 @@ async function handleGalleryUpload(e,type){
         const{data:urlData}=_supabase.storage.from('gallery').getPublicUrl(path);
         storageUrl=urlData.publicUrl;
       }
-    }catch(err){console.warn('Gallery storage upload failed',err);}
+    }catch(err){console.warn('Gallery storage upload failed',err);toast('Saved on this device, but cloud sync failed for this photo',true);}
   }
   const url=storageUrl||localUrl;
   if(_galleryReplaceTarget&&_galleryReplaceTarget.type===type){
@@ -2438,15 +2445,28 @@ async function handlePlacePhotoUpload(e){
   const blobKey='place_'+p.id+'_'+Date.now()+'_'+Math.random().toString(36).slice(2);
   const ok=await idbSet(blobKey,file);
   if(!ok){toast('Could not save photo — storage may be full',true);return;}
-  const url=URL.createObjectURL(file);
+  const localUrl=URL.createObjectURL(file);
+  let storageUrl=null;
+  if(_currentUser){
+    try{
+      const ext=(file.name.split('.').pop()||'jpg').toLowerCase();
+      const path=_currentUser.id+'/'+blobKey+'.'+ext;
+      const{data,error}=await _supabase.storage.from('gallery').upload(path,file,{upsert:true});
+      if(!error&&data){
+        const{data:urlData}=_supabase.storage.from('gallery').getPublicUrl(path);
+        storageUrl=urlData.publicUrl;
+      }
+    }catch(err){console.warn('Place photo storage upload failed',err);toast('Saved on this device, but cloud sync failed for this photo',true);}
+  }
+  const url=storageUrl||localUrl;
   if(!p.photos)p.photos=[];
   if(_placePhotoReplaceIdx!==null){
     const old=p.photos[_placePhotoReplaceIdx];
     if(old&&old.blobKey)idbDel(old.blobKey);
-    p.photos[_placePhotoReplaceIdx]={url,blobKey};
+    p.photos[_placePhotoReplaceIdx]={url,blobKey,storageUrl};
     _placePhotoReplaceIdx=null;
   }else{
-    p.photos.push({url,blobKey});
+    p.photos.push({url,blobKey,storageUrl});
   }
   renderPlacePhotos(p);save();
 }
@@ -2696,8 +2716,20 @@ async function processAudioFiles(files){
     if(!ok){ failed++; continue; }
     const blobUrl=URL.createObjectURL(blob);
     const dur=await getAudioDuration(blobUrl);
+    let storageUrl=null;
+    if(_currentUser){
+      try{
+        const ext=(file.name.split('.').pop()||'mp3').toLowerCase();
+        const path=_currentUser.id+'/'+blobKey+'.'+ext;
+        const{data,error}=await _supabase.storage.from('music').upload(path,blob,{upsert:true,contentType:file.type||'audio/mpeg'});
+        if(!error&&data){
+          const{data:urlData}=_supabase.storage.from('music').getPublicUrl(path);
+          storageUrl=urlData.publicUrl;
+        }
+      }catch(err){console.warn('Music storage upload failed',err);toast('Saved on this device, but cloud sync failed for "'+file.name+'"',true);}
+    }
     const track={
-      id, blobKey, blobUrl, fingerprint:fp,
+      id, blobKey, blobUrl, fingerprint:fp, storageUrl,
       title:file.name.replace(/\.[^.]+$/,''),
       artist:'Unknown artist',
       duration:dur, favourite:false, addedAt:Date.now()
@@ -2742,13 +2774,15 @@ function rebuildQueue(){
 // re-fetch the blob from IndexedDB right then. This is what actually fixes "shows up but won't play".
 async function ensureTrackBlob(track){
   if(track.blobUrl) return track.blobUrl;
-  if(!track.blobKey) return null;
-  try{
-    const blob=await idbGet(track.blobKey);
-    if(!blob) return null;
-    track.blobUrl=URL.createObjectURL(blob);
-    return track.blobUrl;
-  }catch(e){ return null; }
+  if(track.blobKey){
+    try{
+      const blob=await idbGet(track.blobKey);
+      if(blob){ track.blobUrl=URL.createObjectURL(blob); return track.blobUrl; }
+    }catch(e){}
+  }
+  // Not in local IndexedDB (e.g. new device) — fall back to the cloud copy.
+  if(track.storageUrl) return track.storageUrl;
+  return null;
 }
 async function playTrack(id){
   const track=state.music.tracks.find(t=>t.id===id);
@@ -2972,8 +3006,8 @@ function renderPlaylists(){
   }).join('')+`<button class="new-playlist-btn" onclick="createPlaylist()"><i class="ti ti-plus"></i></button>`;
 }
 function selectPlaylist(id){ state.music.activePlaylistId=id; rebuildQueue(); renderPlaylists(); renderMusicLibrary(); save(); }
-function createPlaylist(){
-  const name=prompt('Playlist name:','My playlist'); if(!name)return;
+async function createPlaylist(){
+  const name=await promptDialog('New playlist','Playlist name…','My playlist'); if(!name)return;
   state.music.playlists.push({id:'pl_'+Date.now(),name,auto:false,trackIds:[]});
   renderPlaylists();save();toast('Playlist created');
 }
@@ -2985,12 +3019,41 @@ function deletePlaylist(id){
 function addToPlaylist(trackId){
   const custom=(state.music.playlists||[]).filter(p=>!p.auto);
   if(!custom.length){ toast('Create a playlist first'); return; }
-  const names=custom.map((p,i)=>`${i+1}. ${p.name}`).join('\n');
-  const pick=prompt(`Add to playlist:\n${names}\n\nEnter number:`,'');
-  const idx=parseInt(pick)-1;
-  if(isNaN(idx)||idx<0||idx>=custom.length)return;
-  const pl=custom[idx]; if(!pl.trackIds)pl.trackIds=[];
-  if(!pl.trackIds.includes(trackId)){ pl.trackIds.push(trackId); save(); toast(`Added to ${pl.name}`); renderPlaylists(); }
+  document.getElementById('prompt-modal-title').textContent='Add to playlist';
+  const input=document.getElementById('prompt-modal-input');
+  input.style.display='none';
+  let listWrap=document.getElementById('prompt-modal-playlist-list');
+  if(!listWrap){
+    listWrap=document.createElement('div');
+    listWrap.id='prompt-modal-playlist-list';
+    listWrap.style.cssText='display:flex;flex-direction:column;gap:6px;max-height:240px;overflow-y:auto';
+    input.parentNode.insertBefore(listWrap,input);
+  }
+  listWrap.style.display='';
+  listWrap.innerHTML=custom.map(p=>`<button class="btn" style="text-align:left;width:100%" data-pl-id="${p.id}">${p.name} <span style="color:var(--text3);font-size:11px">(${(p.trackIds||[]).length})</span></button>`).join('');
+  const cancelBtn=document.getElementById('prompt-modal-cancel');
+  const okBtn=document.getElementById('prompt-modal-ok');
+  okBtn.style.display='none';
+  const cleanup=()=>{
+    listWrap.style.display='none';
+    input.style.display='';
+    okBtn.style.display='';
+    cancelBtn.onclick=null;
+    closeModal('prompt-modal');
+  };
+  listWrap.querySelectorAll('button[data-pl-id]').forEach(btn=>{
+    btn.onclick=()=>{
+      const pl=custom.find(p=>p.id===btn.getAttribute('data-pl-id'));
+      if(pl){
+        if(!pl.trackIds)pl.trackIds=[];
+        if(!pl.trackIds.includes(trackId)){ pl.trackIds.push(trackId); save(); toast(`Added to ${pl.name}`); renderPlaylists(); }
+        else toast('Already in '+pl.name);
+      }
+      cleanup();
+    };
+  });
+  cancelBtn.onclick=cleanup;
+  openModal('prompt-modal');
 }
 // ─────────────────────────────────────────────
 // EPIC WATCH
@@ -3273,7 +3336,7 @@ async function syncToSupabase() {
       achievements: state.achievements,
       growth: state.growth,
       milestones: state.milestones,
-      places: state.places.map(p => ({...p, photos: (p.photos||[]).map(ph => ({blobKey:ph.blobKey}))})),
+      places: state.places.map(p => ({...p, photos: (p.photos||[]).map(ph => ({blobKey:ph.blobKey, storageUrl:ph.storageUrl}))})),
       gallery: { memories: state.gallery.memories.map(i=>({blobKey:i.blobKey,storageUrl:i.storageUrl,caption:i.caption})), visionboard: state.gallery.visionboard.map(i=>({blobKey:i.blobKey,storageUrl:i.storageUrl,caption:i.caption})) },
       alarms: state.alarms,
       reminders: state.reminders,
@@ -3312,7 +3375,12 @@ async function loadFromSupabase() {
     if (data.achievements?.length)   state.achievements = data.achievements;
     if (data.growth?.length)         state.growth = data.growth;
     if (data.milestones?.length)     state.milestones = data.milestones;
-    if (data.places?.length)         state.places = data.places;
+    if (data.places?.length) {
+      state.places = data.places.map(p => ({
+        ...p,
+        photos: (p.photos||[]).map(ph => ({...ph, url: ph.storageUrl || ph.url}))
+      }));
+    }
     if (data.gallery)                {
       // Restore storageUrl as img so cross-device photos display immediately
       const restoreGal = arr => (arr||[]).map(i=>({...i, img: i.storageUrl||i.img}));
