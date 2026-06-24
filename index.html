@@ -3,6 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0b1410">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Sanctuary">
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 <title>Sanctuary</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <style>
@@ -3363,4 +3369,130 @@ function togglePw(id, btn) {
     }
   });
 })();
+</script>
+
+<!-- ══ MOBILE DRAWER OVERLAY ══ -->
+<div id="mob-drawer-overlay" onclick="mobDrawerClose()"></div>
+
+<!-- ══ MOBILE DRAWER ══ -->
+<div id="mob-drawer">
+  <div class="mob-drawer-header">
+    <div class="mob-drawer-logo">
+      <div class="mob-drawer-logo-icon">🌿</div>
+      <div class="mob-drawer-logo-text">
+        <div class="name">Sanctuary</div>
+        <div class="sub">Your Best Friend</div>
+      </div>
+    </div>
+    <button class="mob-drawer-close" onclick="mobDrawerClose()"><i class="ti ti-x"></i></button>
+  </div>
+  <nav class="mob-drawer-nav">
+    <div class="mob-drawer-label">Home</div>
+    <div class="mob-drawer-item active" data-mob-section="dashboard" onclick="mobNavGo('dashboard',this)"><i class="ti ti-layout-dashboard"></i>Dashboard</div>
+    <div class="mob-drawer-label">Create</div>
+    <div class="mob-drawer-item" data-mob-section="diary" onclick="mobNavGo('diary',this)"><i class="ti ti-book"></i>Diary</div>
+    <div class="mob-drawer-item" data-mob-section="notes" onclick="mobNavGo('notes',this)"><i class="ti ti-notes"></i>Notebook</div>
+    <div class="mob-drawer-label">Plan</div>
+    <div class="mob-drawer-item" data-mob-section="goals" onclick="mobNavGo('goals',this)"><i class="ti ti-target"></i>Daily Ambitions</div>
+    <div class="mob-drawer-item" data-mob-section="projects" onclick="mobNavGo('projects',this)"><i class="ti ti-layout-kanban"></i>Projects</div>
+    <div class="mob-drawer-label">Discover</div>
+    <div class="mob-drawer-item" data-mob-section="journey" onclick="mobNavGo('journey',this)"><i class="ti ti-route"></i>Life Journey</div>
+    <div class="mob-drawer-item" data-mob-section="gallery" onclick="mobNavGo('gallery',this)"><i class="ti ti-photo"></i>Gallery</div>
+    <div class="mob-drawer-item" data-mob-section="analytics" onclick="mobNavGo('analytics',this)"><i class="ti ti-chart-dots"></i>Analytics</div>
+    <div class="mob-drawer-label">Restore</div>
+    <div class="mob-drawer-item" data-mob-section="breaks" onclick="mobNavGo('breaks',this)"><i class="ti ti-leaf"></i>Breaks</div>
+    <div class="mob-drawer-item" data-mob-section="music" onclick="mobNavGo('music',this)"><i class="ti ti-music"></i>Music</div>
+    <div class="mob-drawer-label">Play</div>
+    <div class="mob-drawer-item" data-mob-section="watch" onclick="mobNavGo('watch',this)"><i class="ti ti-clock-hour-4"></i>Watch</div>
+    <div class="mob-drawer-item" data-mob-section="game" onclick="mobNavGo('game',this)"><i class="ti ti-device-gamepad-2"></i>Mind Game</div>
+    <div class="mob-drawer-label">Identity</div>
+    <div class="mob-drawer-item" data-mob-section="aay" onclick="mobNavGo('aay',this)"><i class="ti ti-sparkles"></i>All About You</div>
+    <div class="mob-drawer-label">More</div>
+    <div class="mob-drawer-item" data-mob-section="trash" onclick="mobNavGo('trash',this)"><i class="ti ti-trash"></i>Trash</div>
+  </nav>
+  <div class="mob-drawer-footer">
+    <div class="mob-drawer-profile" onclick="mobNavGo('aay',document.querySelector('[data-mob-section=aay]'))">
+      <div class="avatar-circle" id="mob-drawer-avatar">S</div>
+      <div class="mob-drawer-profile-info">
+        <div class="name" id="mob-drawer-name">You</div>
+        <div class="streak">🔥 <span id="mob-drawer-streak">0</span> day streak</div>
+      </div>
+    </div>
+    <button class="mob-drawer-signout" onclick="authSignOut();mobDrawerClose()">
+      <i class="ti ti-logout"></i> Sign out
+    </button>
+  </div>
+</div>
+
+<!-- ══ MOBILE BOTTOM NAV ══ -->
+<nav id="mob-bottom-nav">
+  <button class="mob-nav-btn active" data-mob-bottom="dashboard" onclick="mobNavGo('dashboard',this)">
+    <i class="ti ti-layout-dashboard"></i>Home
+  </button>
+  <button class="mob-nav-btn" data-mob-bottom="diary" onclick="mobNavGo('diary',this)">
+    <i class="ti ti-book"></i>Diary
+  </button>
+  <button class="mob-nav-btn" data-mob-bottom="goals" onclick="mobNavGo('goals',this)">
+    <i class="ti ti-target"></i>Goals
+  </button>
+  <button class="mob-nav-btn" data-mob-bottom="notes" onclick="mobNavGo('notes',this)">
+    <i class="ti ti-notes"></i>Notes
+  </button>
+  <button class="mob-nav-btn" data-mob-bottom="music" onclick="mobNavGo('music',this)">
+    <i class="ti ti-music"></i>Music
+  </button>
+</nav>
+
+<script>
+function mobDrawerOpen() {
+  document.getElementById('mob-drawer').classList.add('open');
+  document.getElementById('mob-drawer-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function mobDrawerClose() {
+  document.getElementById('mob-drawer').classList.remove('open');
+  document.getElementById('mob-drawer-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function mobNavGo(section, el) {
+  var desktopNavEl = document.querySelector('.nav-item[data-section="' + section + '"]');
+  switchSection(section, desktopNavEl);
+  document.querySelectorAll('.mob-drawer-item').forEach(function(i){i.classList.remove('active');});
+  var drawerEl = document.querySelector('.mob-drawer-item[data-mob-section="' + section + '"]');
+  if (drawerEl) drawerEl.classList.add('active');
+  document.querySelectorAll('.mob-nav-btn').forEach(function(b){b.classList.remove('active');});
+  var bottomEl = document.querySelector('.mob-nav-btn[data-mob-bottom="' + section + '"]');
+  if (bottomEl) bottomEl.classList.add('active');
+  mobDrawerClose();
+}
+// Sync drawer profile info
+function mobSyncProfile() {
+  var sa = document.getElementById('sidebar-avatar');
+  var da = document.getElementById('mob-drawer-avatar');
+  if (sa && da) da.innerHTML = sa.innerHTML;
+  var sn = document.getElementById('sidebar-name');
+  var dn = document.getElementById('mob-drawer-name');
+  if (sn && dn) dn.textContent = sn.textContent;
+  var ss = document.getElementById('sidebar-streak');
+  var ds = document.getElementById('mob-drawer-streak');
+  if (ss && ds) ds.textContent = ss.textContent;
+}
+// Patch updateProfileUI to also update drawer
+(function() {
+  var _orig = window.updateProfileUI;
+  if (typeof _orig === 'function') {
+    window.updateProfileUI = function() {
+      _orig.apply(this, arguments);
+      mobSyncProfile();
+    };
+  }
+})();
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('/sw.js').catch(function(e){ console.log('SW reg failed', e); });
+  });
+}
 </script>
