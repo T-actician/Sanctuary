@@ -12,112 +12,6 @@
   <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 <title>Sanctuary</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-const SUPA_URL = 'https://hzbcerubdaldvapsajce.supabase.co';
-const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh6YmNlcnViZGFsZHZhcHNhamNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyMjg1NTAsImV4cCI6MjA5NzgwNDU1MH0.lnd851sqdsVYe5x-736sb8St1XddZGBEVZxjCLrH4qA';
-const supa = supabase.createClient(SUPA_URL, SUPA_KEY);
-let _supaUser = null;
-let _supaSession = null;
-let _syncChannels = [];
-
-// ── Auth helpers ──────────────────────────────
-async function supaInit() {
-  const { data: { session } } = await supa.auth.getSession();
-  if (session) { _supaUser = session.user; _supaSession = session; }
-  supa.auth.onAuthStateChange((_event, session) => {
-    _supaUser = session ? session.user : null;
-    _supaSession = session;
-    if (_supaUser) { supaFetchProfile(); supaStartSync(); }
-    else { supaStopSync(); }
-  });
-  if (_supaUser) { await supaFetchProfile(); supaStartSync(); }
-}
-
-async function authSignOut() {
-  supaStopSync();
-  await supa.auth.signOut();
-  toast('Signed out');
-}
-
-// ── Profile sync ──────────────────────────────
-async function supaFetchProfile() {
-  if (!_supaUser) return;
-  const { data, error } = await supa.from('profiles').select('*').eq('id', _supaUser.id).single();
-  if (error || !data) return;
-  // Merge into local state
-  if (data.name) state.profile.name = data.name;
-  if (data.tagline) state.profile.tagline = data.tagline;
-  if (data.initials) state.profile.initials = data.initials;
-  if (data.streak !== undefined && data.streak !== null) state.streak = data.streak;
-  if (data.avatar_url) {
-    // Add cache buster so both devices always get latest
-    const avatarSrc = data.avatar_url + '?t=' + Date.now();
-    state.profile.avatar = avatarSrc;
-    updateAvatarUI(avatarSrc);
-  }
-  updateProfileUI();
-  mobSyncProfile();
-  save();
-}
-
-async function supaSaveProfile() {
-  if (!_supaUser) return;
-  const update = {
-    name: state.profile.name,
-    tagline: state.profile.tagline,
-    initials: state.profile.initials,
-    streak: state.streak,
-    updated_at: new Date().toISOString()
-  };
-  await supa.from('profiles').upsert({ id: _supaUser.id, ...update });
-}
-
-async function supaUploadAvatar(blob) {
-  if (!_supaUser) return null;
-  const path = `${_supaUser.id}/avatar_${Date.now()}.jpg`;
-  const { error } = await supa.storage.from('avatars').upload(path, blob, { upsert: true, contentType: 'image/jpeg' });
-  if (error) { console.error('Avatar upload error', error); return null; }
-  const { data } = supa.storage.from('avatars').getPublicUrl(path);
-  return data.publicUrl;
-}
-
-// ── Project file upload ───────────────────────
-async function supaUploadProjectFile(file, projectId) {
-  if (!_supaUser) return null;
-  const ext = file.name.split('.').pop();
-  const path = `${_supaUser.id}/${projectId}_${Date.now()}.${ext}`;
-  const { error } = await supa.storage.from('project-files').upload(path, file, { upsert: true });
-  if (error) { console.error('File upload error', error); toast('Upload failed', true); return null; }
-  const { data } = supa.storage.from('project-files').getPublicUrl(path);
-  // Save reference to DB
-  await supa.from('project_files').insert({
-    user_id: _supaUser.id,
-    project_id: String(projectId),
-    file_name: file.name,
-    file_url: data.publicUrl,
-    file_size: file.size
-  });
-  return data.publicUrl;
-}
-
-// ── Real-time sync ────────────────────────────
-function supaStartSync() {
-  if (!_supaUser) return;
-  supaStopSync();
-  // Profile changes (avatar updated on another device)
-  const profileCh = supa.channel('profile-sync-' + _supaUser.id)
-    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'profiles', filter: `id=eq.${_supaUser.id}` },
-      () => { supaFetchProfile(); })
-    .subscribe();
-  _syncChannels.push(profileCh);
-}
-
-function supaStopSync() {
-  _syncChannels.forEach(ch => supa.removeChannel(ch));
-  _syncChannels = [];
-}
-</script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -600,11 +494,16 @@ input[type=range]::-moz-range-progress{background:var(--accent3);border-radius:9
   #mob-drawer { display: flex !important; visibility: visible !important; }
   #mob-drawer-overlay { display: block !important; visibility: visible !important; }
   #mob-bottom-nav { display: flex !important; visibility: visible !important; }
-  .topbar { padding: 0 8px !important; gap: 6px !important; }
-  /* FIX 3: Prevent Watch/Alarms title text cutoff */
-  .topbar-title { font-size: 15px !important; white-space: nowrap !important; overflow: visible !important; text-overflow: unset !important; min-width: 60px !important; }
+
+  /* TOPBAR: tight, no overflow */
+  .topbar { padding: 0 8px !important; gap: 4px !important; overflow: hidden !important; }
+  .topbar-title { font-size: 13px !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; max-width: 120px !important; flex: 1 !important; min-width: 0 !important; }
   .topbar-meta { display: none !important; }
-  .btn { padding: 5px 10px !important; font-size: 11px !important; }
+  /* Hide text labels in topbar buttons on mobile — icons only */
+  .topbar-btn-label { display: none !important; }
+  .topbar-btn { padding: 6px 8px !important; font-size: 11px !important; min-width: 32px !important; }
+  .btn { padding: 5px 8px !important; font-size: 11px !important; }
+
   /* FIX 6A: Smooth scrolling */
   .content-area { padding: 12px 12px 80px !important; overflow-y: auto !important; scroll-behavior: smooth !important; -webkit-overflow-scrolling: touch !important; }
   .grid-2 { grid-template-columns: 1fr !important; }
@@ -614,26 +513,29 @@ input[type=range]::-moz-range-progress{background:var(--accent3);border-radius:9
   .ach-grid { grid-template-columns: repeat(2, 1fr) !important; }
   .mini-player { bottom: 70px !important; right: 10px !important; width: calc(100% - 20px) !important; max-width: none !important; }
 
-  /* FIX 3: Watch section titles full width, no cutoff */
-  #s-watch .card-title { white-space: normal !important; overflow: visible !important; word-break: normal !important; }
+  /* Watch section */
   #s-watch .card { width: 100% !important; max-width: 100% !important; }
   #s-watch .alarm-time-lbl { font-size: 22px !important; }
   .sanctuary-watch-wrap { width: 280px !important; height: 280px !important; }
   #watch-canvas { width: 280px !important; height: 280px !important; }
 
-  /* FIX 4: Music section layout on mobile - stack vertically, no overflow */
+  /* Music mobile layout */
   #music-grid-layout { grid-template-columns: 1fr !important; gap: 12px !important; }
   .music-sidebar-panel { width: 100% !important; overflow-x: hidden !important; box-sizing: border-box !important; }
   .np-card { width: 100% !important; box-sizing: border-box !important; }
   .np-art { width: 70px !important; height: 70px !important; }
   .playlist-tabs { overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; }
   .music-upload-zone { padding: 18px !important; }
-  #playlists-list { overflow-x: hidden !important; }
   .track-row { flex-wrap: nowrap !important; }
   .track-title { font-size: 12px !important; }
   .track-artist { font-size: 10px !important; }
 
-  /* FIX 6C: Smoother section transitions on mobile */
+  /* AAY section — prevent content escaping topbar */
+  #s-aay { overflow-x: hidden !important; }
+  #s-aay .profile-banner { margin: 0 0 14px !important; padding: 14px !important; }
+  #s-aay [style*="position:absolute;top:0;right:0"] { position: relative !important; top: auto !important; right: auto !important; margin-top: 8px !important; }
+
+  /* Page transitions */
   .section.active { animation: fadeInMob 0.25s ease forwards !important; }
 }
 
@@ -728,7 +630,7 @@ input[type=range]::-moz-range-progress{background:var(--accent3);border-radius:9
           <div class="prof-streak">🔥 <span id="sidebar-streak">0</span> day streak</div>
         </div>
       </div>
-      <button onclick="authSignOut()" style="width:100%;margin-top:8px;padding:8px;background:rgba(255,60,60,0.07);border:1px solid rgba(255,80,80,0.2);border-radius:8px;color:rgba(240,144,144,0.8);font-size:12px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;transition:all 0.15s">
+      <button onclick="authSignOut()" style="width:100%;margin-top:8px;padding:8px;background:rgba(240,80,80,0.07);border:1px solid rgba(240,80,80,0.2);border-radius:8px;color:rgba(240,144,144,0.85);font-size:12px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;transition:all 0.15s">
         <i class="ti ti-logout"></i> Sign out
       </button>
     </div>
@@ -740,9 +642,9 @@ input[type=range]::-moz-range-progress{background:var(--accent3);border-radius:9
       <button id="mob-hamburger" onclick="mobDrawerOpen()"><i class="ti ti-menu-2"></i></button>
       <span class="topbar-title" id="page-title">Dashboard</span>
       <span class="topbar-meta" id="topbar-date"></span>
-      <button class="btn" onclick="openSearch()"><i class="ti ti-search"></i> Search</button>
-      <button class="btn" id="add-btn" onclick="handleAddBtn()"><i class="ti ti-plus"></i> <span id="add-btn-label">New</span></button>
-      <button class="btn btn-sm" onclick="openModal('theme-modal')" title="Theme"><i class="ti ti-palette"></i></button>
+      <button class="btn topbar-btn" onclick="openSearch()"><i class="ti ti-search"></i><span class="topbar-btn-label"> Search</span></button>
+      <button class="btn topbar-btn" id="add-btn" onclick="handleAddBtn()"><i class="ti ti-plus"></i><span class="topbar-btn-label"> <span id="add-btn-label">New</span></span></button>
+      <button class="btn btn-sm topbar-btn" onclick="openModal('theme-modal')" title="Theme"><i class="ti ti-palette"></i></button>
     </header>
 
     <div class="content-area">
@@ -874,10 +776,7 @@ input[type=range]::-moz-range-progress{background:var(--accent3);border-radius:9
       </section>
 
       <!-- PROJECTS -->
-      <section class="section" id="s-projects">
-        <input type="file" id="project-file-input" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip,.rar,.png,.jpg,.jpeg" style="display:none" onchange="handleProjectFileUpload(event)">
-        <div id="projects-list"></div>
-      </section>
+      <section class="section" id="s-projects"><div id="projects-list"></div></section>
 
       <!-- JOURNEY -->
       <section class="section" id="s-journey">
@@ -1093,14 +992,18 @@ input[type=range]::-moz-range-progress{background:var(--accent3);border-radius:9
       <!-- ALL ABOUT YOU -->
       <section class="section" id="s-aay">
         <div class="profile-banner">
-          <div style="display:flex;align-items:center;gap:16px;position:relative">
+          <div style="display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap">
             <div class="profile-avatar" id="profile-avatar-display" onclick="openAvatarLightbox()">S</div>
-            <div>
-              <div style="font-size:20px;font-weight:700;color:var(--text)" id="profile-name-display">You</div>
-              <div style="font-size:12px;color:var(--text3);margin-top:3px" id="profile-tagline-display">Curious mind. Creative soul.</div>
+            <div style="flex:1;min-width:0">
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
+                <div style="min-width:0">
+                  <div style="font-size:20px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis" id="profile-name-display">You</div>
+                  <div style="font-size:12px;color:var(--text3);margin-top:3px" id="profile-tagline-display">Curious mind. Creative soul.</div>
+                </div>
+                <button class="btn btn-sm" style="flex-shrink:0" onclick="openProfileEdit()"><i class="ti ti-edit"></i> Edit</button>
+              </div>
               <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap" id="profile-tags-display"></div>
             </div>
-            <button class="btn btn-sm" style="position:absolute;top:0;right:0" onclick="openProfileEdit()"><i class="ti ti-edit"></i> Edit</button>
           </div>
         </div>
         <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
@@ -1686,8 +1589,6 @@ async function init() {
   await restorePlacesBlobs().catch(e=>console.warn('places restore failed',e));
   await restoreNoteAttachmentBlobs().catch(e=>console.warn('note attachment restore failed',e));
   await restoreAudioBlobs().catch(e=>console.warn('audio restore failed',e));
-  // Supabase: fetch latest profile + start real-time sync
-  supaInit().catch(e=>console.warn('Supabase init failed',e));
 }
 
 function setDate() {
@@ -1812,7 +1713,6 @@ function saveProfile() {
   updateProfileUI();
   closeModal('profile-modal');
   save(); toast('Profile updated!');
-  if (_supaUser) supaSaveProfile();
 }
 
 // ─────────────────────────────────────────────
@@ -2004,15 +1904,6 @@ async function confirmCrop() {
   closeCropModal();
   updateAvatarUI(dataUrl);
   save(); toast('Photo updated!');
-  // Upload to Supabase for cross-device sync
-  if (_supaUser) {
-    toast('Syncing photo…');
-    const publicUrl = await supaUploadAvatar(blob);
-    if (publicUrl) {
-      await supa.from('profiles').upsert({ id: _supaUser.id, avatar_url: publicUrl, updated_at: new Date().toISOString() });
-      toast('Photo synced ✓');
-    }
-  }
 }
 function openAvatarLightbox() {
   if(!state.profile.avatar) return;
@@ -2283,14 +2174,10 @@ function saveDashJournal() {
 // ─────────────────────────────────────────────
 function renderProjects() {
   const list=document.getElementById('projects-list'); if(!list) return;
-  list.innerHTML=`<div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:12px">
-    <button class="btn" onclick="document.getElementById('project-file-input').click()"><i class="ti ti-upload"></i> Upload file</button>
-    <button class="btn btn-accent" onclick="openModal('project-modal')"><i class="ti ti-plus"></i> New project</button>
-  </div>`+
+  list.innerHTML=`<div style="display:flex;justify-content:flex-end;margin-bottom:12px"><button class="btn btn-accent" onclick="openModal('project-modal')"><i class="ti ti-plus"></i> New project</button></div>`+
     state.projects.map(p=>{
       const steps=p.steps||[];
       const pct=steps.length?Math.round(steps.filter(s=>s.done).length/steps.length*100):0;
-      const files=p.files||[];
       return `<div class="project-card">
         <div class="proj-header">
           <div><div class="proj-title">${p.name}</div><div class="proj-deadline">📅 ${p.deadline||'TBD'}</div></div>
@@ -2309,67 +2196,11 @@ function renderProjects() {
             <button class="btn btn-accent btn-sm" onclick="addStep(${p.id})"><i class="ti ti-plus"></i></button>
           </div>
         </div>
-        ${files.length?`<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
-          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--text3);margin-bottom:6px">Files</div>
-          <div style="display:flex;flex-wrap:wrap;gap:6px">
-            ${files.map((f,fi)=>`<a href="${f.url}" target="_blank" style="display:flex;align-items:center;gap:5px;background:rgba(76,175,110,0.08);padding:5px 10px;border-radius:6px;border:1px solid rgba(76,175,110,0.2);text-decoration:none;font-size:11px;color:var(--text2)">
-              <i class="ti ti-file" style="font-size:13px;color:var(--accent)"></i>${f.name}
-              <button onclick="event.preventDefault();removeProjectFile(${p.id},${fi})" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:12px;padding:0;margin-left:4px"><i class="ti ti-x"></i></button>
-            </a>`).join('')}
-          </div>
-        </div>`:''}
-        <div style="display:flex;gap:6px;justify-content:flex-end;margin-top:8px">
-          <button class="btn btn-sm" onclick="attachFileToProject(${p.id})" title="Attach file"><i class="ti ti-paperclip"></i></button>
+        <div style="text-align:right;margin-top:8px">
           <button class="btn btn-sm" onclick="deleteProject(${p.id})" style="color:rgba(240,144,144,0.7)"><i class="ti ti-trash"></i> Delete</button>
         </div>
       </div>`;
     }).join('');
-}
-
-// Which project a file upload targets
-let _uploadTargetProjectId = null;
-
-function attachFileToProject(pid) {
-  _uploadTargetProjectId = pid;
-  document.getElementById('project-file-input').click();
-}
-
-async function handleProjectFileUpload(e) {
-  const files = Array.from(e.target.files);
-  e.target.value = '';
-  if (!files.length) return;
-  for (const file of files) {
-    const pid = _uploadTargetProjectId;
-    let url = null;
-    let uploading = true;
-    toast(`Uploading ${file.name}…`);
-    // Try Supabase if signed in
-    if (_supaUser && pid) {
-      url = await supaUploadProjectFile(file, pid);
-    }
-    // Fallback: local object URL (session only) or data URL
-    if (!url) {
-      url = URL.createObjectURL(file);
-    }
-    if (pid) {
-      const p = state.projects.find(x => x.id === pid);
-      if (p) {
-        if (!p.files) p.files = [];
-        p.files.push({ name: file.name, url, size: file.size });
-        save();
-        renderProjects();
-        toast(`${file.name} attached ✓`);
-      }
-    }
-  }
-  _uploadTargetProjectId = null;
-}
-
-function removeProjectFile(pid, fi) {
-  const p = state.projects.find(x => x.id === pid);
-  if (!p || !p.files) return;
-  p.files.splice(fi, 1);
-  save(); renderProjects();
 }
 function toggleStep(pid,si){const p=state.projects.find(x=>x.id===pid);if(!p||!p.steps)return;p.steps[si].done=!p.steps[si].done;renderProjects();renderDashProjects();save();}
 function addStep(pid){const p=state.projects.find(x=>x.id===pid);if(!p)return;const inp=document.getElementById('step-input-'+pid);const txt=inp?inp.value.trim():'';if(!txt)return;if(!p.steps)p.steps=[];p.steps.push({text:txt,done:false});renderProjects();renderDashProjects();save();toast('Step added');}
@@ -3716,7 +3547,7 @@ function applyImageZoom() {
       });
     }
   });
-  // Profile avatar in AAY section...
+  // Profile avatar in AAY section....
   var profAvatar = document.getElementById('profile-avatar-display');
   if (profAvatar && !profAvatar.dataset.zoomBound) {
     profAvatar.dataset.zoomBound = '1';
@@ -3728,7 +3559,7 @@ function applyImageZoom() {
   }
 }
 
-// Re-apply after any render (MutationObserver).....
+// Re-apply after any render (MutationObserver)
 (function() {
   var obs = new MutationObserver(function() { applyImageZoom(); });
   document.addEventListener('DOMContentLoaded', function() {
