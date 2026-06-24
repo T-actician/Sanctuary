@@ -10,6 +10,8 @@
   <style>body{overscroll-behavior-y:contain}.content-area{overscroll-behavior-y:contain}</style>
   <meta name="apple-mobile-web-app-title" content="Sanctuary">
   <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+  <!-- Inline SVG favicon — works without any external icon files -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23152019'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-size='18'%3E🌿%3C/text%3E%3C/svg%3E">
 <title>Sanctuary</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <style>
@@ -1490,11 +1492,11 @@ async function restoreAudioBlobs() {
   renderPlaylists();
 }
 
-// Also restore gallery images from IDB if stored as blob keys (backwards compat)
 async function restoreGalleryBlobs() {
   for (const type of ['memories','visionboard']) {
     for (const item of state.gallery[type]) {
-      // Re-fetch if missing or if it's a dead blob URL (starts with blob: but only valid for session)
+      // If we already have a working URL (storageUrl or non-blob local URL), use it
+      if (item.storageUrl) { item.img = item.storageUrl; continue; }
       const needsRestore = !item.img || item.img.startsWith('blob:');
       if (needsRestore && item.blobKey) {
         const blob = await idbGet(item.blobKey);
@@ -1893,12 +1895,24 @@ async function confirmCrop() {
   // Save to IDB as blob
   const blob = await new Promise(res=>canvas.toBlob(res,'image/jpeg',0.85));
   const key = 'avatar_'+Date.now();
-  await idbSet(key, blob);
-  // Also store as data URL for quick reload without IDB latency
+  await idbSet(key, blob).catch(()=>{});
   const dataUrl = canvas.toDataURL('image/jpeg',0.85);
   if(state.profile.avatarKey) idbDel(state.profile.avatarKey);
   state.profile.avatarKey = key;
-  state.profile.avatar = dataUrl; // data URL survives refresh
+  state.profile.avatar = dataUrl;
+  // Upload to Supabase Storage for cross-device access
+  if(_currentUser){
+    try{
+      const path=_currentUser.id+'/avatar.jpg';
+      const{data,error}=await _supabase.storage.from('attachments').upload(path,blob,{upsert:true,contentType:'image/jpeg'});
+      if(!error&&data){
+        const{data:urlData}=_supabase.storage.from('attachments').getPublicUrl(path);
+        state.profile.avatarStorageUrl=urlData.publicUrl;
+        // Also update profiles table
+        await _supabase.from('profiles').upsert({id:_currentUser.id,avatar_url:urlData.publicUrl}).catch(()=>{});
+      }
+    }catch(err){console.warn('Avatar storage upload failed',err);}
+  }
   document.getElementById('profile-avatar-preview').innerHTML=`<img src="${dataUrl}">`;
   document.getElementById('remove-avatar-btn').style.display='';
   closeCropModal();
@@ -2030,8 +2044,20 @@ async function handleNoteAttachment(e){
   const blobKey='note_att_'+Date.now()+'_'+Math.random().toString(36).slice(2);
   const ok=await idbSet(blobKey,file);
   if(!ok){toast('Could not save file — storage may be full',true);return;}
-  const url=URL.createObjectURL(file);
-  const att={name:file.name,type:file.type,url,blobKey};
+  let url=URL.createObjectURL(file);
+  let storageUrl=null;
+  if(_currentUser){
+    try{
+      const ext=file.name.split('.').pop()||'bin';
+      const path=_currentUser.id+'/'+blobKey+'.'+ext;
+      const{data,error}=await _supabase.storage.from('attachments').upload(path,file,{upsert:true});
+      if(!error&&data){
+        const{data:urlData}=_supabase.storage.from('attachments').getPublicUrl(path);
+        storageUrl=urlData.publicUrl;
+      }
+    }catch(err){console.warn('Attachment storage upload failed',err);}
+  }
+  const att={name:file.name,type:file.type,url:storageUrl||url,blobKey,storageUrl};
   state.noteModalAttachments.push(att);
   renderNoteAttachments();
 }
@@ -2056,7 +2082,9 @@ function dataURLtoBlobURL(dataUrl){
 }
 async function showAttachmentInViewer(att){
   if(!att)return;
-  // If no live URL, re-fetch from IDB
+  // Prefer storageUrl (works cross-device), fall back to IDB blob, then cached data
+  if(!att.url && att.storageUrl) { att.url = att.storageUrl; }
+  if((!att.url || att.url.startsWith('blob:')) && att.storageUrl) { att.url = att.storageUrl; }
   if(!att.url && att.blobKey){
     const blob=await idbGet(att.blobKey);
     if(blob){att.url=URL.createObjectURL(blob);}
@@ -2345,19 +2373,33 @@ function replaceGalleryItem(type,idx){
 async function handleGalleryUpload(e,type){
   const file=e.target.files[0];e.target.value='';if(!file)return;
   const blobKey='gallery_'+type+'_'+Date.now()+'_'+Math.random().toString(36).slice(2);
-  const ok=await idbSet(blobKey,file);
-  if(!ok){toast('Could not save photo — storage may be full',true);return;}
-  const url=URL.createObjectURL(file);
+  // Store locally in IDB for immediate display
+  await idbSet(blobKey,file).catch(()=>{});
+  const localUrl=URL.createObjectURL(file);
+  // Upload to Supabase Storage for cross-device access
+  let storageUrl=null;
+  if(_currentUser){
+    try{
+      const ext=file.name.split('.').pop()||'jpg';
+      const path=_currentUser.id+'/'+blobKey+'.'+ext;
+      const{data,error}=await _supabase.storage.from('gallery').upload(path,file,{upsert:true});
+      if(!error&&data){
+        const{data:urlData}=_supabase.storage.from('gallery').getPublicUrl(path);
+        storageUrl=urlData.publicUrl;
+      }
+    }catch(err){console.warn('Gallery storage upload failed',err);}
+  }
+  const url=storageUrl||localUrl;
   if(_galleryReplaceTarget&&_galleryReplaceTarget.type===type){
     const{idx}=_galleryReplaceTarget;_galleryReplaceTarget=null;
     const old=state.gallery[type][idx];
     if(old&&old.blobKey)idbDel(old.blobKey);
-    state.gallery[type][idx]={...old,img:url,blobKey};
+    state.gallery[type][idx]={...old,img:url,blobKey,storageUrl};
     renderGallery(type);save();toast('Photo replaced!');
     return;
   }
   const caption=(await promptDialog('Add a caption','Optional caption…'))||'';
-  state.gallery[type].push({img:url,blobKey,caption});
+  state.gallery[type].push({img:url,blobKey,storageUrl,caption});
   renderGallery(type);save();toast(type==='memories'?'Memory saved!':'Added to vision board!');
 }
 async function removeGalleryItem(type,idx){
@@ -3223,7 +3265,7 @@ async function syncToSupabase() {
     const payload = {
       id: _currentUser.id,
       goals: state.goals,
-      notes: state.notes.map(n => ({...n, attachments: (n.attachments||[]).map(a => ({name:a.name,type:a.type,blobKey:a.blobKey}))})),
+      notes: state.notes.map(n => ({...n, attachments: (n.attachments||[]).map(a => ({name:a.name,type:a.type,blobKey:a.blobKey,storageUrl:a.storageUrl}))})),
       diary_entries: state.diaryEntries,
       projects: state.projects,
       breaks: state.breaks,
@@ -3232,13 +3274,14 @@ async function syncToSupabase() {
       growth: state.growth,
       milestones: state.milestones,
       places: state.places.map(p => ({...p, photos: (p.photos||[]).map(ph => ({blobKey:ph.blobKey}))})),
-      gallery: { memories: state.gallery.memories.map(i=>({blobKey:i.blobKey,caption:i.caption})), visionboard: state.gallery.visionboard.map(i=>({blobKey:i.blobKey,caption:i.caption})) },
+      gallery: { memories: state.gallery.memories.map(i=>({blobKey:i.blobKey,storageUrl:i.storageUrl,caption:i.caption})), visionboard: state.gallery.visionboard.map(i=>({blobKey:i.blobKey,storageUrl:i.storageUrl,caption:i.caption})) },
       alarms: state.alarms,
       reminders: state.reminders,
       trash: state.trash,
       music_tracks: state.music.tracks.map(t=>({...t,blobUrl:undefined})),
       music_playlists: (state.music.playlists||[]).filter(p=>!p.auto),
       streak: state.streak,
+      profile: {name:state.profile.name,tagline:state.profile.tagline,initials:state.profile.initials,avatarStorageUrl:state.profile.avatarStorageUrl},
       app_theme: state.appTheme,
       hero_theme: state.heroTheme,
       notes_layout: state.notesLayout,
@@ -3270,10 +3313,23 @@ async function loadFromSupabase() {
     if (data.growth?.length)         state.growth = data.growth;
     if (data.milestones?.length)     state.milestones = data.milestones;
     if (data.places?.length)         state.places = data.places;
-    if (data.gallery)                state.gallery = data.gallery;
+    if (data.gallery)                {
+      // Restore storageUrl as img so cross-device photos display immediately
+      const restoreGal = arr => (arr||[]).map(i=>({...i, img: i.storageUrl||i.img}));
+      state.gallery = { memories: restoreGal(data.gallery.memories), visionboard: restoreGal(data.gallery.visionboard) };
+    }
     if (data.alarms?.length)         state.alarms = data.alarms;
     if (data.reminders?.length)      state.reminders = data.reminders;
     if (data.trash?.length)          state.trash = data.trash;
+    if (data.profile) {
+      if(data.profile.name) state.profile.name = data.profile.name;
+      if(data.profile.tagline) state.profile.tagline = data.profile.tagline;
+      if(data.profile.initials) state.profile.initials = data.profile.initials;
+      if(data.profile.avatarStorageUrl && !state.profile.avatar) {
+        state.profile.avatarStorageUrl = data.profile.avatarStorageUrl;
+        state.profile.avatar = data.profile.avatarStorageUrl;
+      }
+    }
     if (data.streak !== undefined)   state.streak = data.streak;
     if (data.app_theme)  applyAppTheme(data.app_theme, null, true);
     if (data.hero_theme) { state.heroTheme = data.hero_theme; applyHeroTheme(data.hero_theme, true); }
@@ -3559,7 +3615,7 @@ function applyImageZoom() {
   }
 }
 
-// Re-apply after any render (MutationObserver)
+// Re-apply after any render (MutationObserver)...
 (function() {
   var obs = new MutationObserver(function() { applyImageZoom(); });
   document.addEventListener('DOMContentLoaded', function() {
