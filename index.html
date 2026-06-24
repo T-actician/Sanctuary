@@ -493,7 +493,6 @@ input[type=range]::-moz-range-progress{background:var(--accent3);border-radius:9
 .active-aay{background:rgba(76,175,110,0.12)!important;border-color:var(--accent)!important;color:var(--accent3)!important}
 .quote-block{border-left:2px solid var(--accent2);padding:10px 14px;margin:10px 0;background:rgba(76,175,110,0.04);border-radius:0 var(--radius-sm) var(--radius-sm) 0;position:relative}
 .quote-text{font-size:13px;color:var(--text2);font-style:italic;line-height:1.6}
-<<<<<<< HEAD
 
 /* AUTH SCREEN */
 #auth-screen{position:fixed;inset:0;background:#0b1410;z-index:99999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:0}
@@ -521,13 +520,11 @@ input[type=range]::-moz-range-progress{background:var(--accent3);border-radius:9
 .sync-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);flex-shrink:0}
 .sync-dot.syncing{animation:pulse 1s infinite}
 .sync-dot.err{background:#f09090}
-=======
->>>>>>> a71fc3ba42ebc455e6dcbfcfe945d53765aa1b49
 </style>
 </head>
 <body>
 
-<div class="app">
+<div class="app" id="main-app" style="visibility:hidden">
   <!-- Sidebar -->
   <aside class="sidebar">
     <div class="logo-area">
@@ -872,16 +869,6 @@ input[type=range]::-moz-range-progress{background:var(--accent3);border-radius:9
                 <button class="btn btn-accent btn-sm" onclick="saveAlarm()">Save</button>
                 <button class="btn btn-sm" onclick="document.getElementById('alarm-form').style.display='none'">Cancel</button>
               </div>
-<<<<<<< HEAD
-=======
-              <div style="margin-top:10px;display:flex;align-items:center;gap:8px">
-                <i class="ti ti-music" style="font-size:14px;color:var(--text3)"></i>
-                <select id="alarm-tone-select" style="flex:1;font-size:12px">
-                  <option value="default">Default tone</option>
-                </select>
-                <span style="font-size:11px;color:var(--text3)">Tone</span>
-              </div>
->>>>>>> a71fc3ba42ebc455e6dcbfcfe945d53765aa1b49
             </div>
           </div>
           <div class="card" style="width:100%;max-width:480px">
@@ -901,16 +888,6 @@ input[type=range]::-moz-range-progress{background:var(--accent3);border-radius:9
               <label style="display:flex;align-items:center;gap:6px;margin-top:10px;font-size:12px;color:var(--text2);cursor:pointer">
                 <input type="checkbox" id="reminder-repeat-input" style="width:auto"> Repeat every day
               </label>
-<<<<<<< HEAD
-=======
-              <div style="margin-top:10px;display:flex;align-items:center;gap:8px">
-                <i class="ti ti-music" style="font-size:14px;color:var(--text3)"></i>
-                <select id="reminder-tone-select" style="flex:1;font-size:12px">
-                  <option value="default">Default tone</option>
-                </select>
-                <span style="font-size:11px;color:var(--text3)">Tone</span>
-              </div>
->>>>>>> a71fc3ba42ebc455e6dcbfcfe945d53765aa1b49
             </div>
           </div>
         </div>
@@ -2779,10 +2756,6 @@ function renderMusicLibrary(){
   else tracks=[...tracks].sort((a,b)=>(b.addedAt||0)-(a.addedAt||0));
 
   const dz=document.getElementById('music-drop-zone'); if(dz)dz.style.display=state.music.tracks.length?'none':'';
-<<<<<<< HEAD
-=======
-  populateToneSelects();
->>>>>>> a71fc3ba42ebc455e6dcbfcfe945d53765aa1b49
 
   if(!tracks.length){
     el.innerHTML=`<div style="text-align:center;padding:32px;color:var(--text3);font-size:13px"><i class="ti ti-music-off" style="font-size:32px;display:block;margin-bottom:8px;opacity:0.4"></i>${state.music.tracks.length?'No tracks match.':'Upload audio files to start.'}</div>`;
@@ -2938,24 +2911,16 @@ function startWatchClock(){
 // ─────────────────────────────────────────────
 // ALARMS + REMINDERS
 // ─────────────────────────────────────────────
-<<<<<<< HEAD
 let _alarmCheckInterval=null,_ringing=null,_ringInterval=null,_ringAudioCtx=null,_audioUnlocked=false;
 
 // Audio in browsers is blocked until a real user gesture happens. Unlock on the very first
 // click/keydown/touch anywhere in the app so the alarm tone can actually play later.
-=======
-let _alarmCheckInterval=null,_ringing=null,_ringInterval=null,_ringAudioCtx=null,_audioUnlocked=false,_ringMusicEl=null;
-
->>>>>>> a71fc3ba42ebc455e6dcbfcfe945d53765aa1b49
 function unlockRingAudio(){
   if(_audioUnlocked)return;
   try{
     if(!_ringAudioCtx)_ringAudioCtx=new(window.AudioContext||window.webkitAudioContext)();
     if(_ringAudioCtx.state==='suspended')_ringAudioCtx.resume();
-<<<<<<< HEAD
     // Prime a silent buffer — this is what actually "unlocks" audio on iOS/Safari.
-=======
->>>>>>> a71fc3ba42ebc455e6dcbfcfe945d53765aa1b49
     const buffer=_ringAudioCtx.createBuffer(1,1,22050);
     const src=_ringAudioCtx.createBufferSource();
     src.buffer=buffer;src.connect(_ringAudioCtx.destination);src.start(0);
@@ -2964,7 +2929,6 @@ function unlockRingAudio(){
 }
 ['click','touchstart','keydown'].forEach(evt=>window.addEventListener(evt,unlockRingAudio,{once:false,passive:true}));
 
-<<<<<<< HEAD
 function startAlarmChecker(){
   if(_alarmCheckInterval)return;
   // Run on a 250ms tick so we never skip the :00 second even if the tab is busy/throttled.
@@ -2973,20 +2937,6 @@ function startAlarmChecker(){
   // If the tab was backgrounded/suspended past the alarm time, catch up the instant it's visible again.
   document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ unlockRingAudio(); checkAlarms(); } });
   window.addEventListener('focus',()=>{ unlockRingAudio(); checkAlarms(); });
-=======
-// Populate tone selects with uploaded tracks whenever music library changes
-function populateToneSelects(){
-  const opts='<option value="default">Default tone</option>'+(state.music.tracks||[]).map(t=>`<option value="${t.id}">${t.title}</option>`).join('');
-  ['alarm-tone-select','reminder-tone-select'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=opts;});
-}
-
-function startAlarmChecker(){
-  if(_alarmCheckInterval)return;
-  _alarmCheckInterval=setInterval(checkAlarms,250);
-  checkAlarms();
-  document.addEventListener('visibilitychange',()=>{if(!document.hidden){unlockRingAudio();checkAlarms();}});
-  window.addEventListener('focus',()=>{unlockRingAudio();checkAlarms();});
->>>>>>> a71fc3ba42ebc455e6dcbfcfe945d53765aa1b49
 }
 function checkAlarms(){
   const now=new Date(),hh=String(now.getHours()).padStart(2,'0'),mm=String(now.getMinutes()).padStart(2,'0'),timeStr=`${hh}:${mm}`;
@@ -2998,7 +2948,6 @@ function checkAlarms(){
 }
 function fireAlarm(a){startRinging(a,'alarm');}
 function fireReminder(r){startRinging(r,'reminder');}
-<<<<<<< HEAD
 function startRinging(item,type){
   if(_ringInterval){clearInterval(_ringInterval);_ringInterval=null;}
   _ringing={item,type};
@@ -3010,113 +2959,33 @@ function startRinging(item,type){
   if(overlay)overlay.style.display='flex';
   playRingTone();_ringInterval=setInterval(playRingTone,1200);
 }
-=======
-
-function startRinging(item,type){
-  if(_ringInterval){clearInterval(_ringInterval);_ringInterval=null;}
-  _stopRingMusic();
-  _ringing={item,type};
-  document.getElementById('ring-title').textContent=type==='alarm'?'Alarm':'Reminder';
-  document.getElementById('ring-icon').textContent=type==='alarm'?'⏰':'🔔';
-  document.getElementById('ring-time').textContent=item.time||'';
-  document.getElementById('ring-label').textContent=item.label||(type==='alarm'?'Alarm':'Reminder');
-  const overlay=document.getElementById('alarm-ring-modal');
-  if(overlay)overlay.style.display='flex';
-  // Use chosen track if set, else default tone
-  const toneId=item.toneId||'default';
-  if(toneId!=='default'){
-    const track=state.music.tracks.find(t=>t.id===toneId);
-    if(track&&track.blobUrl){_playRingMusic(track.blobUrl);return;}
-  }
-  // Fallback: default beep tone, repeated
-  playRingTone();_ringInterval=setInterval(playRingTone,1200);
-}
-
-function _playRingMusic(src){
-  _stopRingMusic();
-  _ringMusicEl=new Audio(src);
-  _ringMusicEl.loop=true;
-  // Clamp to 1.0 (max for HTMLAudioElement), boost via Web Audio to 1.5×
-  _ringMusicEl.volume=1.0;
-  try{
-    if(!_ringAudioCtx)_ringAudioCtx=new(window.AudioContext||window.webkitAudioContext)();
-    if(_ringAudioCtx.state==='suspended')_ringAudioCtx.resume();
-    const src_node=_ringAudioCtx.createMediaElementSource(_ringMusicEl);
-    const gain=_ringAudioCtx.createGain();
-    gain.gain.value=1.5; // 150%
-    src_node.connect(gain);gain.connect(_ringAudioCtx.destination);
-  }catch(e){/* if Web Audio fails, plain audio still plays */}
-  _ringMusicEl.play().catch(()=>{});
-}
-
-function _stopRingMusic(){
-  if(_ringMusicEl){try{_ringMusicEl.pause();_ringMusicEl.src='';}catch(e){}}_ringMusicEl=null;
-}
-
->>>>>>> a71fc3ba42ebc455e6dcbfcfe945d53765aa1b49
 function playRingTone(){
   try{
     if(!_ringAudioCtx)_ringAudioCtx=new(window.AudioContext||window.webkitAudioContext)();
     if(_ringAudioCtx.state==='suspended')_ringAudioCtx.resume();
     const ctx=_ringAudioCtx;
-<<<<<<< HEAD
     [0,0.3,0.6].forEach(delay=>{const osc=ctx.createOscillator(),gain=ctx.createGain();osc.connect(gain);gain.connect(ctx.destination);osc.frequency.value=880;osc.type='sine';gain.gain.setValueAtTime(0,ctx.currentTime+delay);gain.gain.linearRampToValueAtTime(0.6,ctx.currentTime+delay+0.05);gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+delay+0.4);osc.start(ctx.currentTime+delay);osc.stop(ctx.currentTime+delay+0.45);});
   }catch(e){}
 }
 function dismissRing(){
   if(_ringInterval){clearInterval(_ringInterval);_ringInterval=null;}
-=======
-    // 1.5× gain node for default tone too
-    const master=ctx.createGain();master.gain.value=1.5;master.connect(ctx.destination);
-    [0,0.3,0.6].forEach(delay=>{
-      const osc=ctx.createOscillator(),gain=ctx.createGain();
-      osc.connect(gain);gain.connect(master);
-      osc.frequency.value=880;osc.type='sine';
-      gain.gain.setValueAtTime(0,ctx.currentTime+delay);
-      gain.gain.linearRampToValueAtTime(0.6,ctx.currentTime+delay+0.05);
-      gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+delay+0.4);
-      osc.start(ctx.currentTime+delay);osc.stop(ctx.currentTime+delay+0.45);
-    });
-  }catch(e){}
-}
-
-function dismissRing(){
-  if(_ringInterval){clearInterval(_ringInterval);_ringInterval=null;}
-  _stopRingMusic();
->>>>>>> a71fc3ba42ebc455e6dcbfcfe945d53765aa1b49
   if(_ringing){const{item,type}=_ringing;item.snoozeUntil=null;if(type==='reminder'){state.pastReminders.unshift({...item,firedAt:new Date().toISOString()});if(!item.repeat){state.reminders=state.reminders.filter(r=>r.id!==item.id);}renderReminders();}}
   _ringing=null;const _ro=document.getElementById('alarm-ring-modal');if(_ro)_ro.style.display='none';save();
 }
 function snoozeRing(){
   if(_ringing)_ringing.item.snoozeUntil=Date.now()+5*60000;
   if(_ringInterval){clearInterval(_ringInterval);_ringInterval=null;}
-<<<<<<< HEAD
   _ringing=null;const _sro=document.getElementById('alarm-ring-modal');if(_sro)_sro.style.display='none';toast('Snoozed 5 min');save();
 }
 // Alarms UI
 function addAlarm(){const f=document.getElementById('alarm-form');f.style.display=f.style.display==='none'?'':'none';if(f.style.display!=='none'){const now=new Date();document.getElementById('alarm-time-input').value=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');document.getElementById('alarm-label-input').value='';}}
 function saveAlarm(){const time=document.getElementById('alarm-time-input').value;if(!time){toast('Pick a time',true);return;}const label=document.getElementById('alarm-label-input').value.trim();state.alarms.push({id:Date.now(),time,label,on:true});document.getElementById('alarm-form').style.display='none';renderAlarms();save();toast('Alarm set ⏰');}
-=======
-  _stopRingMusic();
-  _ringing=null;const _sro=document.getElementById('alarm-ring-modal');if(_sro)_sro.style.display='none';toast('Snoozed 5 min');save();
-}
-// Alarms UI
-function addAlarm(){
-  const f=document.getElementById('alarm-form');f.style.display=f.style.display==='none'?'':'none';
-  if(f.style.display!=='none'){const now=new Date();document.getElementById('alarm-time-input').value=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');document.getElementById('alarm-label-input').value='';populateToneSelects();}
-}
-function saveAlarm(){const time=document.getElementById('alarm-time-input').value;if(!time){toast('Pick a time',true);return;}const label=document.getElementById('alarm-label-input').value.trim();const toneId=document.getElementById('alarm-tone-select').value;state.alarms.push({id:Date.now(),time,label,toneId,on:true});document.getElementById('alarm-form').style.display='none';renderAlarms();save();toast('Alarm set ⏰');}
->>>>>>> a71fc3ba42ebc455e6dcbfcfe945d53765aa1b49
 function renderAlarms(){const el=document.getElementById('alarm-list');if(!el)return;if(!state.alarms.length){el.innerHTML='<div style="font-size:12px;color:var(--text3);padding:8px 0">No alarms set.</div>';return;}el.innerHTML=state.alarms.map(a=>`<div class="alarm-item"><div style="flex:1"><div class="alarm-time-lbl">${a.time}</div>${a.label?`<div style="font-size:12px;color:var(--text3)">${a.label}</div>`:''}</div><button class="alarm-toggle ${a.on?'on':''}" onclick="toggleAlarm(${a.id})"></button><button class="btn btn-sm" onclick="deleteAlarm(${a.id})" style="opacity:0.4;margin-left:6px"><i class="ti ti-trash"></i></button></div>`).join('');}
 function toggleAlarm(id){const a=state.alarms.find(x=>x.id===id);if(a){a.on=!a.on;renderAlarms();save();}}
 function deleteAlarm(id){const a=state.alarms.find(x=>x.id===id);if(a)moveToTrash('alarm',a);state.alarms=state.alarms.filter(x=>x.id!==id);renderAlarms();save();}
 // Reminders UI
 function addReminder(){const f=document.getElementById('reminder-form');f.style.display=f.style.display==='none'?'':'none';if(f.style.display!=='none'){const now=new Date();document.getElementById('reminder-time-input').value=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');document.getElementById('reminder-label-input').value='';document.getElementById('reminder-repeat-input').checked=false;}}
-<<<<<<< HEAD
 function saveReminder(){const time=document.getElementById('reminder-time-input').value;if(!time){toast('Pick a time',true);return;}const label=document.getElementById('reminder-label-input').value.trim();const repeat=document.getElementById('reminder-repeat-input').checked;state.reminders.push({id:Date.now(),time,label,on:true,repeat});document.getElementById('reminder-form').style.display='none';renderReminders();save();toast('Reminder set 🔔');}
-=======
-function saveReminder(){const time=document.getElementById('reminder-time-input').value;if(!time){toast('Pick a time',true);return;}const label=document.getElementById('reminder-label-input').value.trim();const repeat=document.getElementById('reminder-repeat-input').checked;const toneId=document.getElementById('reminder-tone-select').value;state.reminders.push({id:Date.now(),time,label,on:true,repeat,toneId});document.getElementById('reminder-form').style.display='none';renderReminders();save();toast('Reminder set 🔔');}
->>>>>>> a71fc3ba42ebc455e6dcbfcfe945d53765aa1b49
 function renderReminders(){
   const el=document.getElementById('reminder-list');if(!el)return;
   const active=state.reminders.map(r=>`<div class="alarm-item"><div style="flex:1"><div class="alarm-time-lbl">${r.time}</div>${r.label?`<div style="font-size:12px;color:var(--text3)">${r.label}</div>`:''}<div style="margin-top:3px">${r.repeat?'<span style="background:rgba(76,175,110,0.2);color:var(--accent3);font-size:10px;padding:1px 7px;border-radius:99px">Repeats daily</span>':'<span style="background:var(--border);color:var(--text3);font-size:10px;padding:1px 7px;border-radius:99px">One-time</span>'}</div></div><button class="alarm-toggle ${r.on?'on':''}" onclick="toggleReminder(${r.id})"></button><button class="btn btn-sm" onclick="deleteReminder(${r.id})" style="opacity:0.4;margin-left:6px"><i class="ti ti-trash"></i></button></div>`).join('');
@@ -3144,7 +3013,6 @@ function gameWrong(){_game.accepting=false;document.querySelectorAll('.game-pad'
 // ─────────────────────────────────────────────
 init();
 </script>
-<<<<<<< HEAD
 
 <!-- SUPABASE -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -3163,7 +3031,7 @@ init();
     </div>
     <div id="auth-login-form">
       <div style="margin-bottom:12px"><label style="display:block;font-size:11px;font-weight:600;color:rgba(232,245,236,0.35);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:5px">Email</label><input type="email" id="auth-email" placeholder="you@email.com" onkeydown="if(event.key==='Enter')authSubmit()" style="width:100%;background:#0f1c14;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#e8f5ec;font-size:14px;padding:10px 12px;font-family:inherit"></div>
-      <div style="margin-bottom:12px"><label style="display:block;font-size:11px;font-weight:600;color:rgba(232,245,236,0.35);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:5px">Password</label><input type="password" id="auth-password" placeholder="••••••••" onkeydown="if(event.key==='Enter')authSubmit()" style="width:100%;background:#0f1c14;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#e8f5ec;font-size:14px;padding:10px 12px;font-family:inherit"></div>
+      <div style="margin-bottom:12px"><label style="display:block;font-size:11px;font-weight:600;color:rgba(232,245,236,0.35);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:5px">Password</label><div style="position:relative"><input type="password" id="auth-password" placeholder="••••••••" onkeydown="if(event.key==='Enter')authSubmit()" style="width:100%;background:#0f1c14;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#e8f5ec;font-size:14px;padding:10px 40px 10px 12px;font-family:inherit;box-sizing:border-box"><button type="button" onclick="togglePw('auth-password',this)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:rgba(232,245,236,0.4);cursor:pointer;font-size:16px;padding:4px;line-height:1">👁</button></div></div>
       <button onclick="authSubmit()" id="auth-btn" style="width:100%;padding:12px;background:var(--accent2);border:none;border-radius:8px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:4px">Sign in</button>
       <div id="auth-msg" style="font-size:12px;text-align:center;margin-top:10px;min-height:18px"></div>
       <div style="text-align:center;font-size:11px;color:rgba(232,245,236,0.3);margin-top:14px">Forgot password? <span style="color:#4caf6e;cursor:pointer" onclick="authResetPassword()">Reset it</span></div>
@@ -3171,7 +3039,7 @@ init();
     <div id="auth-signup-form" style="display:none">
       <div style="margin-bottom:12px"><label style="display:block;font-size:11px;font-weight:600;color:rgba(232,245,236,0.35);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:5px">Your name</label><input type="text" id="auth-name" placeholder="e.g. Alex" style="width:100%;background:#0f1c14;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#e8f5ec;font-size:14px;padding:10px 12px;font-family:inherit"></div>
       <div style="margin-bottom:12px"><label style="display:block;font-size:11px;font-weight:600;color:rgba(232,245,236,0.35);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:5px">Email</label><input type="email" id="auth-email-2" placeholder="you@email.com" onkeydown="if(event.key==='Enter')authSubmit()" style="width:100%;background:#0f1c14;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#e8f5ec;font-size:14px;padding:10px 12px;font-family:inherit"></div>
-      <div style="margin-bottom:12px"><label style="display:block;font-size:11px;font-weight:600;color:rgba(232,245,236,0.35);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:5px">Password</label><input type="password" id="auth-password-2" placeholder="Min 6 characters" onkeydown="if(event.key==='Enter')authSubmit()" style="width:100%;background:#0f1c14;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#e8f5ec;font-size:14px;padding:10px 12px;font-family:inherit"></div>
+      <div style="margin-bottom:12px"><label style="display:block;font-size:11px;font-weight:600;color:rgba(232,245,236,0.35);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:5px">Password</label><div style="position:relative"><input type="password" id="auth-password-2" placeholder="Min 6 characters" onkeydown="if(event.key==='Enter')authSubmit()" style="width:100%;background:#0f1c14;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#e8f5ec;font-size:14px;padding:10px 40px 10px 12px;font-family:inherit;box-sizing:border-box"><button type="button" onclick="togglePw('auth-password-2',this)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:rgba(232,245,236,0.4);cursor:pointer;font-size:16px;padding:4px;line-height:1">👁</button></div></div>
       <button onclick="authSubmit()" id="auth-btn-2" style="width:100%;padding:12px;background:var(--accent2);border:none;border-radius:8px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:4px">Create account</button>
       <div id="auth-msg-2" style="font-size:12px;text-align:center;margin-top:10px;min-height:18px"></div>
     </div>
@@ -3383,9 +3251,17 @@ function injectSyncBar() {
   topbar.appendChild(bar);
 }
 
+function togglePw(id, btn) {
+  const inp = document.getElementById(id);
+  if (!inp) return;
+  if (inp.type === 'password') { inp.type = 'text'; btn.style.color = '#4caf6e'; }
+  else { inp.type = 'password'; btn.style.color = 'rgba(232,245,236,0.4)'; }
+}
+
 // Boot auth
 (async () => {
   const { data: { session } } = await _supabase.auth.getSession();
+  document.getElementById('main-app').style.visibility = 'visible';
   if (session) {
     _currentUser = session.user;
     document.getElementById('auth-screen').style.display = 'none';
@@ -3419,7 +3295,3 @@ function injectSyncBar() {
   });
 })();
 </script>
-=======
-</body>
-</html>
->>>>>>> a71fc3ba42ebc455e6dcbfcfe945d53765aa1b49
