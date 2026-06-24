@@ -12,6 +12,112 @@
   <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 <title>Sanctuary</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPA_URL = 'https://hzbcerubdaldvapsajce.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh6YmNlcnViZGFsZHZhcHNhamNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyMjg1NTAsImV4cCI6MjA5NzgwNDU1MH0.lnd851sqdsVYe5x-736sb8St1XddZGBEVZxjCLrH4qA';
+const supa = supabase.createClient(SUPA_URL, SUPA_KEY);
+let _supaUser = null;
+let _supaSession = null;
+let _syncChannels = [];
+
+// ── Auth helpers ──────────────────────────────
+async function supaInit() {
+  const { data: { session } } = await supa.auth.getSession();
+  if (session) { _supaUser = session.user; _supaSession = session; }
+  supa.auth.onAuthStateChange((_event, session) => {
+    _supaUser = session ? session.user : null;
+    _supaSession = session;
+    if (_supaUser) { supaFetchProfile(); supaStartSync(); }
+    else { supaStopSync(); }
+  });
+  if (_supaUser) { await supaFetchProfile(); supaStartSync(); }
+}
+
+async function authSignOut() {
+  supaStopSync();
+  await supa.auth.signOut();
+  toast('Signed out');
+}
+
+// ── Profile sync ──────────────────────────────
+async function supaFetchProfile() {
+  if (!_supaUser) return;
+  const { data, error } = await supa.from('profiles').select('*').eq('id', _supaUser.id).single();
+  if (error || !data) return;
+  // Merge into local state
+  if (data.name) state.profile.name = data.name;
+  if (data.tagline) state.profile.tagline = data.tagline;
+  if (data.initials) state.profile.initials = data.initials;
+  if (data.streak !== undefined && data.streak !== null) state.streak = data.streak;
+  if (data.avatar_url) {
+    // Add cache buster so both devices always get latest
+    const avatarSrc = data.avatar_url + '?t=' + Date.now();
+    state.profile.avatar = avatarSrc;
+    updateAvatarUI(avatarSrc);
+  }
+  updateProfileUI();
+  mobSyncProfile();
+  save();
+}
+
+async function supaSaveProfile() {
+  if (!_supaUser) return;
+  const update = {
+    name: state.profile.name,
+    tagline: state.profile.tagline,
+    initials: state.profile.initials,
+    streak: state.streak,
+    updated_at: new Date().toISOString()
+  };
+  await supa.from('profiles').upsert({ id: _supaUser.id, ...update });
+}
+
+async function supaUploadAvatar(blob) {
+  if (!_supaUser) return null;
+  const path = `${_supaUser.id}/avatar_${Date.now()}.jpg`;
+  const { error } = await supa.storage.from('avatars').upload(path, blob, { upsert: true, contentType: 'image/jpeg' });
+  if (error) { console.error('Avatar upload error', error); return null; }
+  const { data } = supa.storage.from('avatars').getPublicUrl(path);
+  return data.publicUrl;
+}
+
+// ── Project file upload ───────────────────────
+async function supaUploadProjectFile(file, projectId) {
+  if (!_supaUser) return null;
+  const ext = file.name.split('.').pop();
+  const path = `${_supaUser.id}/${projectId}_${Date.now()}.${ext}`;
+  const { error } = await supa.storage.from('project-files').upload(path, file, { upsert: true });
+  if (error) { console.error('File upload error', error); toast('Upload failed', true); return null; }
+  const { data } = supa.storage.from('project-files').getPublicUrl(path);
+  // Save reference to DB
+  await supa.from('project_files').insert({
+    user_id: _supaUser.id,
+    project_id: String(projectId),
+    file_name: file.name,
+    file_url: data.publicUrl,
+    file_size: file.size
+  });
+  return data.publicUrl;
+}
+
+// ── Real-time sync ────────────────────────────
+function supaStartSync() {
+  if (!_supaUser) return;
+  supaStopSync();
+  // Profile changes (avatar updated on another device)
+  const profileCh = supa.channel('profile-sync-' + _supaUser.id)
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'profiles', filter: `id=eq.${_supaUser.id}` },
+      () => { supaFetchProfile(); })
+    .subscribe();
+  _syncChannels.push(profileCh);
+}
+
+function supaStopSync() {
+  _syncChannels.forEach(ch => supa.removeChannel(ch));
+  _syncChannels = [];
+}
+</script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -29,7 +135,7 @@ body.theme-ocean{--bg:#0a1620;--bg2:#0f1f2c;--bg3:#16303f;--accent:#4aa8d8;--acc
 body.theme-sunset{--bg:#1a1108;--bg2:#241708;--bg3:#33200d;--accent:#f0944a;--accent2:#c06a2d;--accent3:#ffc190;--card:#241a10;--card2:#2e2213;--input:#1a1208}
 body.theme-midnight{--bg:#10101e;--bg2:#161628;--bg3:#1f1f38;--accent:#9a7af0;--accent2:#6a4dc6;--accent3:#c4aef7;--card:#191930;--card2:#21213d;--input:#13132a}
 body.theme-rose{--bg:#1a0e14;--bg2:#241319;--bg3:#331c25;--accent:#f06a96;--accent2:#c0436b;--accent3:#ffaecb;--card:#241319;--card2:#2e1a22;--input:#190d12}
-html,body{height:100%;font-family:'Inter',system-ui,sans-serif;background:#0b1410;color:var(--text);font-size:14px;line-height:1.5;overflow:hidden}
+html,body{height:100%;font-family:'Inter',system-ui,sans-serif;background:#0b1410;color:var(--text);font-size:14px;line-height:1.5;overflow:hidden;scroll-behavior:smooth}
 ::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:99px}
@@ -67,11 +173,12 @@ html,body{height:100%;font-family:'Inter',system-ui,sans-serif;background:#0b141
 .btn-accent{background:var(--accent2);border-color:var(--accent2);color:#fff;font-weight:500}
 .btn-accent:hover{background:var(--accent);border-color:var(--accent);color:#fff}
 .btn-sm{padding:4px 9px;font-size:11px}
-.content-area{flex:1;overflow-y:auto;padding:22px}
+.content-area{flex:1;overflow-y:auto;padding:22px;scroll-behavior:smooth;-webkit-overflow-scrolling:touch}
 
 .section{display:none}
 .section.active{display:block;animation:fadeIn 0.2s ease}
 @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeInMob{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 
 /* Cards */
 .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;margin-bottom:14px}
@@ -494,16 +601,40 @@ input[type=range]::-moz-range-progress{background:var(--accent3);border-radius:9
   #mob-drawer-overlay { display: block !important; visibility: visible !important; }
   #mob-bottom-nav { display: flex !important; visibility: visible !important; }
   .topbar { padding: 0 8px !important; gap: 6px !important; }
-  .topbar-title { font-size: 15px !important; }
+  /* FIX 3: Prevent Watch/Alarms title text cutoff */
+  .topbar-title { font-size: 15px !important; white-space: nowrap !important; overflow: visible !important; text-overflow: unset !important; min-width: 60px !important; }
   .topbar-meta { display: none !important; }
   .btn { padding: 5px 10px !important; font-size: 11px !important; }
-  .content-area { padding: 12px 12px 80px !important; overflow-y: auto !important; }
+  /* FIX 6A: Smooth scrolling */
+  .content-area { padding: 12px 12px 80px !important; overflow-y: auto !important; scroll-behavior: smooth !important; -webkit-overflow-scrolling: touch !important; }
   .grid-2 { grid-template-columns: 1fr !important; }
   .grid-3 { grid-template-columns: 1fr !important; }
   .grid-4 { grid-template-columns: 1fr !important; }
   .gallery-grid { grid-template-columns: repeat(2, 1fr) !important; }
   .ach-grid { grid-template-columns: repeat(2, 1fr) !important; }
   .mini-player { bottom: 70px !important; right: 10px !important; width: calc(100% - 20px) !important; max-width: none !important; }
+
+  /* FIX 3: Watch section titles full width, no cutoff */
+  #s-watch .card-title { white-space: normal !important; overflow: visible !important; word-break: normal !important; }
+  #s-watch .card { width: 100% !important; max-width: 100% !important; }
+  #s-watch .alarm-time-lbl { font-size: 22px !important; }
+  .sanctuary-watch-wrap { width: 280px !important; height: 280px !important; }
+  #watch-canvas { width: 280px !important; height: 280px !important; }
+
+  /* FIX 4: Music section layout on mobile - stack vertically, no overflow */
+  #music-grid-layout { grid-template-columns: 1fr !important; gap: 12px !important; }
+  .music-sidebar-panel { width: 100% !important; overflow-x: hidden !important; box-sizing: border-box !important; }
+  .np-card { width: 100% !important; box-sizing: border-box !important; }
+  .np-art { width: 70px !important; height: 70px !important; }
+  .playlist-tabs { overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; }
+  .music-upload-zone { padding: 18px !important; }
+  #playlists-list { overflow-x: hidden !important; }
+  .track-row { flex-wrap: nowrap !important; }
+  .track-title { font-size: 12px !important; }
+  .track-artist { font-size: 10px !important; }
+
+  /* FIX 6C: Smoother section transitions on mobile */
+  .section.active { animation: fadeInMob 0.25s ease forwards !important; }
 }
 
 #mob-hamburger { background: none; border: none; color: var(--text2); font-size: 24px; cursor: pointer; padding: 6px 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: color 0.15s ease; line-height: 1; height: 36px; width: 36px; order: -1; margin-right: 4px; }
@@ -597,6 +728,9 @@ input[type=range]::-moz-range-progress{background:var(--accent3);border-radius:9
           <div class="prof-streak">🔥 <span id="sidebar-streak">0</span> day streak</div>
         </div>
       </div>
+      <button onclick="authSignOut()" style="width:100%;margin-top:8px;padding:8px;background:rgba(255,60,60,0.07);border:1px solid rgba(255,80,80,0.2);border-radius:8px;color:rgba(240,144,144,0.8);font-size:12px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;transition:all 0.15s">
+        <i class="ti ti-logout"></i> Sign out
+      </button>
     </div>
   </aside>
 
@@ -740,7 +874,10 @@ input[type=range]::-moz-range-progress{background:var(--accent3);border-radius:9
       </section>
 
       <!-- PROJECTS -->
-      <section class="section" id="s-projects"><div id="projects-list"></div></section>
+      <section class="section" id="s-projects">
+        <input type="file" id="project-file-input" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip,.rar,.png,.jpg,.jpeg" style="display:none" onchange="handleProjectFileUpload(event)">
+        <div id="projects-list"></div>
+      </section>
 
       <!-- JOURNEY -->
       <section class="section" id="s-journey">
@@ -1549,6 +1686,8 @@ async function init() {
   await restorePlacesBlobs().catch(e=>console.warn('places restore failed',e));
   await restoreNoteAttachmentBlobs().catch(e=>console.warn('note attachment restore failed',e));
   await restoreAudioBlobs().catch(e=>console.warn('audio restore failed',e));
+  // Supabase: fetch latest profile + start real-time sync
+  supaInit().catch(e=>console.warn('Supabase init failed',e));
 }
 
 function setDate() {
@@ -1673,6 +1812,7 @@ function saveProfile() {
   updateProfileUI();
   closeModal('profile-modal');
   save(); toast('Profile updated!');
+  if (_supaUser) supaSaveProfile();
 }
 
 // ─────────────────────────────────────────────
@@ -1864,6 +2004,15 @@ async function confirmCrop() {
   closeCropModal();
   updateAvatarUI(dataUrl);
   save(); toast('Photo updated!');
+  // Upload to Supabase for cross-device sync
+  if (_supaUser) {
+    toast('Syncing photo…');
+    const publicUrl = await supaUploadAvatar(blob);
+    if (publicUrl) {
+      await supa.from('profiles').upsert({ id: _supaUser.id, avatar_url: publicUrl, updated_at: new Date().toISOString() });
+      toast('Photo synced ✓');
+    }
+  }
 }
 function openAvatarLightbox() {
   if(!state.profile.avatar) return;
@@ -2134,10 +2283,14 @@ function saveDashJournal() {
 // ─────────────────────────────────────────────
 function renderProjects() {
   const list=document.getElementById('projects-list'); if(!list) return;
-  list.innerHTML=`<div style="display:flex;justify-content:flex-end;margin-bottom:12px"><button class="btn btn-accent" onclick="openModal('project-modal')"><i class="ti ti-plus"></i> New project</button></div>`+
+  list.innerHTML=`<div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:12px">
+    <button class="btn" onclick="document.getElementById('project-file-input').click()"><i class="ti ti-upload"></i> Upload file</button>
+    <button class="btn btn-accent" onclick="openModal('project-modal')"><i class="ti ti-plus"></i> New project</button>
+  </div>`+
     state.projects.map(p=>{
       const steps=p.steps||[];
       const pct=steps.length?Math.round(steps.filter(s=>s.done).length/steps.length*100):0;
+      const files=p.files||[];
       return `<div class="project-card">
         <div class="proj-header">
           <div><div class="proj-title">${p.name}</div><div class="proj-deadline">📅 ${p.deadline||'TBD'}</div></div>
@@ -2156,11 +2309,67 @@ function renderProjects() {
             <button class="btn btn-accent btn-sm" onclick="addStep(${p.id})"><i class="ti ti-plus"></i></button>
           </div>
         </div>
-        <div style="text-align:right;margin-top:8px">
+        ${files.length?`<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--text3);margin-bottom:6px">Files</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px">
+            ${files.map((f,fi)=>`<a href="${f.url}" target="_blank" style="display:flex;align-items:center;gap:5px;background:rgba(76,175,110,0.08);padding:5px 10px;border-radius:6px;border:1px solid rgba(76,175,110,0.2);text-decoration:none;font-size:11px;color:var(--text2)">
+              <i class="ti ti-file" style="font-size:13px;color:var(--accent)"></i>${f.name}
+              <button onclick="event.preventDefault();removeProjectFile(${p.id},${fi})" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:12px;padding:0;margin-left:4px"><i class="ti ti-x"></i></button>
+            </a>`).join('')}
+          </div>
+        </div>`:''}
+        <div style="display:flex;gap:6px;justify-content:flex-end;margin-top:8px">
+          <button class="btn btn-sm" onclick="attachFileToProject(${p.id})" title="Attach file"><i class="ti ti-paperclip"></i></button>
           <button class="btn btn-sm" onclick="deleteProject(${p.id})" style="color:rgba(240,144,144,0.7)"><i class="ti ti-trash"></i> Delete</button>
         </div>
       </div>`;
     }).join('');
+}
+
+// Which project a file upload targets
+let _uploadTargetProjectId = null;
+
+function attachFileToProject(pid) {
+  _uploadTargetProjectId = pid;
+  document.getElementById('project-file-input').click();
+}
+
+async function handleProjectFileUpload(e) {
+  const files = Array.from(e.target.files);
+  e.target.value = '';
+  if (!files.length) return;
+  for (const file of files) {
+    const pid = _uploadTargetProjectId;
+    let url = null;
+    let uploading = true;
+    toast(`Uploading ${file.name}…`);
+    // Try Supabase if signed in
+    if (_supaUser && pid) {
+      url = await supaUploadProjectFile(file, pid);
+    }
+    // Fallback: local object URL (session only) or data URL
+    if (!url) {
+      url = URL.createObjectURL(file);
+    }
+    if (pid) {
+      const p = state.projects.find(x => x.id === pid);
+      if (p) {
+        if (!p.files) p.files = [];
+        p.files.push({ name: file.name, url, size: file.size });
+        save();
+        renderProjects();
+        toast(`${file.name} attached ✓`);
+      }
+    }
+  }
+  _uploadTargetProjectId = null;
+}
+
+function removeProjectFile(pid, fi) {
+  const p = state.projects.find(x => x.id === pid);
+  if (!p || !p.files) return;
+  p.files.splice(fi, 1);
+  save(); renderProjects();
 }
 function toggleStep(pid,si){const p=state.projects.find(x=>x.id===pid);if(!p||!p.steps)return;p.steps[si].done=!p.steps[si].done;renderProjects();renderDashProjects();save();}
 function addStep(pid){const p=state.projects.find(x=>x.id===pid);if(!p)return;const inp=document.getElementById('step-input-'+pid);const txt=inp?inp.value.trim():'';if(!txt)return;if(!p.steps)p.steps=[];p.steps.push({text:txt,done:false});renderProjects();renderDashProjects();save();toast('Step added');}
@@ -3442,6 +3651,92 @@ function mobSyncProfile() {
       mobSyncProfile();
     };
   }
+})();
+</script>
+
+<script>
+// FIX 6B: Image zoom (pinch, double-tap) for gallery + profile photo
+function openImageViewer(src) {
+  if (!src || src === '' || src === 'undefined') return;
+  var viewer = document.createElement('div');
+  viewer.id = 'img-zoom-viewer';
+  viewer.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:9998;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.25s ease;touch-action:none;';
+  var img = document.createElement('img');
+  img.src = src;
+  img.style.cssText = 'max-width:95vw;max-height:90vh;object-fit:contain;border-radius:8px;transition:transform 0.15s ease;transform-origin:center;user-select:none;-webkit-user-drag:none;';
+  var scale = 1, lastDist = 0, tapCount = 0, tapTimer = null;
+  // Pinch-to-zoom
+  viewer.addEventListener('touchmove', function(e) {
+    if (e.touches.length === 2) {
+      e.preventDefault();
+      var dx = e.touches[0].clientX - e.touches[1].clientX;
+      var dy = e.touches[0].clientY - e.touches[1].clientY;
+      var dist = Math.sqrt(dx*dx + dy*dy);
+      if (lastDist) { scale *= dist / lastDist; scale = Math.min(Math.max(scale, 1), 4); img.style.transform = 'scale('+scale+')'; }
+      lastDist = dist;
+    }
+  }, {passive: false});
+  viewer.addEventListener('touchend', function(e) { if (e.touches.length < 2) lastDist = 0; });
+  // Double-tap to zoom
+  img.addEventListener('click', function(e) {
+    e.stopPropagation();
+    tapCount++;
+    clearTimeout(tapTimer);
+    if (tapCount >= 2) { scale = (scale > 1) ? 1 : 2; img.style.transform = 'scale('+scale+')'; tapCount = 0; }
+    else { tapTimer = setTimeout(function(){ tapCount = 0; }, 280); }
+  });
+  // Close on backdrop
+  viewer.addEventListener('click', function(e) {
+    if (e.target === viewer) { viewer.style.opacity = '0'; setTimeout(function(){ if (viewer.parentNode) viewer.parentNode.removeChild(viewer); }, 250); }
+  });
+  // Swipe down to close
+  var startY = 0;
+  viewer.addEventListener('touchstart', function(e) { if (e.touches.length === 1) startY = e.touches[0].clientY; }, {passive: true});
+  viewer.addEventListener('touchend', function(e) {
+    if (e.changedTouches.length === 1 && scale <= 1) {
+      var dy = e.changedTouches[0].clientY - startY;
+      if (dy > 80) { viewer.style.opacity = '0'; setTimeout(function(){ if (viewer.parentNode) viewer.parentNode.removeChild(viewer); }, 250); }
+    }
+  }, {passive: true});
+  viewer.appendChild(img);
+  document.body.appendChild(viewer);
+  requestAnimationFrame(function(){ viewer.style.opacity = '1'; });
+}
+
+// Mark gallery and profile images zoomable on load + after dynamic renders
+function applyImageZoom() {
+  // Gallery images
+  document.querySelectorAll('.gallery-item img').forEach(function(img) {
+    if (!img.dataset.zoomBound) {
+      img.dataset.zoomBound = '1';
+      img.style.cursor = 'zoom-in';
+      img.addEventListener('click', function(e) {
+        e.stopPropagation();
+        openImageViewer(img.src);
+      });
+    }
+  });
+  // Profile avatar in AAY section...
+  var profAvatar = document.getElementById('profile-avatar-display');
+  if (profAvatar && !profAvatar.dataset.zoomBound) {
+    profAvatar.dataset.zoomBound = '1';
+    var profImg = profAvatar.querySelector('img');
+    if (profImg) {
+      profImg.style.cursor = 'zoom-in';
+      profImg.addEventListener('click', function(e) { e.stopPropagation(); openImageViewer(profImg.src); });
+    }
+  }
+}
+
+// Re-apply after any render (MutationObserver)
+(function() {
+  var obs = new MutationObserver(function() { applyImageZoom(); });
+  document.addEventListener('DOMContentLoaded', function() {
+    obs.observe(document.getElementById('memories-grid') || document.body, {childList: true, subtree: true});
+    obs.observe(document.getElementById('visionboard-grid') || document.body, {childList: true, subtree: true});
+    applyImageZoom();
+  });
+  window.addEventListener('load', applyImageZoom);
 })();
 </script>
 
