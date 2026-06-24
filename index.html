@@ -3728,7 +3728,7 @@ function applyImageZoom() {
   }
 }
 
-// Re-apply after any render (MutationObserver)
+// Re-apply after any render (MutationObserver).....
 (function() {
   var obs = new MutationObserver(function() { applyImageZoom(); });
   document.addEventListener('DOMContentLoaded', function() {
