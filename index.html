@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#0b1410">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <style>body{overscroll-behavior-y:contain}.content-area{overscroll-behavior-y:contain}</style>
+  <style>body{overscroll-behavior-y:none}.content-area{overscroll-behavior-y:auto}</style>
   <meta name="apple-mobile-web-app-title" content="Sanctuary">
   <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
   <!-- Inline SVG favicon — works without any external icon files -->
@@ -4396,298 +4396,313 @@ if ('serviceWorker' in navigator) {
 
 <script>
 // ═══════════════════════════════════════════════════════
-// FIX 2: Pull-to-refresh — intentional pull only, lively indicator
+// PULL-TO-REFRESH — intentional only (no accidental scroll trigger)
 // ═══════════════════════════════════════════════════════
 (function(){
-  let startY=0, currentY=0, pulling=false, triggered=false, indicator=null;
-  const THRESHOLD=110; // px — requires deliberate pull, not accidental scroll
-
-  function createIndicator(){
-    if(indicator) return;
-    indicator=document.createElement('div');
-    indicator.style.cssText=[
-      'position:fixed','top:-60px','left:50%','transform:translateX(-50%)',
-      'background:var(--accent2)','color:#fff','font-size:13px','font-weight:700',
-      'padding:10px 22px','border-radius:0 0 16px 16px','z-index:9999',
-      'display:flex','align-items:center','gap:8px',
-      'box-shadow:0 4px 20px rgba(0,0,0,0.35)',
-      'transition:top 0.2s cubic-bezier(.2,.8,.3,1)',
-      'white-space:nowrap'
-    ].join(';');
-    indicator.innerHTML='<i class="ti ti-arrow-down" id="ptr-icon"></i><span id="ptr-label">Pull to refresh</span>';
-    document.body.appendChild(indicator);
-  }
-
-  function setIndicatorState(pct, done){
-    if(!indicator) return;
-    // Slide in proportionally as user pulls
-    const maxTop = 0;
-    const minTop = -60;
-    indicator.style.top = (minTop + (maxTop - minTop) * Math.min(pct,1)) + 'px';
-    const icon = document.getElementById('ptr-icon');
-    const lbl = document.getElementById('ptr-label');
-    if(done){
-      if(icon) icon.className='ti ti-refresh';
-      if(lbl) lbl.textContent='Refreshing…';
-      // Spin animation
-      if(icon) icon.style.animation='spin 0.8s linear infinite';
-    } else {
-      if(icon){ icon.className='ti ti-arrow-down'; icon.style.animation=''; icon.style.transform=`rotate(${Math.min(pct,1)*180}deg)`; }
-      if(lbl) lbl.textContent = pct>=1 ? 'Release to refresh' : 'Pull to refresh';
-      indicator.style.background = pct>=1 ? 'var(--accent)' : 'var(--accent2)';
+  // Keyframes injected once
+  const ks=document.createElement('style');
+  ks.textContent=`
+    @keyframes ptr-spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+    @keyframes ptr-bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(4px)}}
+    #ptr-indicator{
+      position:fixed;top:-72px;left:50%;transform:translateX(-50%);
+      background:linear-gradient(135deg,var(--accent2),var(--accent));
+      color:#fff;font-size:13px;font-weight:700;
+      padding:11px 24px;border-radius:0 0 20px 20px;z-index:10000;
+      display:flex;align-items:center;gap:9px;
+      box-shadow:0 6px 28px rgba(0,0,0,0.45);
+      transition:top 0.22s cubic-bezier(.2,.8,.3,1),background 0.2s;
+      white-space:nowrap;pointer-events:none;
+      min-width:160px;justify-content:center;
     }
+    #ptr-indicator.ready{background:linear-gradient(135deg,var(--accent),#5dd488)}
+    #ptr-indicator.visible{top:0}
+    #ptr-icon.spin{animation:ptr-spin 0.7s linear infinite}
+    #ptr-icon.bounce{animation:ptr-bounce 0.6s ease-in-out infinite}
+  `;
+  document.head.appendChild(ks);
+
+  let startY=0,currentY=0,pulling=false,indicator=null;
+  const THRESHOLD=115;
+
+  function getIndicator(){
+    if(!indicator){
+      indicator=document.createElement('div');
+      indicator.id='ptr-indicator';
+      indicator.innerHTML='<i class="ti ti-arrow-down" id="ptr-icon"></i><span id="ptr-label">Pull to refresh</span>';
+      document.body.appendChild(indicator);
+    }
+    return indicator;
   }
 
-  // Add spin keyframe
-  const s=document.createElement('style');
-  s.textContent='@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}';
-  document.head.appendChild(s);
+  function setProgress(pct){
+    const el=getIndicator();
+    const icon=document.getElementById('ptr-icon');
+    const lbl=document.getElementById('ptr-label');
+    // Slide proportionally — fully revealed at threshold
+    el.style.top=((-72)+(72*Math.min(pct,1)))+'px';
+    el.classList.toggle('ready',pct>=1);
+    if(icon){
+      icon.className='ti ti-arrow-down';
+      icon.style.transform=`rotate(${Math.min(pct,1)*180}deg)`;
+      icon.style.transition='transform 0.12s';
+    }
+    if(lbl) lbl.textContent=pct>=1?'Release to refresh ✦':'Pull to refresh';
+  }
+
+  function setRefreshing(){
+    const el=getIndicator();
+    el.classList.add('visible','ready');
+    el.style.top='0';
+    const icon=document.getElementById('ptr-icon');
+    const lbl=document.getElementById('ptr-label');
+    if(icon){icon.className='ti ti-refresh spin';icon.style.transform='';icon.style.transition='';}
+    if(lbl) lbl.textContent='Refreshing…';
+  }
+
+  function hide(){
+    const el=getIndicator();
+    el.style.top='-72px';
+    el.classList.remove('visible','ready');
+    setTimeout(()=>{
+      const icon=document.getElementById('ptr-icon');
+      if(icon){icon.className='ti ti-arrow-down';icon.style.transform='';}
+    },300);
+  }
 
   document.addEventListener('touchstart',e=>{
-    // Only trigger if at the very top of the scrollable area
     const ca=document.querySelector('.content-area');
-    const scrollTop=ca?ca.scrollTop:window.scrollY;
-    if(scrollTop===0&&e.touches.length===1){
-      startY=e.touches[0].clientY;
-      currentY=startY;
-      pulling=true;
-      triggered=false;
-      createIndicator();
-    }
+    if((ca?ca.scrollTop:window.scrollY)>0) return; // not at top — ignore
+    if(e.touches.length!==1) return;
+    startY=e.touches[0].clientY;
+    currentY=startY;
+    pulling=true;
+    getIndicator(); // pre-create
   },{passive:true});
 
   document.addEventListener('touchmove',e=>{
     if(!pulling) return;
     currentY=e.touches[0].clientY;
     const dy=currentY-startY;
-    if(dy>0){
-      const pct=dy/THRESHOLD;
-      setIndicatorState(pct, false);
-    }
+    if(dy<=0){pulling=false;hide();return;}
+    setProgress(dy/THRESHOLD);
   },{passive:true});
 
-  document.addEventListener('touchend',async e=>{
+  document.addEventListener('touchend',async ()=>{
     if(!pulling) return;
     pulling=false;
     const dy=currentY-startY;
     if(dy>=THRESHOLD){
-      triggered=true;
-      setIndicatorState(1, true);
-      if(_currentUser){ await loadFromSupabase().catch(()=>{}); }
-      else{ loadFromStorage();renderDashTasks();renderNotes();renderGoals(); }
+      setRefreshing();
+      if(typeof _currentUser!=='undefined'&&_currentUser){
+        await loadFromSupabase().catch(()=>{});
+      } else {
+        loadFromStorage();renderDashTasks();renderNotes();renderGoals();
+      }
+      // Brief pause so user sees the "Refreshing" state
+      await new Promise(r=>setTimeout(r,600));
     }
-    // Slide indicator back out
-    if(indicator){ indicator.style.top='-60px'; }
-    setTimeout(()=>{ if(indicator){ indicator.style.top='-60px'; const i=document.getElementById('ptr-icon');if(i)i.style.animation=''; } },350);
+    hide();
   },{passive:true});
 })();
 
 // ═══════════════════════════════════════════════════════
-// FIX 3: Attachment viewer — filename horizontal, nothing truncated or vertical on mobile
+// FILE VIEWER — clean styles for PDF / Word / Excel
 // ═══════════════════════════════════════════════════════
 (function(){
   const style=document.createElement('style');
   style.textContent=`
-    /* Viewer header: wrap on small screens so filename never goes vertical */
-    #attachment-viewer > div > div:first-child {
-      flex-wrap: wrap !important;
-      gap: 8px !important;
-      padding: 10px 14px !important;
-      min-height: unset !important;
+    /* Header: always horizontal, filename wraps, never cuts off */
+    #attachment-viewer > div > div:first-child{
+      flex-wrap:wrap!important;gap:8px!important;padding:10px 14px!important;
     }
-    #att-viewer-name {
-      white-space: normal !important;
-      word-break: break-all !important;
-      max-width: 100% !important;
-      width: 100% !important;
-      font-size: 13px !important;
-      line-height: 1.4 !important;
-      order: 0 !important;
-      flex: 1 1 100% !important;
+    #att-viewer-name{
+      white-space:normal!important;word-break:break-all!important;
+      font-size:13px!important;line-height:1.4!important;
+      flex:1 1 100%!important;order:0!important;
     }
-    /* Button row always on its own line on mobile */
-    #att-viewer-pdf-nav,
-    #att-viewer-download-btn,
-    #attachment-viewer button[onclick*="closeAttachmentViewer"] {
-      flex-shrink: 0 !important;
+    #att-viewer-pdf-nav,#att-viewer-download-btn,
+    #attachment-viewer button[onclick*="closeAttachmentViewer"]{flex-shrink:0!important;}
+    /* PDF — pure white background, no bleed from dark theme */
+    #att-viewer-pdf-wrap{
+      background:#ffffff!important;min-height:300px;
+      display:flex!important;align-items:flex-start!important;
+      justify-content:center!important;padding:16px!important;
     }
-    #att-viewer-body{overflow:auto!important}
-    #att-viewer-text{white-space:pre-wrap!important;word-break:break-word!important;font-size:13px!important;line-height:1.6!important}
-    #att-viewer-excel{overflow:auto!important;max-width:100%!important}
-    #att-viewer-docx{overflow:auto!important}
+    #att-viewer-canvas{
+      background:#ffffff!important;display:block!important;
+      margin:0 auto!important;box-shadow:0 2px 16px rgba(0,0,0,0.25)!important;
+      border-radius:4px!important;max-width:100%!important;
+    }
+    /* Word doc — white page feel */
+    #att-viewer-docx{
+      background:#fff!important;overflow:auto!important;
+    }
+    /* Excel / CSV */
+    #att-viewer-excel{overflow:auto!important;max-width:100%!important;}
+    /* Plain text */
+    #att-viewer-text{
+      white-space:pre-wrap!important;word-break:break-word!important;
+      font-size:13px!important;line-height:1.6!important;overflow:auto!important;
+    }
     @media(max-width:600px){
       #att-viewer-name{font-size:12px!important}
       #att-viewer-download-btn span{display:none}
     }
   `;
-    .att-viewer-card-header{flex-wrap:wrap!important;gap:8px!important}
-  `;
   document.head.appendChild(style);
-})();
 
-// ═══════════════════════════════════════════════════════
-// FIX 4: PDF rendering — higher scale + white background
-// ═══════════════════════════════════════════════════════
-(function(){
-  const style=document.createElement('style');
-  style.textContent=`
-    #att-viewer-pdf-wrap{background:#fff!important;min-height:400px}
-    #att-viewer-canvas{background:#fff!important;display:block!important;margin:0 auto!important}
-  `;
-  document.head.appendChild(style);
-  // Patch _attRenderPdfPage to use higher scale for crisp PDFs
-  const _origRender = window._attRenderPdfPage;
+  // Override PDF page renderer — crisp DPI-aware rendering, white fill first
   window._attRenderPdfPage = async function(pageNum){
     if(!window._attPdfDoc) return;
-    const page = await window._attPdfDoc.getPage(pageNum);
-    const canvas = document.getElementById('att-viewer-canvas');
-    const wrap = document.getElementById('att-viewer-pdf-wrap');
-    const wrapWidth = wrap.clientWidth || document.getElementById('att-viewer-body').clientWidth || 700;
-    // Use devicePixelRatio for crisp rendering on retina/high-DPI screens
-    const dpr = window.devicePixelRatio || 1;
-    const baseScale = Math.min(2.5, Math.max(0.8, (wrapWidth - 32) / page.getViewport({scale:1}).width));
-    const scale = baseScale * dpr;
-    const vp = page.getViewport({scale});
-    canvas.width = vp.width;
-    canvas.height = vp.height;
-    canvas.style.width = (vp.width/dpr)+'px';
-    canvas.style.height = (vp.height/dpr)+'px';
-    const ctx = canvas.getContext('2d');
-    ctx.fillStyle='#fff'; ctx.fillRect(0,0,canvas.width,canvas.height);
-    await page.render({canvasContext:ctx, viewport:vp}).promise;
-    document.getElementById('att-viewer-pdf-page').textContent=`${pageNum} / ${window._attPdfDoc.numPages}`;
+    const page=await window._attPdfDoc.getPage(pageNum);
+    const canvas=document.getElementById('att-viewer-canvas');
+    const wrap=document.getElementById('att-viewer-pdf-wrap');
+    // Use actual rendered width for scale; wait a frame if wrap is 0
+    const wrapW=wrap.clientWidth||document.getElementById('att-viewer-body').clientWidth||700;
+    const dpr=window.devicePixelRatio||1;
+    const baseVp=page.getViewport({scale:1});
+    const baseScale=Math.min(3,Math.max(1,(wrapW-32)/baseVp.width));
+    const vp=page.getViewport({scale:baseScale*dpr});
+    canvas.width=vp.width;
+    canvas.height=vp.height;
+    canvas.style.width=(vp.width/dpr)+'px';
+    canvas.style.height=(vp.height/dpr)+'px';
+    const ctx=canvas.getContext('2d');
+    // White fill prevents dark-theme bleed through transparent PDF areas
+    ctx.fillStyle='#ffffff';
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    await page.render({canvasContext:ctx,viewport:vp,background:'#ffffff'}).promise;
+    const nav=document.getElementById('att-viewer-pdf-page');
+    if(nav) nav.textContent=`${pageNum} / ${window._attPdfDoc.numPages}`;
   };
 })();
 
 // ═══════════════════════════════════════════════════════
-// FIX 6: Offline login — cache credentials locally so
-// a known user can sign in without network access
+// OFFLINE LOGIN — cache last-signed-in user for offline access
 // ═══════════════════════════════════════════════════════
 (function(){
-  // After successful sign-in, cache a hashed record that this email is valid
-  const _origOnAuthChange = null;
-  const OFFLINE_KEY = 'sanctuary_offline_users';
+  const OFFLINE_KEY='sanctuary_offline_users';
   function saveOfflineUser(user){
     try{
-      const existing = JSON.parse(localStorage.getItem(OFFLINE_KEY)||'[]');
-      if(!existing.find(u=>u.id===user.id)){
-        existing.push({id:user.id, email:user.email, name:user.user_metadata?.name||''});
-        localStorage.setItem(OFFLINE_KEY, JSON.stringify(existing));
+      const ex=JSON.parse(localStorage.getItem(OFFLINE_KEY)||'[]');
+      if(!ex.find(u=>u.id===user.id)){
+        ex.push({id:user.id,email:user.email,name:user.user_metadata?.name||''});
+        localStorage.setItem(OFFLINE_KEY,JSON.stringify(ex));
       }
     }catch(e){}
   }
   function getOfflineUsers(){
-    try{ return JSON.parse(localStorage.getItem(OFFLINE_KEY)||'[]'); }catch(e){ return []; }
+    try{return JSON.parse(localStorage.getItem(OFFLINE_KEY)||'[]');}catch(e){return[];}
   }
-  // Expose for auth flow
-  window._saveOfflineUser = saveOfflineUser;
-  window._getOfflineUsers = getOfflineUsers;
+  window._saveOfflineUser=saveOfflineUser;
+  window._getOfflineUsers=getOfflineUsers;
 
-  // Patch the auth screen to show offline login option when network is down
   async function checkAndShowOfflineOption(){
     if(navigator.onLine) return;
-    const users = getOfflineUsers();
-    if(!users.length) return;
-    // Show a simple offline user picker above the login form
-    let picker = document.getElementById('offline-user-picker');
-    if(picker) return;
-    picker = document.createElement('div');
-    picker.id = 'offline-user-picker';
+    const users=getOfflineUsers();if(!users.length)return;
+    let picker=document.getElementById('offline-user-picker');if(picker)return;
+    picker=document.createElement('div');
+    picker.id='offline-user-picker';
     picker.style.cssText='background:rgba(76,175,110,0.08);border:1px solid rgba(76,175,110,0.2);border-radius:10px;padding:12px;margin-bottom:14px';
     picker.innerHTML=`<div style="font-size:11px;font-weight:700;color:var(--accent3);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px">📶 Offline — quick access</div>`+
       users.map(u=>`<div onclick="offlineSignIn('${u.id}','${u.email}')" style="display:flex;align-items:center;gap:10px;padding:8px;border-radius:8px;cursor:pointer;background:rgba(255,255,255,0.04);margin-bottom:6px">
         <div style="width:32px;height:32px;border-radius:8px;background:var(--accent2);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff">${(u.name||u.email)[0].toUpperCase()}</div>
         <div><div style="font-size:13px;font-weight:600;color:var(--text)">${u.name||u.email}</div><div style="font-size:11px;color:var(--text3)">${u.email}</div></div>
       </div>`).join('');
-    const loginForm = document.getElementById('auth-login-form');
-    if(loginForm) loginForm.parentNode.insertBefore(picker, loginForm);
+    const loginForm=document.getElementById('auth-login-form');
+    if(loginForm) loginForm.parentNode.insertBefore(picker,loginForm);
   }
-  window.offlineSignIn = async function(userId, email){
-    // Load from localStorage (last synced data)
+  window.offlineSignIn=async function(userId,email){
     loadFromStorage();
-    _currentUser = {id:userId, email, user_metadata:{name:localStorage.getItem('sanctuary_uid_name_'+userId)||''}};
+    _currentUser={id:userId,email,user_metadata:{name:localStorage.getItem('sanctuary_uid_name_'+userId)||''}};
     document.getElementById('auth-screen').style.display='none';
-    injectSyncBar();
-    updateProfileUI();
+    injectSyncBar();updateProfileUI();
     toast('Offline mode — showing last synced data');
-    // Try to sync when back online
-    window.addEventListener('online', async ()=>{
-      const {data:{session}} = await _supabase.auth.getSession().catch(()=>({data:{session:null}}));
-      if(session){ await loadFromSupabase(); toast('Back online — data synced ✓'); }
-    }, {once:true});
+    window.addEventListener('online',async()=>{
+      const{data:{session}}=await _supabase.auth.getSession().catch(()=>({data:{session:null}}));
+      if(session){await loadFromSupabase();toast('Back online — data synced ✓');}
+    },{once:true});
   };
-  window.addEventListener('online', ()=>{ const p=document.getElementById('offline-user-picker'); if(p)p.remove(); });
-  window.addEventListener('offline', checkAndShowOfflineOption);
-  // Check on load too
-  setTimeout(checkAndShowOfflineOption, 1000);
+  window.addEventListener('online',()=>{const p=document.getElementById('offline-user-picker');if(p)p.remove();});
+  window.addEventListener('offline',checkAndShowOfflineOption);
+  setTimeout(checkAndShowOfflineOption,1000);
 
-  // Save name alongside uid for offline display
-  const _origSave2 = window.save;
-  window.save = function(){
+  const _origSave2=window.save;
+  window.save=function(){
     _origSave2.apply(this,arguments);
-    if(_currentUser){
-      try{ localStorage.setItem('sanctuary_uid_name_'+_currentUser.id, state.profile.name||''); }catch(e){}
+    if(typeof _currentUser!=='undefined'&&_currentUser){
+      try{localStorage.setItem('sanctuary_uid_name_'+_currentUser.id,state.profile.name||'');}catch(e){}
     }
   };
 })();
 
 // Hook into auth to save offline user record on each sign-in
 (function(){
-  const boot = window._supabase;
-  if(!boot) return;
-  boot.auth.onAuthStateChange((event, session)=>{
-    if(event==='SIGNED_IN' && session && window._saveOfflineUser){
-      window._saveOfflineUser(session.user);
-    }
+  const boot=window._supabase;if(!boot)return;
+  boot.auth.onAuthStateChange((event,session)=>{
+    if(event==='SIGNED_IN'&&session&&window._saveOfflineUser) window._saveOfflineUser(session.user);
   });
 })();
 
 // ═══════════════════════════════════════════════════════
-// FIX 9: Android/mobile back button closes overlays
+// BACK BUTTON — overlays close, sections navigate back (stack-based)
 // ═══════════════════════════════════════════════════════
 (function(){
-  // Push a state for each overlay that opens so back button pops it
-  function pushBackState(closeFunc){
-    history.pushState({sanctuary_overlay:true},'');
-    window._sanctuaryBackClose = closeFunc;
+  // Stack of close-functions, one per history entry pushed by us.
+  // popstate fires once per entry; we process only ours.
+  const _closeStack=[];
+
+  function pushBack(closeFn){
+    history.pushState({sanctuaryStack:true},'');
+    _closeStack.push(closeFn);
   }
-  window.addEventListener('popstate', e=>{
-    if(window._sanctuaryBackClose){
-      window._sanctuaryBackClose();
-      window._sanctuaryBackClose = null;
+
+  window.addEventListener('popstate',e=>{
+    if(_closeStack.length){
+      const fn=_closeStack.pop();
+      try{fn();}catch(ex){}
     }
+    // If stack is empty the browser handles normal history navigation — no interference.
   });
 
-  // Patch openLightbox, openModal, openSearch, openImageViewer
-  const _origOpenLightbox = window.openLightbox;
-  window.openLightbox = function(src){
+  // ── Overlays ──
+  const _origOpenLightbox=window.openLightbox;
+  window.openLightbox=function(src){
     _origOpenLightbox.apply(this,arguments);
-    pushBackState(()=>closeLightbox());
+    pushBack(()=>closeLightbox());
   };
-  const _origOpenModal = window.openModal;
-  window.openModal = function(id){
-    _origOpenModal.apply(this,arguments);
-    pushBackState(()=>{ if(id==='place-modal') cancelPlaceModal(); else closeModal(id); });
-  };
-  const _origOpenSearch = window.openSearch;
-  window.openSearch = function(){
+
+  const _origOpenSearch=window.openSearch;
+  window.openSearch=function(){
     _origOpenSearch.apply(this,arguments);
-    pushBackState(()=>closeSearch());
+    pushBack(()=>closeSearch());
   };
-  const _origOpenImageViewer = window.openImageViewer;
-  if(_origOpenImageViewer){
-    window.openImageViewer = function(src){
+
+  const _origOpenModal=window.openModal;
+  window.openModal=function(id){
+    _origOpenModal.apply(this,arguments);
+    pushBack(()=>{ if(id==='place-modal') cancelPlaceModal(); else closeModal(id); });
+  };
+
+  const _origOpenImageViewer=window.openImageViewer;
+  if(typeof _origOpenImageViewer==='function'){
+    window.openImageViewer=function(src){
       _origOpenImageViewer.apply(this,arguments);
-      pushBackState(()=>{
+      pushBack(()=>{
         const v=document.getElementById('img-zoom-viewer');
         if(v){v.style.opacity='0';setTimeout(()=>{if(v.parentNode)v.parentNode.removeChild(v);},250);}
       });
     };
   }
-  // Also patch the ring overlay dismiss on back
-  const _origDismissRing = window.dismissRing;
-  window.dismissRing = function(){
-    _origDismissRing.apply(this,arguments);
-  };
+
+  // ── Mobile drawer ──
+  const _origMobDrawerOpen=window.mobDrawerOpen;
+  if(typeof _origMobDrawerOpen==='function'){
+    window.mobDrawerOpen=function(){
+      _origMobDrawerOpen.apply(this,arguments);
+      pushBack(()=>mobDrawerClose());
+    };
+  }
 })();
 </script>
