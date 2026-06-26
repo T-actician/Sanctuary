@@ -549,10 +549,9 @@ input[type=range]::-moz-range-progress{background:var(--accent3);border-radius:9
   /* Search + sort + upload row: stop forcing 3 fixed-width controls onto
      one line. Search takes the full first row; sort + upload share the
      second row, sized by content instead of a hardcoded 130px. */
-  #music-controls-row { flex-wrap: wrap !important; gap: 6px !important; }
-  #music-search { flex: 1 1 100% !important; min-width: 0 !important; width: 100% !important; }
-  #music-sort { flex: 1 !important; width: auto !important; min-width: 0 !important; max-width: none !important; }
-  #music-controls-row .btn { flex-shrink: 0 !important; white-space: nowrap !important; }
+  #music-controls-row { flex-wrap: wrap !important; }
+  #music-search { flex: 1 1 100% !important; min-width: 0 !important; }
+  #music-sort { flex: 1 !important; width: auto !important; min-width: 0 !important; }
 
   .playlist-tabs { overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; }
   .music-upload-zone { padding: 16px !important; }
