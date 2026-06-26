@@ -690,6 +690,7 @@ input[type=range]::-moz-range-progress{background:var(--accent3);border-radius:9
       <button class="btn topbar-btn" onclick="openSearch()"><i class="ti ti-search"></i><span class="topbar-btn-label"> Search</span></button>
       <button class="btn topbar-btn" id="add-btn" onclick="handleAddBtn()"><i class="ti ti-plus"></i><span class="topbar-btn-label"> <span id="add-btn-label">New</span></span></button>
       <button class="btn btn-sm topbar-btn" onclick="openModal('theme-modal')" title="Theme"><i class="ti ti-palette"></i></button>
+      <button class="btn btn-sm topbar-btn" id="pwa-install-btn" onclick="pwaInstall()" title="Install app" style="display:none;color:var(--accent3);border-color:rgba(76,175,110,0.4)"><i class="ti ti-download"></i><span class="topbar-btn-label"> Install</span></button>
     </header>
 
     <div class="content-area">
@@ -4646,7 +4647,34 @@ if ('serviceWorker' in navigator) {
 })();
 
 // ═══════════════════════════════════════════════════════
-// BACK BUTTON — section history + overlay dismissal
+// PWA INSTALL — desktop + Android Chrome/Edge prompt
+// ═══════════════════════════════════════════════════════
+(function(){
+  let _deferredPrompt=null;
+
+  window.addEventListener('beforeinstallprompt',e=>{
+    e.preventDefault();
+    _deferredPrompt=e;
+    const btn=document.getElementById('pwa-install-btn');
+    if(btn) btn.style.display='';
+  });
+
+  window.pwaInstall=async function(){
+    if(!_deferredPrompt){ toast('Open Sanctuary in Chrome or Edge to install it as an app'); return; }
+    _deferredPrompt.prompt();
+    const{outcome}=await _deferredPrompt.userChoice;
+    _deferredPrompt=null;
+    const btn=document.getElementById('pwa-install-btn');
+    if(btn) btn.style.display='none';
+    if(outcome==='accepted') toast('Sanctuary installed! Find it in your Start menu or desktop 🌿');
+  };
+
+  window.addEventListener('appinstalled',()=>{
+    const btn=document.getElementById('pwa-install-btn');
+    if(btn) btn.style.display='none';
+    _deferredPrompt=null;
+  });
+})();
 // ═══════════════════════════════════════════════════════
 (function(){
   // Two separate stacks:
