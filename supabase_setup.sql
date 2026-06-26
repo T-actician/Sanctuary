@@ -1,7 +1,12 @@
 -- ════════════════════════════════════════════════════════════════
--- SANCTUARY — FULL SUPABASE SETUP
+-- SANCTUARY — SUPABASE SETUP (DATA + AUTH ONLY)
 -- Paste this WHOLE file into Supabase Dashboard → SQL Editor → New query → Run
 -- Safe to re-run: every statement is "create if not exists" or "drop + recreate"
+--
+-- NOTE: File storage (photos, music, documents) now lives in Cloudflare R2,
+-- not Supabase Storage — see the separate R2 + Worker setup guide.
+-- Supabase here only handles: user accounts (auth) and your app's data
+-- (goals, notes, diary entries, etc.) in the sanctuary_data table below.
 -- ════════════════════════════════════════════════════════════════
 
 -- ─────────────────────────────────────────────
@@ -76,83 +81,10 @@ create policy "update own profile" on public.profiles
   for update using (auth.uid() = id);
 
 -- ─────────────────────────────────────────────
--- 3. STORAGE BUCKETS
---    attachments → avatars + note attachments (pdf/word/excel/images)
---    gallery     → memories + vision board photos + place photos
---    music       → audio tracks  ← THIS WAS MISSING, music never synced
--- ─────────────────────────────────────────────
-insert into storage.buckets (id, name, public)
-values ('attachments', 'attachments', true)
-on conflict (id) do nothing;
-
-insert into storage.buckets (id, name, public)
-values ('gallery', 'gallery', true)
-on conflict (id) do nothing;
-
-insert into storage.buckets (id, name, public)
-values ('music', 'music', true)
-on conflict (id) do nothing;
-
--- ─────────────────────────────────────────────
--- 4. STORAGE POLICIES
---    Files are stored under a path like  <user_id>/filename.ext
---    so each user can only touch their own folder.
+-- DONE. No storage buckets needed here — R2 handles all files now.
+-- If you previously created 'attachments', 'gallery', or 'music' buckets
+-- in Supabase Storage from an earlier setup, you can leave them (harmless,
+-- unused) or delete them from Supabase Dashboard → Storage to reclaim
+-- your 1GB free quota for nothing-in-particular.
 -- ─────────────────────────────────────────────
 
--- ATTACHMENTS bucket
-drop policy if exists "attachments read own" on storage.objects;
-create policy "attachments read own" on storage.objects
-  for select using (bucket_id = 'attachments' and (storage.foldername(name))[1] = auth.uid()::text);
-
-drop policy if exists "attachments insert own" on storage.objects;
-create policy "attachments insert own" on storage.objects
-  for insert with check (bucket_id = 'attachments' and (storage.foldername(name))[1] = auth.uid()::text);
-
-drop policy if exists "attachments update own" on storage.objects;
-create policy "attachments update own" on storage.objects
-  for update using (bucket_id = 'attachments' and (storage.foldername(name))[1] = auth.uid()::text);
-
-drop policy if exists "attachments delete own" on storage.objects;
-create policy "attachments delete own" on storage.objects
-  for delete using (bucket_id = 'attachments' and (storage.foldername(name))[1] = auth.uid()::text);
-
--- GALLERY bucket
-drop policy if exists "gallery read own" on storage.objects;
-create policy "gallery read own" on storage.objects
-  for select using (bucket_id = 'gallery' and (storage.foldername(name))[1] = auth.uid()::text);
-
-drop policy if exists "gallery insert own" on storage.objects;
-create policy "gallery insert own" on storage.objects
-  for insert with check (bucket_id = 'gallery' and (storage.foldername(name))[1] = auth.uid()::text);
-
-drop policy if exists "gallery update own" on storage.objects;
-create policy "gallery update own" on storage.objects
-  for update using (bucket_id = 'gallery' and (storage.foldername(name))[1] = auth.uid()::text);
-
-drop policy if exists "gallery delete own" on storage.objects;
-create policy "gallery delete own" on storage.objects
-  for delete using (bucket_id = 'gallery' and (storage.foldername(name))[1] = auth.uid()::text);
-
--- MUSIC bucket
-drop policy if exists "music read own" on storage.objects;
-create policy "music read own" on storage.objects
-  for select using (bucket_id = 'music' and (storage.foldername(name))[1] = auth.uid()::text);
-
-drop policy if exists "music insert own" on storage.objects;
-create policy "music insert own" on storage.objects
-  for insert with check (bucket_id = 'music' and (storage.foldername(name))[1] = auth.uid()::text);
-
-drop policy if exists "music update own" on storage.objects;
-create policy "music update own" on storage.objects
-  for update using (bucket_id = 'music' and (storage.foldername(name))[1] = auth.uid()::text);
-
-drop policy if exists "music delete own" on storage.objects;
-create policy "music delete own" on storage.objects
-  for delete using (bucket_id = 'music' and (storage.foldername(name))[1] = auth.uid()::text);
-
--- ─────────────────────────────────────────────
--- DONE.
--- After running this, also raise file-size limits in:
--- Supabase Dashboard → Storage → (each bucket) → ⚙️ → File size limit
--- music files in particular can be 5-10MB+ each; default cap may be too low.
--- ─────────────────────────────────────────────

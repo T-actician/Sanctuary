@@ -1,0 +1,12 @@
+name = "sanctuary-storage"
+main = "src/index.js"
+compatibility_date = "2026-06-23"
+
+# No R2 binding needed this time — this Worker talks to Backblaze B2's
+# S3-compatible API directly, using credentials you'll set as secrets
+# (see setup guide). Secrets are configured with:
+#   wrangler secret put B2_KEY_ID
+#   wrangler secret put B2_APP_KEY
+#   wrangler secret put B2_BUCKET
+#   wrangler secret put B2_ENDPOINT
+#   wrangler secret put APP_SECRET
