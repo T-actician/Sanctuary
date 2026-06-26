@@ -3,6 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0b1410">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <style>body{overscroll-behavior-y:none}.content-area{overscroll-behavior-y:auto}</style>
+  <meta name="apple-mobile-web-app-title" content="Sanctuary">
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+  <!-- Inline SVG favicon — works without any external icon files -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23152019'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-size='18'%3E🌿%3C/text%3E%3C/svg%3E">
 <title>Sanctuary</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <style>
@@ -22,7 +31,7 @@ body.theme-ocean{--bg:#0a1620;--bg2:#0f1f2c;--bg3:#16303f;--accent:#4aa8d8;--acc
 body.theme-sunset{--bg:#1a1108;--bg2:#241708;--bg3:#33200d;--accent:#f0944a;--accent2:#c06a2d;--accent3:#ffc190;--card:#241a10;--card2:#2e2213;--input:#1a1208}
 body.theme-midnight{--bg:#10101e;--bg2:#161628;--bg3:#1f1f38;--accent:#9a7af0;--accent2:#6a4dc6;--accent3:#c4aef7;--card:#191930;--card2:#21213d;--input:#13132a}
 body.theme-rose{--bg:#1a0e14;--bg2:#241319;--bg3:#331c25;--accent:#f06a96;--accent2:#c0436b;--accent3:#ffaecb;--card:#241319;--card2:#2e1a22;--input:#190d12}
-html,body{height:100%;font-family:'Inter',system-ui,sans-serif;background:#0b1410;color:var(--text);font-size:14px;line-height:1.5;overflow:hidden}
+html,body{height:100%;font-family:'Inter',system-ui,sans-serif;background:#0b1410;color:var(--text);font-size:14px;line-height:1.5;overflow:hidden;scroll-behavior:smooth}
 ::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:99px}
@@ -60,11 +69,12 @@ html,body{height:100%;font-family:'Inter',system-ui,sans-serif;background:#0b141
 .btn-accent{background:var(--accent2);border-color:var(--accent2);color:#fff;font-weight:500}
 .btn-accent:hover{background:var(--accent);border-color:var(--accent);color:#fff}
 .btn-sm{padding:4px 9px;font-size:11px}
-.content-area{flex:1;overflow-y:auto;padding:22px}
+.content-area{flex:1;overflow-y:auto;padding:22px;scroll-behavior:smooth;-webkit-overflow-scrolling:touch}
 
 .section{display:none}
 .section.active{display:block;animation:fadeIn 0.2s ease}
 @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeInMob{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 
 /* Cards */
 .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;margin-bottom:14px}
@@ -232,6 +242,7 @@ select option{background:var(--bg2)}
 .track-del{background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:3px;flex-shrink:0;opacity:0;transition:opacity var(--trans)}
 .track-row:hover .track-del{opacity:0.5}
 .track-del:hover{opacity:1!important;color:#f09090}
+.track-more{display:none;background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px;padding:6px;flex-shrink:0}
 .eq-bars{display:none;align-items:flex-end;gap:2px;height:16px;width:16px}
 .track-row.playing .eq-bars{display:flex}
 .track-row.playing .track-num-txt{display:none}
@@ -278,34 +289,6 @@ select option{background:var(--bg2)}
 .mp-play-btn:hover{background:var(--accent)!important}
 .mp-vol{display:none}
 
-/* Music layout */
-.music-now-playing-hero{
-  display:flex;align-items:center;gap:16px;
-  background:linear-gradient(135deg,#0c2216,#152d1c);
-  border:1px solid var(--border2);border-radius:var(--radius-lg);
-  padding:16px;margin-bottom:14px;
-}
-.music-np-left{display:flex;align-items:center;gap:12px;flex-shrink:0}
-.music-np-left .np-art{width:72px;height:72px;font-size:30px;flex-shrink:0}
-.music-np-meta{min-width:0}
-.music-np-meta .np-title{font-size:14px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px}
-.music-np-meta .np-artist{font-size:12px;color:var(--text3)}
-.music-np-right{flex:1;min-width:0}
-.music-body-grid{display:grid;grid-template-columns:160px 1fr;gap:14px;align-items:start}
-.music-toolbar{display:flex;gap:8px;margin-bottom:12px;align-items:center;flex-wrap:wrap}
-
-@media(max-width:768px){
-  .music-now-playing-hero{flex-direction:column;align-items:stretch;gap:12px}
-  .music-np-left{flex-direction:row}
-  .music-np-left .np-art{width:56px;height:56px;font-size:24px}
-  .music-np-meta .np-title{max-width:none}
-  .music-np-right .np-controls{flex-wrap:wrap}
-  .music-body-grid{grid-template-columns:1fr}
-  .music-sidebar-panel{order:-1}
-  .music-toolbar{gap:6px}
-  .music-toolbar input{min-width:0;width:100%}
-}
-
 /* Places */
 .place-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:8px}
 .place-map{height:70px;display:flex;align-items:center;justify-content:center;font-size:26px;position:relative}
@@ -334,6 +317,7 @@ select option{background:var(--bg2)}
 .game-pad.flash::after{background:rgba(255,255,255,0.55)}
 .game-pad.wrong::after{background:rgba(240,80,80,0.6)}
 @keyframes ringShake{0%,100%{transform:rotate(0)}20%{transform:rotate(-12deg)}40%{transform:rotate(10deg)}60%{transform:rotate(-8deg)}80%{transform:rotate(6deg)}}
+@keyframes ringFlash{0%,100%{background-color:rgba(5,12,8,0.94)}50%{background-color:rgba(76,175,110,0.35)}}
 
 /* Modal */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:999;display:none;align-items:center;justify-content:center;backdrop-filter:blur(3px)}
@@ -364,7 +348,7 @@ select option{background:var(--bg2)}
 .toast.show{transform:translateX(0)}
 
 /* Ringing overlay */
-.ring-overlay{position:fixed;inset:0;background:rgba(5,12,8,0.94);z-index:9500;display:none;align-items:center;justify-content:center;flex-direction:column;gap:6px;backdrop-filter:blur(6px)}
+.ring-overlay{position:fixed;inset:0;background:rgba(5,12,8,0.94);z-index:9500;display:none;align-items:center;justify-content:center;flex-direction:column;gap:6px;backdrop-filter:blur(6px);animation:ringFlash 1.1s ease-in-out infinite}
 .ring-overlay.open{display:flex}
 
 /* Insight */
@@ -493,39 +477,248 @@ input[type=range]::-moz-range-progress{background:var(--accent3);border-radius:9
 /* Lightbox */
 #avatar-lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:9999;align-items:center;justify-content:center;flex-direction:column}
 
-/* Mobile */
-@media(max-width:768px){
-  :root{--sidebar-w:70px}
-  .sidebar{width:70px}
-  .logo-area{padding:12px 8px;flex-direction:column;justify-content:center;border-bottom:1px solid var(--border)}
-  .logo-icon{width:28px;height:28px;font-size:14px}
-  .logo-text{display:none}
-  .nav-area{padding:4px 0}
-  .nav-section-label{display:none}
-  .nav-item{padding:10px 8px;justify-content:center;gap:0;text-align:center;font-size:0;border-left:none;border-right:2px solid transparent;min-width:0}
-  .nav-item i{width:24px;font-size:20px}
-  .nav-item span{display:none}
-  .nav-badge{display:none}
-  .nav-item.active{border-right-color:var(--accent);border-left:none;background:rgba(76,175,110,0.08)}
-  .profile-area{padding:8px 6px;border-top:1px solid var(--border)}
-  .prof-inner{flex-direction:column;gap:6px;padding:8px 4px}
-  .prof-name,.prof-streak{display:none}
-  .avatar-circle{width:28px;height:28px;font-size:10px}
-  .content-area{padding:14px;overflow-y:auto}
-  .grid-2,.grid-3,.grid-4{grid-template-columns:1fr}
-  .gallery-grid{grid-template-columns:repeat(2,1fr)}
-  .ach-grid{grid-template-columns:repeat(2,1fr)}
-  .mini-player{bottom:14px;right:14px;width:calc(100% - 28px);max-width:280px}
+<style>
+/* ═══════════════════════════════════════════════════════════════════════════════ */
+/* MOBILE RESPONSIVE - CLEAN REWRITE */
+/* ═══════════════════════════════════════════════════════════════════════════════ */
+
+/* DEFAULT DESKTOP STYLES */
+.sidebar { display: flex !important; }
+.main { width: auto; }
+#mob-hamburger { display: none !important; }
+#mob-drawer { display: none !important; }
+#mob-drawer-overlay { display: none !important; }
+#mob-bottom-nav { display: none !important; }
+
+/* MOBILE ONLY (max-width: 768px) */
+@media screen and (max-width: 768px) {
+  .sidebar { display: none !important; }
+  .main { width: 100vw !important; }
+  #mob-hamburger { display: flex !important; visibility: visible !important; opacity: 1 !important; }
+  #mob-drawer { display: flex !important; visibility: visible !important; }
+  #mob-drawer-overlay { display: block !important; visibility: visible !important; }
+  #mob-bottom-nav { display: flex !important; visibility: visible !important; }
+
+  /* TOPBAR: tight, no overflow */
+  .topbar { padding: 0 8px !important; gap: 4px !important; overflow: hidden !important; }
+  .topbar-title { font-size: 13px !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; max-width: 120px !important; flex: 1 !important; min-width: 0 !important; }
+  .topbar-meta { display: none !important; }
+  /* Hide text labels in topbar buttons on mobile — icons only */
+  .topbar-btn-label { display: none !important; }
+  .topbar-btn { padding: 6px 8px !important; font-size: 11px !important; min-width: 32px !important; }
+  .btn { padding: 5px 8px !important; font-size: 11px !important; }
+
+  /* Global overflow guard: nothing on the page should ever be wider than
+     the viewport, no matter what fixed pixel widths exist deeper in the
+     markup. This is a backstop, not a substitute for the specific fixes
+     below — but it means a missed case degrades to "scrolls" rather than
+     "breaks the layout". */
+  body, .content-area, .section, .card { max-width: 100vw; }
+  .content-area { padding: 12px 12px 84px !important; overflow-y: auto !important; overflow-x: hidden !important; scroll-behavior: smooth !important; -webkit-overflow-scrolling: touch !important; }
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr !important; }
+  .gallery-grid { grid-template-columns: repeat(2, 1fr) !important; }
+  .ach-grid { grid-template-columns: repeat(2, 1fr) !important; }
+  .mini-player { bottom: 70px !important; right: 10px !important; width: calc(100% - 20px) !important; max-width: none !important; }
+
+  /* Any modal: never let it run past the viewport edge, and let it scroll
+     internally if its content is taller than the screen. */
+  .modal { width: calc(100vw - 32px) !important; max-width: calc(100vw - 32px) !important; max-height: 85vh !important; overflow-y: auto !important; padding: 18px !important; }
+
+  /* Forms with fixed-pixel-width inputs sitting next to other fields are
+     the most common source of real overflow on phones (alarm/reminder time
+     pickers, name+icon rows, etc). Make the row wrap instead of forcing
+     everything onto one line that doesn't fit. */
+  .form-row, #alarm-form > div, #reminder-form > div { flex-wrap: wrap !important; }
+  #alarm-time-input, #reminder-time-input { width: 100% !important; max-width: 160px !important; }
+  #alarm-label-input, #reminder-label-input { min-width: 0 !important; width: 100% !important; }
+  #alarm-ringtone-input, #reminder-ringtone-input { width: 100% !important; }
+
+  /* Watch section */
+  #s-watch .card { width: 100% !important; max-width: 100% !important; }
+  #s-watch .alarm-time-lbl { font-size: 22px !important; }
+  .sanctuary-watch-wrap { width: 100% !important; max-width: 280px !important; height: auto !important; aspect-ratio: 1; }
+  #watch-canvas { width: 100% !important; height: auto !important; aspect-ratio: 1; }
+
+  /* ═══════════════════════════════════════════
+     MUSIC — full mobile rewrite
+  ═══════════════════════════════════════════ */
+  #music-grid-layout {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0 !important;
+  }
+
+  /* ── Now Playing card ── */
+  .np-card {
+    background: linear-gradient(160deg,#0c2216,#152d1c) !important;
+    border-radius: 20px !important;
+    padding: 20px 18px 16px !important;
+    margin-bottom: 12px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  .np-art {
+    width: 100px !important;
+    height: 100px !important;
+    font-size: 44px !important;
+    border-radius: 16px !important;
+    margin: 0 auto 12px !important;
+  }
+  .np-title {
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    text-align: center !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    padding: 0 4px !important;
+  }
+  .np-artist {
+    font-size: 12px !important;
+    text-align: center !important;
+    margin-bottom: 14px !important;
+  }
+
+  /* ── Seek bar ── */
+  .np-seek-wrap {
+    gap: 8px !important;
+    margin: 0 0 14px !important;
+    align-items: center !important;
+  }
+  .np-time { font-size: 10px !important; width: 28px !important; flex-shrink: 0 !important; }
+
+  /* Make the thumb bigger so it's easy to grab on mobile */
+  #np-seek::-webkit-slider-thumb { width: 18px !important; height: 18px !important; margin-top: -7px !important; }
+  #np-seek::-moz-range-thumb { width: 18px !important; height: 18px !important; }
+  #np-seek::-webkit-slider-runnable-track { height: 5px !important; }
+  #mp-seek-bar::-webkit-slider-thumb { width: 18px !important; height: 18px !important; margin-top: -7px !important; }
+  #mp-seek-bar::-moz-range-thumb { width: 18px !important; height: 18px !important; }
+
+  /* ── Controls ── */
+  .np-controls {
+    gap: 0 !important;
+    justify-content: space-between !important;
+    padding: 0 4px !important;
+    margin-bottom: 14px !important;
+  }
+  .np-btn { font-size: 22px !important; padding: 8px !important; }
+  .np-play {
+    width: 54px !important;
+    height: 54px !important;
+    font-size: 22px !important;
+  }
+
+  /* ── Volume ── */
+  .np-card > div[style*="border-top"] {
+    margin-top: 0 !important;
+    padding-top: 12px !important;
+    margin-bottom: 10px !important;
+  }
+
+  /* ── Sleep timer ── */
+  .sleep-timer-row { flex-wrap: nowrap !important; font-size: 11px !important; }
+  .sleep-timer-row select { font-size: 11px !important; }
+
+  /* ── Playlists panel ── */
+  .music-sidebar-panel {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    border-radius: 16px !important;
+    margin-bottom: 12px !important;
+  }
+
+  /* ── Controls row: search full width, sort+upload on one line below ── */
+  #music-controls-row {
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+  #music-search { flex: 1 1 100% !important; min-width: 0 !important; }
+  #music-sort { flex: 1 1 0 !important; min-width: 0 !important; width: auto !important; }
+  #music-controls-row .btn { flex-shrink: 0 !important; white-space: nowrap !important; }
+
+  /* ── Playlist tabs ── */
+  .playlist-tabs {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+    margin-bottom: 10px !important;
+  }
+  .playlist-tabs::-webkit-scrollbar { display: none !important; }
+
+  /* ── Upload zone ── */
+  .music-upload-zone { padding: 20px 16px !important; border-radius: 14px !important; }
+
+  /* ── Track rows ── */
+  .track-row { padding: 10px 8px !important; gap: 10px !important; border-radius: 10px !important; }
+  .track-num { display: none !important; }
+  .track-dur { display: none !important; }
+  .track-art { width: 40px !important; height: 40px !important; font-size: 18px !important; flex-shrink: 0 !important; }
+  .track-title { font-size: 13px !important; }
+  .track-artist { font-size: 11px !important; }
+  .track-fav { font-size: 18px !important; padding: 6px !important; }
+  .track-row > .btn.btn-sm[title="Add to playlist"] { display: none !important; }
+  .track-del { display: none !important; }
+  .track-more { display: flex !important; align-items: center !important; justify-content: center !important; font-size: 18px !important; padding: 6px !important; }
+
+  /* AAY section — prevent content escaping topbar */
+  #s-aay { overflow-x: hidden !important; }
+  #s-aay .profile-banner { margin: 0 0 14px !important; padding: 14px !important; }
+  #s-aay [style*="position:absolute;top:0;right:0"] { position: relative !important; top: auto !important; right: auto !important; margin-top: 8px !important; }
+
+  /* Page transitions */
+  .section.active { animation: fadeInMob 0.25s ease forwards !important; }
 }
 
-.active-aay{background:rgba(76,175,110,0.12)!important;border-color:var(--accent)!important;color:var(--accent3)!important}
-.quote-block{border-left:2px solid var(--accent2);padding:10px 14px;margin:10px 0;background:rgba(76,175,110,0.04);border-radius:0 var(--radius-sm) var(--radius-sm) 0;position:relative}
-.quote-text{font-size:13px;color:var(--text2);font-style:italic;line-height:1.6}
-</style>
-</head>
-<body>
+#mob-hamburger { background: none; border: none; color: var(--text2); font-size: 24px; cursor: pointer; padding: 6px 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: color 0.15s ease; line-height: 1; height: 36px; width: 36px; order: -1; margin-right: 4px; }
+#mob-hamburger:hover { color: var(--text); background: rgba(255, 255, 255, 0.05); border-radius: 6px; }
 
-<div class="app">
+#mob-drawer-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6); z-index: 299; backdrop-filter: blur(2px); opacity: 0; pointer-events: none; transition: opacity 0.28s cubic-bezier(0.4, 0, 0.2, 1); }
+#mob-drawer-overlay.open { opacity: 1 !important; pointer-events: auto !important; }
+
+#mob-drawer { position: fixed; top: 0; left: 0; bottom: 0; width: 280px; background: var(--bg); z-index: 300; display: flex; flex-direction: column; overflow: hidden; transform: translateX(-100%); transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 4px 0 24px rgba(0, 0, 0, 0.4); will-change: transform; }
+#mob-drawer.open { transform: translateX(0) !important; }
+
+#mob-drawer > div:first-child { display: flex; align-items: center; justify-content: space-between; padding: 12px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+#mob-drawer .logo-icon { width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, var(--accent2), var(--accent)); display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+#mob-drawer .logo-text { display: flex; flex-direction: column; }
+#mob-drawer .logo-text .name { font-size: 15px; font-weight: 600; color: var(--text); }
+#mob-drawer .logo-text .sub { font-size: 10px; color: var(--text3); }
+
+#mob-drawer button[onclick*="mobDrawerClose"] { background: none; border: none; color: var(--text3); font-size: 22px; cursor: pointer; padding: 4px; line-height: 1; transition: color 0.15s; }
+#mob-drawer button[onclick*="mobDrawerClose"]:hover { color: var(--text); }
+
+#mob-drawer nav { flex: 1; overflow-y: auto; padding: 8px 0; }
+#mob-drawer .nav-section-label { padding: 12px 16px 4px; font-size: 9.5px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--text3); font-weight: 600; }
+#mob-drawer .nav-item { display: flex; align-items: center; gap: 12px; padding: 10px 16px; cursor: pointer; font-size: 13px; color: var(--text2); transition: all 0.15s; border-left: 3px solid transparent; user-select: none; }
+#mob-drawer .nav-item:hover { color: var(--text); background: rgba(255, 255, 255, 0.04); }
+#mob-drawer .nav-item.active { color: var(--accent3); background: rgba(76, 175, 110, 0.1); border-left-color: var(--accent); }
+#mob-drawer .nav-item i { font-size: 18px; flex-shrink: 0; width: 18px; }
+#mob-drawer .nav-badge { margin-left: auto; background: rgba(76, 175, 110, 0.15); color: var(--accent3); font-size: 9.5px; padding: 2px 7px; border-radius: 99px; font-weight: 600; }
+
+#mob-drawer .profile-area { padding: 12px 16px; border-top: 1px solid var(--border); flex-shrink: 0; }
+#mob-drawer .prof-inner { display: flex; align-items: center; gap: 10px; cursor: pointer; border-radius: 8px; padding: 6px; transition: background 0.15s; margin-bottom: 8px; }
+#mob-drawer .prof-inner:hover { background: rgba(255, 255, 255, 0.05); }
+#mob-drawer .avatar-circle { width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, var(--accent2), var(--accent)); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: #fff; flex-shrink: 0; }
+#mob-drawer .prof-name { font-size: 12px; font-weight: 600; color: var(--text); }
+#mob-drawer .prof-streak { font-size: 10px; color: var(--accent); }
+
+#mob-drawer button[onclick*="authSignOut"] { width: 100%; padding: 10px; background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border); border-radius: 8px; color: var(--text2); font-size: 12px; cursor: pointer; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.15s; }
+#mob-drawer button[onclick*="authSignOut"]:hover { background: rgba(255, 255, 255, 0.08); color: var(--text); }
+
+#mob-bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 60px; background: var(--bg); border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-around; z-index: 200; padding: 0; gap: 0; }
+.mob-nav-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 6px 8px; border: none; background: none; color: var(--text3); cursor: pointer; font-family: inherit; font-size: 9px; font-weight: 600; letter-spacing: 0.3px; border-radius: 6px; transition: all 0.15s; flex: 1; min-width: 0; max-width: 70px; user-select: none; }
+.mob-nav-btn i { font-size: 20px; line-height: 1; }
+.mob-nav-btn:hover { background: rgba(255, 255, 255, 0.04); color: var(--text2); }
+.mob-nav-btn.active { color: var(--accent3); background: rgba(76, 175, 110, 0.1); }
+.mob-nav-btn.active i { color: var(--accent3); }
+
+#mob-drawer nav::-webkit-scrollbar { width: 4px; }
+#mob-drawer nav::-webkit-scrollbar-track { background: transparent; }
+#mob-drawer nav::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+</style>
+
+
+<div class="app" id="main-app" style="visibility:hidden">
   <!-- Sidebar -->
   <aside class="sidebar">
     <div class="logo-area">
@@ -567,17 +760,21 @@ input[type=range]::-moz-range-progress{background:var(--accent3);border-radius:9
           <div class="prof-streak">🔥 <span id="sidebar-streak">0</span> day streak</div>
         </div>
       </div>
+      <button onclick="authSignOut()" style="width:100%;margin-top:8px;padding:8px;background:rgba(240,80,80,0.07);border:1px solid rgba(240,80,80,0.2);border-radius:8px;color:rgba(240,144,144,0.85);font-size:12px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;transition:all 0.15s">
+        <i class="ti ti-logout"></i> Sign out
+      </button>
     </div>
   </aside>
 
   <!-- Main -->
   <div class="main">
     <header class="topbar">
+      <button id="mob-hamburger" onclick="mobDrawerOpen()"><i class="ti ti-menu-2"></i></button>
       <span class="topbar-title" id="page-title">Dashboard</span>
       <span class="topbar-meta" id="topbar-date"></span>
-      <button class="btn" onclick="openSearch()"><i class="ti ti-search"></i> Search</button>
-      <button class="btn" id="add-btn" onclick="handleAddBtn()"><i class="ti ti-plus"></i> <span id="add-btn-label">New</span></button>
-      <button class="btn btn-sm" onclick="openModal('theme-modal')" title="Theme"><i class="ti ti-palette"></i></button>
+      <button class="btn topbar-btn" onclick="openSearch()"><i class="ti ti-search"></i><span class="topbar-btn-label"> Search</span></button>
+      <button class="btn topbar-btn" id="add-btn" onclick="handleAddBtn()"><i class="ti ti-plus"></i><span class="topbar-btn-label"> <span id="add-btn-label">New</span></span></button>
+      <button class="btn btn-sm topbar-btn" onclick="openModal('theme-modal')" title="Theme"><i class="ti ti-palette"></i></button>
     </header>
 
     <div class="content-area">
@@ -789,65 +986,56 @@ input[type=range]::-moz-range-progress{background:var(--accent3);border-radius:9
 
       <!-- MUSIC -->
       <section class="section" id="s-music">
-        <!-- NOW PLAYING HERO -->
-        <div class="music-now-playing-hero">
-          <div class="music-np-left">
-            <div class="np-art" id="np-art">🎵</div>
-            <div class="music-np-meta">
+        <div style="display:grid;grid-template-columns:220px 1fr;gap:16px;align-items:start" id="music-grid-layout">
+          <div>
+            <div class="np-card">
+              <div class="np-art" id="np-art">🎵</div>
               <div class="np-title" id="np-title">No track selected</div>
               <div class="np-artist" id="np-artist">—</div>
+              <div class="np-seek-wrap">
+                <span class="np-time" id="np-cur">0:00</span>
+                <input type="range" class="mp-range" id="np-seek" value="0" min="0" max="100" step="0.1" oninput="seekTo(this.value)" style="flex:1">
+                <span class="np-time right" id="np-dur">0:00</span>
+              </div>
+              <div class="np-controls">
+                <button class="np-btn" id="np-shuffle-btn" onclick="toggleShuffle()" title="Shuffle"><i class="ti ti-arrows-shuffle"></i></button>
+                <button class="np-btn" onclick="prevTrack()"><i class="ti ti-player-skip-back"></i></button>
+                <button class="np-play" id="np-play-big" onclick="togglePlay()"><i class="ti ti-player-play" id="np-play-icon-big"></i></button>
+                <button class="np-btn" onclick="nextTrack()"><i class="ti ti-player-skip-forward"></i></button>
+                <button class="np-btn" id="np-repeat-btn" onclick="cycleRepeat()" title="Repeat"><i class="ti ti-repeat" id="np-repeat-icon"></i></button>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
+                <i class="ti ti-volume" style="font-size:14px;color:var(--text3)"></i>
+                <input type="range" class="mp-range" id="np-vol" value="80" min="0" max="100" oninput="setVolume(this.value)" style="flex:1">
+              </div>
+              <div class="sleep-timer-row">
+                <i class="ti ti-moon"></i>
+                <span>Sleep timer:</span>
+                <select id="sleep-select" onchange="setSleepTimer(this.value)" style="flex:1">
+                  <option value="0">Off</option>
+                  <option value="10">10 min</option>
+                  <option value="20">20 min</option>
+                  <option value="30">30 min</option>
+                  <option value="60">60 min</option>
+                </select>
+                <span id="sleep-countdown" class="sleep-timer-active" style="display:none"></span>
+              </div>
+            </div>
+            <div class="music-sidebar-panel">
+              <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--text3);margin-bottom:10px">Playlists</div>
+              <div id="playlists-list"></div>
+              <button class="new-playlist-btn" style="width:100%;margin-top:8px;text-align:center" onclick="createPlaylist()"><i class="ti ti-plus"></i> New playlist</button>
             </div>
           </div>
-          <div class="music-np-right">
-            <div class="np-seek-wrap" style="margin:0 0 8px">
-              <span class="np-time" id="np-cur">0:00</span>
-              <input type="range" class="mp-range" id="np-seek" value="0" min="0" max="100" step="0.1" oninput="seekTo(this.value)" style="flex:1">
-              <span class="np-time right" id="np-dur">0:00</span>
-            </div>
-            <div class="np-controls" style="justify-content:flex-start;gap:6px;margin:0">
-              <button class="np-btn" id="np-shuffle-btn" onclick="toggleShuffle()" title="Shuffle"><i class="ti ti-arrows-shuffle"></i></button>
-              <button class="np-btn" onclick="prevTrack()"><i class="ti ti-player-skip-back"></i></button>
-              <button class="np-play" id="np-play-big" onclick="togglePlay()"><i class="ti ti-player-play" id="np-play-icon-big"></i></button>
-              <button class="np-btn" onclick="nextTrack()"><i class="ti ti-player-skip-forward"></i></button>
-              <button class="np-btn" id="np-repeat-btn" onclick="cycleRepeat()" title="Repeat"><i class="ti ti-repeat" id="np-repeat-icon"></i></button>
-              <div style="flex:1"></div>
-              <i class="ti ti-volume" style="font-size:14px;color:var(--text3)"></i>
-              <input type="range" class="mp-range" id="np-vol" value="80" min="0" max="100" oninput="setVolume(this.value)" style="width:80px">
-            </div>
-            <div class="sleep-timer-row" style="border:none;padding:6px 0 0;margin:0">
-              <i class="ti ti-moon"></i>
-              <span>Sleep:</span>
-              <select id="sleep-select" onchange="setSleepTimer(this.value)" style="flex:1">
-                <option value="0">Off</option>
-                <option value="10">10 min</option>
-                <option value="20">20 min</option>
-                <option value="30">30 min</option>
-                <option value="60">60 min</option>
-              </select>
-              <span id="sleep-countdown" class="sleep-timer-active" style="display:none"></span>
-            </div>
-          </div>
-        </div>
-
-        <!-- LIBRARY + PLAYLISTS ROW -->
-        <div class="music-body-grid">
-          <!-- LEFT: Playlists -->
-          <div class="music-sidebar-panel">
-            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--text3);margin-bottom:10px">Playlists</div>
-            <div id="playlists-list"></div>
-            <button class="new-playlist-btn" style="width:100%;margin-top:8px;text-align:center" onclick="createPlaylist()"><i class="ti ti-plus"></i> New playlist</button>
-          </div>
-
-          <!-- RIGHT: Library -->
           <div>
-            <div class="music-toolbar">
-              <input type="text" id="music-search" placeholder="Search tracks…" oninput="renderMusicLibrary()" style="flex:1;min-width:0">
-              <select id="music-sort" onchange="renderMusicLibrary()" style="width:120px;flex-shrink:0">
-                <option value="added">Recent</option>
-                <option value="title">A–Z</option>
+            <div id="music-controls-row" style="display:flex;gap:8px;margin-bottom:14px;align-items:center">
+              <input type="text" id="music-search" placeholder="Search tracks…" oninput="renderMusicLibrary()" style="flex:1">
+              <select id="music-sort" onchange="renderMusicLibrary()" style="width:130px">
+                <option value="added">Recently added</option>
+                <option value="title">Title A–Z</option>
                 <option value="duration">Duration</option>
               </select>
-              <button class="btn btn-accent btn-sm" style="flex-shrink:0;white-space:nowrap" onclick="document.getElementById('music-file-input').click()"><i class="ti ti-upload"></i> Upload</button>
+              <button class="btn btn-accent btn-sm" onclick="document.getElementById('music-file-input').click()"><i class="ti ti-upload"></i> Upload</button>
             </div>
             <input type="file" id="music-file-input" accept="audio/*" multiple style="display:none" onchange="handleMusicUpload(event)">
             <div class="playlist-tabs" id="playlist-tabs"></div>
@@ -857,7 +1045,7 @@ input[type=range]::-moz-range-progress{background:var(--accent3);border-radius:9
               ondrop="handleMusicDrop(event)"
               onclick="document.getElementById('music-file-input').click()">
               <i class="ti ti-music-plus"></i>
-              <span>Drop audio files here or tap to upload</span>
+              <span>Drop audio files here or click to upload</span>
             </div>
             <div id="music-status" style="font-size:11px;color:var(--text3);margin:-4px 0 10px;display:none"></div>
             <div id="music-library"></div>
@@ -879,12 +1067,10 @@ input[type=range]::-moz-range-progress{background:var(--accent3);border-radius:9
                 <button class="btn btn-accent btn-sm" onclick="saveAlarm()">Save</button>
                 <button class="btn btn-sm" onclick="document.getElementById('alarm-form').style.display='none'">Cancel</button>
               </div>
-              <div style="margin-top:10px;display:flex;align-items:center;gap:8px">
+              <div style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:12px;color:var(--text2)">
                 <i class="ti ti-music" style="font-size:14px;color:var(--text3)"></i>
-                <select id="alarm-tone-select" style="flex:1;font-size:12px">
-                  <option value="default">Default tone</option>
-                </select>
-                <span style="font-size:11px;color:var(--text3)">Tone</span>
+                <span style="flex-shrink:0">Ringtone:</span>
+                <select id="alarm-ringtone-input" style="flex:1"><option value="">Default tone</option></select>
               </div>
             </div>
           </div>
@@ -902,16 +1088,14 @@ input[type=range]::-moz-range-progress{background:var(--accent3);border-radius:9
                 <button class="btn btn-accent btn-sm" onclick="saveReminder()">Save</button>
                 <button class="btn btn-sm" onclick="document.getElementById('reminder-form').style.display='none'">Cancel</button>
               </div>
+              <div style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:12px;color:var(--text2)">
+                <i class="ti ti-music" style="font-size:14px;color:var(--text3)"></i>
+                <span style="flex-shrink:0">Ringtone:</span>
+                <select id="reminder-ringtone-input" style="flex:1"><option value="">Default tone</option></select>
+              </div>
               <label style="display:flex;align-items:center;gap:6px;margin-top:10px;font-size:12px;color:var(--text2);cursor:pointer">
                 <input type="checkbox" id="reminder-repeat-input" style="width:auto"> Repeat every day
               </label>
-              <div style="margin-top:10px;display:flex;align-items:center;gap:8px">
-                <i class="ti ti-music" style="font-size:14px;color:var(--text3)"></i>
-                <select id="reminder-tone-select" style="flex:1;font-size:12px">
-                  <option value="default">Default tone</option>
-                </select>
-                <span style="font-size:11px;color:var(--text3)">Tone</span>
-              </div>
             </div>
           </div>
         </div>
@@ -948,14 +1132,18 @@ input[type=range]::-moz-range-progress{background:var(--accent3);border-radius:9
       <!-- ALL ABOUT YOU -->
       <section class="section" id="s-aay">
         <div class="profile-banner">
-          <div style="display:flex;align-items:center;gap:16px;position:relative">
+          <div style="display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap">
             <div class="profile-avatar" id="profile-avatar-display" onclick="openAvatarLightbox()">S</div>
-            <div>
-              <div style="font-size:20px;font-weight:700;color:var(--text)" id="profile-name-display">You</div>
-              <div style="font-size:12px;color:var(--text3);margin-top:3px" id="profile-tagline-display">Curious mind. Creative soul.</div>
+            <div style="flex:1;min-width:0">
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
+                <div style="min-width:0">
+                  <div style="font-size:20px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis" id="profile-name-display">You</div>
+                  <div style="font-size:12px;color:var(--text3);margin-top:3px" id="profile-tagline-display">Curious mind. Creative soul.</div>
+                </div>
+                <button class="btn btn-sm" style="flex-shrink:0" onclick="openProfileEdit()"><i class="ti ti-edit"></i> Edit</button>
+              </div>
               <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap" id="profile-tags-display"></div>
             </div>
-            <button class="btn btn-sm" style="position:absolute;top:0;right:0" onclick="openProfileEdit()"><i class="ti ti-edit"></i> Edit</button>
           </div>
         </div>
         <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
@@ -1006,6 +1194,7 @@ input[type=range]::-moz-range-progress{background:var(--accent3);border-radius:9
 </div>
 
 <audio id="global-audio" preload="metadata"></audio>
+<audio id="ringtone-audio" preload="none" loop></audio>
 
 <div class="toast-wrap" id="toast-wrap"></div>
 
@@ -1223,19 +1412,32 @@ input[type=range]::-moz-range-progress{background:var(--accent3);border-radius:9
 </div>
 
 <!-- ATTACHMENT VIEWER -->
-<div class="modal-overlay" id="attachment-viewer" onclick="if(event.target===this)closeModal('attachment-viewer')">
+<div class="modal-overlay" id="attachment-viewer" onclick="if(event.target===this)closeAttachmentViewer()">
   <div style="background:var(--card);border-radius:var(--radius-lg);width:90%;max-width:900px;height:85vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:var(--shadow)">
     <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid var(--border);flex-shrink:0">
       <div style="font-size:13px;font-weight:600;color:var(--text)" id="att-viewer-name">File</div>
       <div style="display:flex;gap:8px;align-items:center">
-        <a id="att-viewer-download" download style="background:none;border:1px solid var(--border2);border-radius:var(--radius-sm);padding:5px 10px;color:var(--text2);font-size:11px;text-decoration:none;display:flex;align-items:center;gap:5px"><i class="ti ti-download"></i> Download</a>
-        <button onclick="closeModal('attachment-viewer')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:20px"><i class="ti ti-x"></i></button>
+        <div id="att-viewer-pdf-nav" style="display:none;align-items:center;gap:6px">
+          <button onclick="attPdfPrev()" style="background:none;border:1px solid var(--border2);border-radius:var(--radius-sm);padding:4px 8px;color:var(--text2);cursor:pointer;font-size:11px">‹ Prev</button>
+          <span id="att-viewer-pdf-page" style="font-size:11px;color:var(--text3)">1 / 1</span>
+          <button onclick="attPdfNext()" style="background:none;border:1px solid var(--border2);border-radius:var(--radius-sm);padding:4px 8px;color:var(--text2);cursor:pointer;font-size:11px">Next ›</button>
+        </div>
+        <button id="att-viewer-download-btn" onclick="attViewerDownload()" style="background:none;border:1px solid var(--border2);border-radius:var(--radius-sm);padding:5px 10px;color:var(--text2);font-size:11px;cursor:pointer;display:flex;align-items:center;gap:5px;font-family:inherit"><i class="ti ti-download"></i> Download</button>
+        <button onclick="closeAttachmentViewer()" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:20px"><i class="ti ti-x"></i></button>
       </div>
     </div>
-    <div style="flex:1;min-height:0;overflow:auto;display:flex;align-items:center;justify-content:center;background:var(--bg)">
+    <div style="flex:1;min-height:0;overflow:auto;display:flex;align-items:center;justify-content:center;background:var(--bg)" id="att-viewer-body">
       <img id="att-viewer-img" style="display:none;max-width:100%;max-height:100%;object-fit:contain"/>
-      <iframe id="att-viewer-pdf" style="display:none;width:100%;height:100%;border:none"></iframe>
+      <div id="att-viewer-pdf-wrap" style="display:none;width:100%;height:100%;overflow:auto;align-items:flex-start;justify-content:center;padding:16px;box-sizing:border-box">
+        <canvas id="att-viewer-canvas" style="box-shadow:0 4px 24px rgba(0,0,0,0.5);max-width:100%"></canvas>
+      </div>
+      <div id="att-viewer-excel" style="display:none;width:100%;height:100%;overflow:auto;padding:16px;box-sizing:border-box;font-size:12px"></div>
+      <div id="att-viewer-docx" style="display:none;width:100%;height:100%;overflow:auto;padding:32px;box-sizing:border-box"></div>
       <div id="att-viewer-text" style="display:none;padding:20px;color:var(--text);font-size:13px;white-space:pre-wrap;overflow:auto;width:100%;height:100%"></div>
+      <div id="att-viewer-fallback" style="display:none;flex-direction:column;align-items:center;gap:14px;padding:40px;text-align:center;max-width:380px">
+        <div style="font-size:40px;opacity:0.5" id="att-viewer-fallback-icon">📄</div>
+        <div style="font-size:13px;color:var(--text2);line-height:1.6" id="att-viewer-fallback-text"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -1353,7 +1555,7 @@ function save() {
   const stripImg = arr => (arr||[]).map(it => ({...it, img: undefined}));
   const payload = {
     goals:state.goals,
-    notes: state.notes.map(n=>({...n, attachments:(n.attachments||[]).map(a=>({name:a.name,type:a.type,blobKey:a.blobKey,data:a.blobKey?undefined:a.data}))})),
+    notes: state.notes.map(n=>({...n, attachments:(n.attachments||[]).map(a=>({name:a.name,type:a.type,blobKey:a.blobKey,storageKey:a.storageKey,data:a.blobKey?undefined:a.data}))})),
     diaryEntries:state.diaryEntries,
     projects:state.projects, breaks:state.breaks, aay:state.aay,
     profile: state.profile,
@@ -1361,7 +1563,7 @@ function save() {
     achievements:state.achievements, growth:state.growth,
     milestones:state.milestones,
     gallery:{ memories: stripImg(state.gallery.memories), visionboard: stripImg(state.gallery.visionboard) },
-    places: state.places.map(p=>({...p, photos: (p.photos||[]).map(ph=>({blobKey: ph.blobKey}))})),
+    places: state.places.map(p=>({...p, photos: (p.photos||[]).map(ph=>({blobKey: ph.blobKey, storageUrl: ph.storageUrl, storageKey: ph.storageKey}))})),
     appTheme:state.appTheme, heroTheme:state.heroTheme,
     notesLayout:state.notesLayout, alarms:state.alarms, reminders:state.reminders, pastReminders:state.pastReminders, trash:state.trash,
     miniPlayerVisible:state.miniPlayerVisible, gameBest:state.gameBest,
@@ -1419,34 +1621,44 @@ function loadFromStorage() {
   } catch(e) { console.warn('Load failed',e); }
 }
 
-async function restoreAudioBlobs() {
+async function restoreAudioBlobs(cloudDataLoaded) {
   const dead=[];
   for (const track of state.music.tracks) {
     if (track.blobKey) {
       const blob = await idbGet(track.blobKey);
       if (blob) {
         track.blobUrl = URL.createObjectURL(blob);
-      } else {
+      } else if (track.storageUrl) {
+        // Not cached locally — will stream from cloud via ensureTrackBlob. Not a dead track.
+        track.blobUrl = null;
+      } else if (cloudDataLoaded) {
+        // No local blob and no cloud URL — genuinely gone.
         track.blobUrl = null;
         dead.push(track.id);
+      } else {
+        track.blobUrl = null;
       }
+    } else if (track.storageUrl) {
+      // Cloud-only track (uploaded on another device and not yet cached here).
+      track.blobUrl = null;
     }
   }
   if(dead.length){
     state.music.tracks = state.music.tracks.filter(t=>!dead.includes(t.id));
-    toast(dead.length+' track'+(dead.length>1?'s were':' was')+' removed (browser cleared storage)',true);
     save();
+    console.warn(dead.length+' track(s) removed — no local or cloud copy found');
   }
   rebuildQueue();
   renderMusicLibrary();
   renderPlaylists();
 }
 
-// Also restore gallery images from IDB if stored as blob keys (backwards compat)
 async function restoreGalleryBlobs() {
   for (const type of ['memories','visionboard']) {
     for (const item of state.gallery[type]) {
-      // Re-fetch if missing or if it's a dead blob URL (starts with blob: but only valid for session)
+      // Cloud URL is the authoritative cross-device source — always prefer it.
+      if (item.storageUrl) { item.img = item.storageUrl; continue; }
+      // Only fall back to IDB blob if there is no cloud URL.
       const needsRestore = !item.img || item.img.startsWith('blob:');
       if (needsRestore && item.blobKey) {
         const blob = await idbGet(item.blobKey);
@@ -1462,7 +1674,10 @@ async function restorePlacesBlobs() {
   for (const p of state.places) {
     if (!p.photos) continue;
     for (const ph of p.photos) {
-      const phNeedsRestore = ph && ph.blobKey && (!ph.url || ph.url.startsWith('blob:'));
+      if (!ph) continue;
+      // Cloud URL is authoritative — always prefer it.
+      if (ph.storageUrl) { ph.url = ph.storageUrl; continue; }
+      const phNeedsRestore = ph.blobKey && (!ph.url || ph.url.startsWith('blob:'));
       if (phNeedsRestore) {
         const blob = await idbGet(ph.blobKey);
         if (blob) ph.url = URL.createObjectURL(blob);
@@ -1477,6 +1692,8 @@ async function restoreNoteAttachmentBlobs() {
   for (const n of state.notes) {
     if (!n.attachments) continue;
     for (const att of n.attachments) {
+      // Cloud URL is authoritative — always prefer it over a potentially stale blob.
+      if (att && att.storageUrl) { att.url = att.storageUrl; continue; }
       const attNeedsRestore = att && att.blobKey && (!att.url || att.url.startsWith('blob:'));
       if (attNeedsRestore) {
         const blob = await idbGet(att.blobKey);
@@ -1489,9 +1706,15 @@ async function restoreNoteAttachmentBlobs() {
 }
 
 async function restoreAvatarBlob() {
+  // Cloud URL is always preferred — it works on every device.
+  if (state.profile.avatarStorageUrl) {
+    state.profile.avatar = state.profile.avatarStorageUrl;
+    updateAvatarUI(state.profile.avatarStorageUrl);
+    return;
+  }
   if (!state.profile.avatarKey && !state.profile.avatar) return;
-  if (state.profile.avatar) {
-    // already a data URL or blob URL
+  if (state.profile.avatar && !state.profile.avatar.startsWith('blob:')) {
+    // data: URL or any non-blob — use it directly.
     updateAvatarUI(state.profile.avatar);
     return;
   }
@@ -1512,6 +1735,7 @@ async function init() {
   loadFromStorage();
   setDate();
   setGreeting();
+  recalculateStreak();
   updateProfileUI();
   renderDashTasks();
   renderDashProjects();
@@ -1540,7 +1764,7 @@ async function init() {
   await restoreGalleryBlobs().catch(e=>console.warn('gallery restore failed',e));
   await restorePlacesBlobs().catch(e=>console.warn('places restore failed',e));
   await restoreNoteAttachmentBlobs().catch(e=>console.warn('note attachment restore failed',e));
-  await restoreAudioBlobs().catch(e=>console.warn('audio restore failed',e));
+  await restoreAudioBlobs(false).catch(e=>console.warn('audio restore failed',e));
 }
 
 function setDate() {
@@ -1836,6 +2060,7 @@ function openCropModal(src) {
 function applyCropTransform() { document.getElementById('crop-img').style.transform=`translate(${_cropState.dx}px,${_cropState.dy}px) scale(${_cropState.scale})`; }
 function clampCrop() { const CW=280,CH=280,w=_cropState.naturalW*_cropState.scale,h=_cropState.naturalH*_cropState.scale; _cropState.dx=Math.min(0,Math.max(CW-w,_cropState.dx)); _cropState.dy=Math.min(0,Math.max(CH-h,_cropState.dy)); }
 function closeCropModal() { document.getElementById('avatar-crop-modal').style.display='none'; }
+let _avatarUploadInFlight = false;
 async function confirmCrop() {
   const img = document.getElementById('crop-img');
   const SIZE=400; const canvas=document.createElement('canvas'); canvas.width=SIZE; canvas.height=SIZE;
@@ -1845,17 +2070,43 @@ async function confirmCrop() {
   // Save to IDB as blob
   const blob = await new Promise(res=>canvas.toBlob(res,'image/jpeg',0.85));
   const key = 'avatar_'+Date.now();
-  await idbSet(key, blob);
-  // Also store as data URL for quick reload without IDB latency
+  await idbSet(key, blob).catch(()=>{});
   const dataUrl = canvas.toDataURL('image/jpeg',0.85);
   if(state.profile.avatarKey) idbDel(state.profile.avatarKey);
   state.profile.avatarKey = key;
-  state.profile.avatar = dataUrl; // data URL survives refresh
+  state.profile.avatar = dataUrl;
+  // Show the new photo immediately — don't make the person wait on the network for this
   document.getElementById('profile-avatar-preview').innerHTML=`<img src="${dataUrl}">`;
   document.getElementById('remove-avatar-btn').style.display='';
   closeCropModal();
   updateAvatarUI(dataUrl);
-  save(); toast('Photo updated!');
+  save();
+  // Upload to cloud storage (via Worker) for cross-device access
+  if(_currentUser){
+    if(_avatarUploadInFlight){
+      toast('Still saving your last photo — please wait a moment and try again',true);
+      return;
+    }
+    _avatarUploadInFlight = true;
+    try{
+      const avatarKey = 'avatar_' + _currentUser.id + '.jpg';
+      const { url, error } = await storageUpload(blob, avatarKey);
+      if(url){
+        state.profile.avatarStorageUrl=url;
+        await _supabase.from('profiles').upsert({id:_currentUser.id,avatar_url:url});
+        toast('Photo updated!');
+      } else {
+        toast('Saved on this device, but cloud sync failed: ' + (error || 'unknown error'), true);
+      }
+    }catch(err){
+      console.warn('Avatar storage upload failed',err);
+      toast('Saved on this device, but cloud sync failed: ' + (err.message || 'unknown error'), true);
+    } finally {
+      _avatarUploadInFlight = false;
+    }
+  } else {
+    toast('Photo updated!');
+  }
 }
 function openAvatarLightbox() {
   if(!state.profile.avatar) return;
@@ -1894,7 +2145,7 @@ function renderGoals() {
     </div>`).join('');
   renderDashTasks();
 }
-function toggleGoal(id) { const g=state.goals.find(x=>x.id===id); if(g){g.done=!g.done;renderGoals();save();} }
+function toggleGoal(id) { const g=state.goals.find(x=>x.id===id); if(g){g.done=!g.done;renderGoals();recalculateStreak();save();} }
 function removeGoal(id) { const g=state.goals.find(x=>x.id===id); if(g)moveToTrash('goal',g); state.goals=state.goals.filter(x=>x.id!==id); renderGoals(); save(); }
 function openAddGoal() { document.getElementById('add-goal-form').style.display='flex'; document.getElementById('new-goal-input').focus(); }
 function closeAddGoal() { document.getElementById('add-goal-form').style.display='none'; document.getElementById('new-goal-input').value=''; }
@@ -1982,8 +2233,18 @@ async function handleNoteAttachment(e){
   const blobKey='note_att_'+Date.now()+'_'+Math.random().toString(36).slice(2);
   const ok=await idbSet(blobKey,file);
   if(!ok){toast('Could not save file — storage may be full',true);return;}
-  const url=URL.createObjectURL(file);
-  const att={name:file.name,type:file.type,url,blobKey};
+  let url=URL.createObjectURL(file);
+  let storageUrl=null;
+  const ext=file.name.split('.').pop()||'bin';
+  const storageKey=blobKey+'.'+ext;
+  if(_currentUser){
+    try{
+      const result = await storageUpload(file, storageKey);
+      storageUrl = result.url;
+      if(!storageUrl) toast('Saved on this device, but cloud sync failed: ' + (result.error || 'unknown error'), true);
+    }catch(err){console.warn('Attachment storage upload failed',err);toast('Saved on this device, but cloud sync failed: ' + (err.message || 'unknown error'), true);}
+  }
+  const att={name:file.name,type:file.type,url:storageUrl||url,blobKey,storageUrl,storageKey};
   state.noteModalAttachments.push(att);
   renderNoteAttachments();
 }
@@ -2006,36 +2267,253 @@ function dataURLtoBlobURL(dataUrl){
     return URL.createObjectURL(new Blob([bytes],{type:mime}));
   }catch(e){return dataUrl;}
 }
-async function showAttachmentInViewer(att){
-  if(!att)return;
-  // If no live URL, re-fetch from IDB
-  if(!att.url && att.blobKey){
-    const blob=await idbGet(att.blobKey);
-    if(blob){att.url=URL.createObjectURL(blob);}
+// ── Attachment viewer state ──
+let _attViewerCurrentAtt = null;
+let _attPdfDoc = null;
+let _attPdfPage = 1;
+let _attCurrentBlobUrl = null;
+// Expose for external patching (PDF quality fix)
+Object.defineProperty(window,'_attPdfDoc',{get:()=>_attPdfDoc,set:v=>{_attPdfDoc=v;}});
+function closeAttachmentViewer() {
+  if (_attCurrentBlobUrl) { URL.revokeObjectURL(_attCurrentBlobUrl); _attCurrentBlobUrl = null; }
+  _attViewerCurrentAtt = null;
+  _attPdfDoc = null;
+  closeModal('attachment-viewer');
+}
+
+function attViewerDownload() {
+  if (!_attViewerCurrentAtt) return;
+  const att = _attViewerCurrentAtt;
+  const src = att.url || att.storageUrl || att.data || '';
+  if (!src) return;
+  const a = document.createElement('a');
+  a.href = src.includes('/file/') ? src + (src.includes('?') ? '&' : '?') + 'download=1' : src;
+  a.download = att.name;
+  a.click();
+}
+
+function _attHideAll() {
+  document.getElementById('att-viewer-img').style.display = 'none';
+  const wrap = document.getElementById('att-viewer-pdf-wrap');
+  wrap.style.display = 'none';
+  document.getElementById('att-viewer-excel').style.display = 'none';
+  document.getElementById('att-viewer-docx').style.display = 'none';
+  document.getElementById('att-viewer-text').style.display = 'none';
+  document.getElementById('att-viewer-fallback').style.display = 'none';
+  document.getElementById('att-viewer-pdf-nav').style.display = 'none';
+  document.getElementById('att-viewer-body').style.alignItems = 'center';
+}
+
+async function _attRenderPdfPage(pageNum) {
+  if (!_attPdfDoc) return;
+  const page = await _attPdfDoc.getPage(pageNum);
+  const canvas = document.getElementById('att-viewer-canvas');
+  const wrap = document.getElementById('att-viewer-pdf-wrap');
+  const wrapWidth = wrap.clientWidth || document.getElementById('att-viewer-body').clientWidth || 640;
+  const scale = Math.min(2, Math.max(0.4, (wrapWidth - 32) / page.getViewport({scale:1}).width));
+  const vp = page.getViewport({scale});
+  canvas.width = vp.width;
+  canvas.height = vp.height;
+  await page.render({canvasContext: canvas.getContext('2d'), viewport: vp}).promise;
+  document.getElementById('att-viewer-pdf-page').textContent = `${pageNum} / ${_attPdfDoc.numPages}`;
+}
+
+async function attPdfPrev() {
+  if (_attPdfPage > 1) { _attPdfPage--; await _attRenderPdfPage(_attPdfPage); }
+}
+async function attPdfNext() {
+  if (_attPdfDoc && _attPdfPage < _attPdfDoc.numPages) { _attPdfPage++; await _attRenderPdfPage(_attPdfPage); }
+}
+
+async function showAttachmentInViewer(att) {
+  if (!att) return;
+  _attViewerCurrentAtt = att;
+  _attPdfDoc = null;
+  _attPdfPage = 1;
+
+  // Resolve URL — cloud storageUrl is authoritative for cross-device; fall back to IDB blob only if needed
+  if (att.storageUrl) {
+    att.url = att.storageUrl;
+  } else if ((!att.url || att.url.startsWith('blob:')) && att.blobKey) {
+    const blob = await idbGet(att.blobKey);
+    if (blob) att.url = URL.createObjectURL(blob);
   }
-  document.getElementById('att-viewer-name').textContent=att.name;
-  document.getElementById('att-viewer-img').style.display='none';
-  document.getElementById('att-viewer-pdf').style.display='none';
-  document.getElementById('att-viewer-text').style.display='none';
-  const dl=document.getElementById('att-viewer-download');
-  const src=att.url||att.data||'';
-  dl.href=src||'#';dl.download=att.name;
-  const isPdf=att.type==='application/pdf'||att.name.toLowerCase().endsWith('.pdf');
-  const isImg=(att.type||'').startsWith('image/');
-  if(!src){
-    document.getElementById('att-viewer-text').textContent='File could not be loaded. It may have been cleared by the browser.';
-    document.getElementById('att-viewer-text').style.display='';
-  }else if(isPdf){
-    document.getElementById('att-viewer-pdf').src=src;
-    document.getElementById('att-viewer-pdf').style.display='';
-  }else if(isImg){
-    document.getElementById('att-viewer-img').src=src;
-    document.getElementById('att-viewer-img').style.display='';
-  }else{
-    document.getElementById('att-viewer-text').textContent='File: '+att.name+'\n\nType: '+att.type+'\n\n(Preview not available — use Download above)';
-    document.getElementById('att-viewer-text').style.display='';
-  }
+  if (!att.url && att.storageUrl) att.url = att.storageUrl;
+
+  const src = att.url || att.data || '';
+  document.getElementById('att-viewer-name').textContent = att.name;
+  _attHideAll();
+
+  // Open the modal NOW, before any rendering — this guarantees the viewer
+  // has real layout dimensions (clientWidth etc.) by the time PDF/docx/
+  // anything else measures them. Opening it only at the end was the cause
+  // of page 1 of a PDF rendering tiny/blank (it measured a hidden, 0-width
+  // container) while every later page rendered correctly.
   openModal('attachment-viewer');
+  // One frame to let the browser actually paint the now-visible layout
+  // before anything reads clientWidth/clientHeight from it.
+  await new Promise(res => requestAnimationFrame(() => requestAnimationFrame(res)));
+
+  const lowerName = (att.name || '').toLowerCase();
+  const mime = att.type || '';
+  const isPdf = mime === 'application/pdf' || lowerName.endsWith('.pdf');
+  const isImg = mime.startsWith('image/');
+  const isXls = lowerName.endsWith('.xlsx') || lowerName.endsWith('.xls');
+  const isCsv = lowerName.endsWith('.csv') || lowerName.endsWith('.tsv') || mime === 'text/csv';
+  const isDocx = lowerName.endsWith('.docx') || mime === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+  const isLegacyDoc = lowerName.endsWith('.doc') && !isDocx;
+  const isPlainText = mime.startsWith('text/') || /\.(txt|md|markdown|json|log|csv$|js|ts|css|html?|xml|yaml|yml|ini|conf|sh|py|java|c|cpp|rb|go|rs)$/.test(lowerName) && !isCsv;
+
+  const fb = (icon, text) => {
+    document.getElementById('att-viewer-fallback-icon').textContent = icon;
+    document.getElementById('att-viewer-fallback-text').textContent = text;
+    document.getElementById('att-viewer-fallback').style.display = 'flex';
+  };
+
+  if (!src) {
+    fb('⚠️', 'This file could not be loaded — it may have been cleared by the browser. Try re-uploading it.');
+  } else if (isImg) {
+    const imgEl = document.getElementById('att-viewer-img');
+    imgEl.style.display = '';
+    imgEl.src = '';
+    try {
+      // Fetch as a Blob and render an in-memory blob: URL — never the raw
+      // network URL directly. A blob: URL has no server response and no
+      // Content-Disposition header attached to it, so there is nothing for
+      // any browser, extension, or download manager to ever interpret as
+      // "download this" instead of "show this".
+      const blob = await fetch(src).then(r => r.blob());
+      const blobUrl = URL.createObjectURL(blob);
+      if (_attCurrentBlobUrl) URL.revokeObjectURL(_attCurrentBlobUrl);
+      _attCurrentBlobUrl = blobUrl;
+      imgEl.src = blobUrl;
+    } catch(e) {
+      imgEl.style.display = 'none';
+      fb('🖼️', 'This image could not be loaded (' + e.message + '). Try re-uploading it.');
+    }
+  } else if (isPdf) {
+    // Fetch as ArrayBuffer so IDM never sees the URL
+    const wrap = document.getElementById('att-viewer-pdf-wrap');
+    wrap.style.display = 'flex';
+    document.getElementById('att-viewer-body').style.alignItems = 'flex-start';
+    document.getElementById('att-viewer-pdf-page').textContent = 'Loading…';
+    document.getElementById('att-viewer-pdf-nav').style.display = 'flex';
+    try {
+      if (!window.pdfjsLib) {
+        await new Promise((res, rej) => {
+          const s = document.createElement('script');
+          s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+          s.onload = res; s.onerror = rej;
+          document.head.appendChild(s);
+        });
+        window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+      }
+      const ab = await fetch(src).then(r => r.arrayBuffer());
+      _attPdfDoc = await window.pdfjsLib.getDocument({data: ab}).promise;
+      await _attRenderPdfPage(1);
+    } catch(e) {
+      document.getElementById('att-viewer-pdf-nav').style.display = 'none';
+      wrap.style.display = 'none';
+      fb('📄', 'This PDF could not be rendered (' + e.message + '). Try re-uploading it.');
+    }
+  } else if (isXls) {
+    const excelEl = document.getElementById('att-viewer-excel');
+    excelEl.style.display = '';
+    excelEl.innerHTML = '<div style="color:var(--text3);padding:20px">Loading spreadsheet…</div>';
+    try {
+      if (!window.XLSX) {
+        await new Promise((res, rej) => {
+          const s = document.createElement('script');
+          s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+          s.onload = res; s.onerror = rej;
+          document.head.appendChild(s);
+        });
+      }
+      const ab = await fetch(src).then(r => r.arrayBuffer());
+      const wb = window.XLSX.read(ab, {type:'array'});
+      let html = '';
+      wb.SheetNames.forEach(name => {
+        const ws = wb.Sheets[name];
+        const tbl = window.XLSX.utils.sheet_to_html(ws, {id:'att-xls-tbl'});
+        html += `<div style="margin-bottom:24px"><div style="font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px;padding:6px 10px;background:rgba(76,175,110,0.08);border-radius:6px;border:1px solid var(--border)">${name}</div>${tbl}</div>`;
+      });
+      excelEl.innerHTML = `<style>#att-xls-tbl,#att-viewer-excel table{border-collapse:collapse;font-size:12px;color:var(--text);width:max-content}#att-viewer-excel td,#att-viewer-excel th{border:1px solid var(--border);padding:5px 10px;white-space:nowrap}#att-viewer-excel th{background:var(--bg3);color:var(--text2);font-weight:600}</style>${html}`;
+    } catch(e) {
+      excelEl.style.display = 'none';
+      fb('📊', 'This spreadsheet could not be rendered (' + e.message + '). Try re-uploading it.');
+    }
+  } else if (isCsv) {
+    const excelEl = document.getElementById('att-viewer-excel');
+    excelEl.style.display = '';
+    excelEl.innerHTML = '<div style="color:var(--text3);padding:20px">Loading CSV…</div>';
+    try {
+      if (!window.XLSX) {
+        await new Promise((res, rej) => {
+          const s = document.createElement('script');
+          s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+          s.onload = res; s.onerror = rej;
+          document.head.appendChild(s);
+        });
+      }
+      const text = await fetch(src).then(r => r.text());
+      const wb = window.XLSX.read(text, {type:'string'});
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const tbl = window.XLSX.utils.sheet_to_html(ws, {id:'att-xls-tbl'});
+      excelEl.innerHTML = `<style>#att-xls-tbl{border-collapse:collapse;font-size:12px;color:var(--text);width:max-content}#att-xls-tbl td,#att-xls-tbl th{border:1px solid var(--border);padding:5px 10px;white-space:nowrap}#att-xls-tbl th{background:var(--bg3);color:var(--text2);font-weight:600}</style>${tbl}`;
+    } catch(e) {
+      excelEl.style.display = 'none';
+      fb('📋', 'This CSV could not be rendered (' + e.message + '). Try re-uploading it.');
+    }
+  } else if (isDocx) {
+    const docxEl = document.getElementById('att-viewer-docx');
+    docxEl.style.display = '';
+    docxEl.innerHTML = '<div style="color:var(--text3)">Loading document…</div>';
+    document.getElementById('att-viewer-body').style.alignItems = 'flex-start';
+    try {
+      if (!window.mammoth) {
+        await new Promise((res, rej) => {
+          const s = document.createElement('script');
+          s.src = 'https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.11.0/mammoth.browser.min.js';
+          s.onload = res; s.onerror = rej;
+          document.head.appendChild(s);
+        });
+      }
+      const ab = await fetch(src).then(r => r.arrayBuffer());
+      const result = await window.mammoth.convertToHtml({ arrayBuffer: ab });
+      docxEl.innerHTML = `<style>
+        #att-viewer-docx{max-width:680px;margin:0 auto;background:#fff;color:#1a1a1a;padding:48px 56px;border-radius:6px;box-shadow:0 2px 16px rgba(0,0,0,0.3);font-family:'Georgia',serif;line-height:1.6;font-size:14px}
+        #att-viewer-docx h1{font-size:24px;margin:0 0 16px;font-weight:700}
+        #att-viewer-docx h2{font-size:19px;margin:24px 0 12px;font-weight:700}
+        #att-viewer-docx h3{font-size:16px;margin:20px 0 10px;font-weight:700}
+        #att-viewer-docx p{margin:0 0 12px}
+        #att-viewer-docx table{border-collapse:collapse;margin:12px 0}
+        #att-viewer-docx td,#att-viewer-docx th{border:1px solid #ccc;padding:6px 10px}
+        #att-viewer-docx img{max-width:100%}
+        #att-viewer-docx ul,#att-viewer-docx ol{margin:0 0 12px;padding-left:24px}
+      </style>` + result.value;
+      if (!result.value.trim()) {
+        docxEl.innerHTML += '<div style="color:#999;font-style:italic;margin-top:12px">(This document appears to be empty, or contains only unsupported elements.)</div>';
+      }
+    } catch(e) {
+      docxEl.style.display = 'none';
+      fb('📝', 'This Word document could not be rendered (' + e.message + '). Try re-uploading it, or download it to open in Word.');
+    }
+  } else if (isLegacyDoc) {
+    // Legacy .doc (pre-2007 binary format) has no reliable client-side renderer.
+    // Being honest about this beats faking a broken preview.
+    fb('📝', 'Older .doc files can\'t be previewed in-browser yet — only modern .docx files can. Use Download to open this one in Word, or re-save it as .docx for in-app preview.');
+  } else if (isPlainText) {
+    const textEl = document.getElementById('att-viewer-text');
+    try {
+      const text = await fetch(src).then(r => r.text());
+      textEl.textContent = text || '(This file is empty.)';
+      textEl.style.display = '';
+    } catch(e) {
+      fb('📃', 'This file could not be loaded (' + e.message + ').');
+    }
+  } else {
+    fb('📦', `"${att.name}" is a file type Sanctuary can't preview yet. Use Download to open it in another app.`);
+  }
 }
 function viewModalAttachment(idx){showAttachmentInViewer(state.noteModalAttachments[idx]);}
 function removeNoteAttachment(idx){
@@ -2047,12 +2525,13 @@ function saveNote() {
   const title=document.getElementById('note-title-input').value.trim(); if(!title){toast('Add a title',true);return;}
   const content=document.getElementById('note-content-input').value.trim();
   const tag=document.getElementById('note-tag-input').value;
+  let isNewNote = false;
   if(state.noteModalEditId){
     const n=state.notes.find(x=>x.id===state.noteModalEditId);
     if(n){n.title=title;n.content=content;n.tag=tag;n.attachments=state.noteModalAttachments;n.date='Just now';}
   }
-  else state.notes.unshift({id:Date.now(),title,content,tag,attachments:state.noteModalAttachments,date:'Just now'});
-  closeModal('note-modal'); renderNotes(); save(); toast(state.noteModalEditId?'Note updated!':'Note saved!');
+  else { state.notes.unshift({id:Date.now(),title,content,tag,attachments:state.noteModalAttachments,date:'Just now'}); isNewNote = true; }
+  closeModal('note-modal'); renderNotes(); if(isNewNote) recalculateStreak(); save(); toast(state.noteModalEditId?'Note updated!':'Note saved!');
 }
 function viewAttachment(noteId,attIdx){
   const note=state.notes.find(n=>n.id===noteId);
@@ -2111,14 +2590,14 @@ function saveDiary() {
   const now=new Date();
   const dateStr=now.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
   state.diaryEntries.unshift({date:dateStr,mood:state.currentMood.emoji,moodLabel:state.currentMood.label+' '+state.currentMood.emoji,content:txt.substring(0,200)+(txt.length>200?'…':''),savedAt:now.toISOString()});
-  clearEditor(); renderDiary(); save(); toast('Entry saved! 📖');
+  clearEditor(); renderDiary(); recalculateStreak(); save(); toast('Entry saved! 📖');
 }
 function saveDashJournal() {
   const txt=document.getElementById('dash-journal').value.trim(); if(!txt){toast('Write something first',true);return;}
   const now=new Date();
   const dateStr=now.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
   state.diaryEntries.unshift({date:dateStr,mood:state.currentMood.emoji,moodLabel:state.currentMood.label+' '+state.currentMood.emoji,content:txt.substring(0,200)+(txt.length>200?'…':''),savedAt:now.toISOString()});
-  document.getElementById('dash-journal').value=''; renderDiary(); save(); toast('Saved to diary! 📖');
+  document.getElementById('dash-journal').value=''; renderDiary(); recalculateStreak(); save(); toast('Saved to diary! 📖');
 }
 
 // ─────────────────────────────────────────────
@@ -2130,6 +2609,7 @@ function renderProjects() {
     state.projects.map(p=>{
       const steps=p.steps||[];
       const pct=steps.length?Math.round(steps.filter(s=>s.done).length/steps.length*100):0;
+      const atts=p.attachments||[];
       return `<div class="project-card">
         <div class="proj-header">
           <div><div class="proj-title">${p.name}</div><div class="proj-deadline">📅 ${p.deadline||'TBD'}</div></div>
@@ -2148,7 +2628,21 @@ function renderProjects() {
             <button class="btn btn-accent btn-sm" onclick="addStep(${p.id})"><i class="ti ti-plus"></i></button>
           </div>
         </div>
-        <div style="text-align:right;margin-top:8px">
+        ${atts.length?`<div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border)">
+          <div style="font-size:11px;font-weight:600;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.6px"><i class="ti ti-paperclip"></i> Files</div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px">${atts.map((att,ai)=>`
+            <div onclick="viewProjAttachment(${p.id},${ai})" style="display:flex;align-items:center;gap:6px;background:rgba(76,175,110,0.08);padding:8px 12px;border-radius:8px;border:1px solid rgba(76,175,110,0.2);cursor:pointer;transition:all var(--trans);max-width:200px" onmouseover="this.style.background='rgba(76,175,110,0.16)'" onmouseout="this.style.background='rgba(76,175,110,0.08)'">
+              <i class="ti ti-file" style="font-size:16px;color:var(--accent);flex-shrink:0"></i>
+              <span style="font-size:12px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${att.name}</span>
+              <button onclick="event.stopPropagation();removeProjAttachment(${p.id},${ai})" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;padding:0;margin-left:4px;flex-shrink:0;opacity:0.5"><i class="ti ti-x"></i></button>
+            </div>`).join('')}
+          </div>
+        </div>`:''}
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:8px;border-top:1px solid var(--border)">
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;color:var(--text2)">
+            <i class="ti ti-upload" style="font-size:14px;color:var(--accent)"></i> Add file
+            <input type="file" style="display:none" onchange="handleProjAttachment(event,${p.id})" accept=".pdf,.xlsx,.xls,.png,.jpg,.jpeg,.gif,.docx,.doc,.txt,.csv">
+          </label>
           <button class="btn btn-sm" onclick="deleteProject(${p.id})" style="color:rgba(240,144,144,0.7)"><i class="ti ti-trash"></i> Delete</button>
         </div>
       </div>`;
@@ -2161,6 +2655,39 @@ function saveProject(){const name=document.getElementById('proj-name-input').val
 async function deleteProject(id){if(!await confirmDialog('Delete project? Goes to Trash.'))return;const p=state.projects.find(x=>x.id===id);if(p)moveToTrash('project',p);state.projects=state.projects.filter(x=>x.id!==id);renderProjects();renderDashProjects();save();toast('Moved to trash');}
 function renderDashProjects(){const el=document.getElementById('dash-projects');if(!el)return;el.innerHTML=state.projects.map(p=>{const pct=p.steps&&p.steps.length?Math.round(p.steps.filter(s=>s.done).length/p.steps.length*100):0;return`<div class="task-row" style="padding:10px 0"><div class="task-body" style="flex:1"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px"><span style="font-size:13px;font-weight:600;color:var(--text)">${p.name}</span><span style="font-size:12px;font-weight:700;color:var(--accent3)">${pct}%</span></div><div class="prog-wrap"><div class="prog-fill ${p.color||'fill-green'}" style="width:${pct}%"></div></div></div></div>`;}).join('')||'<div style="font-size:12px;color:var(--text3);padding:8px 0">No projects yet.</div>';}
 
+async function handleProjAttachment(e, pid) {
+  const file = e.target.files[0]; e.target.value=''; if(!file) return;
+  const p = state.projects.find(x=>x.id===pid); if(!p) return;
+  if(!p.attachments) p.attachments=[];
+  const blobKey='proj_att_'+Date.now()+'_'+Math.random().toString(36).slice(2);
+  const ok = await idbSet(blobKey, file);
+  if(!ok){toast('Could not save file — storage may be full',true);return;}
+  let url=URL.createObjectURL(file), storageUrl=null;
+  const ext=file.name.split('.').pop()||'bin';
+  const storageKey=blobKey+'.'+ext;
+  if(_currentUser){
+    try{
+      const result=await storageUpload(file,storageKey);
+      storageUrl=result.url;
+      if(!storageUrl) toast('Saved on this device, but cloud sync failed: '+(result.error||'unknown'),true);
+    }catch(err){toast('Saved on this device, but cloud sync failed: '+(err.message||'unknown'),true);}
+  }
+  p.attachments.push({name:file.name,type:file.type,url:storageUrl||url,blobKey,storageUrl,storageKey});
+  renderProjects(); save(); toast('File added to project');
+}
+function viewProjAttachment(pid, ai){
+  const p=state.projects.find(x=>x.id===pid); if(!p||!p.attachments||!p.attachments[ai]) return;
+  showAttachmentInViewer(p.attachments[ai]);
+}
+async function removeProjAttachment(pid, ai){
+  if(!await confirmDialog('Remove this file?')) return;
+  const p=state.projects.find(x=>x.id===pid); if(!p||!p.attachments) return;
+  const att=p.attachments[ai];
+  if(att&&att.blobKey) idbDel(att.blobKey);
+  if(att&&att.storageKey) storageDelete(att.storageKey);
+  p.attachments.splice(ai,1); renderProjects(); save();
+}
+
 // ─────────────────────────────────────────────
 // BREAKS + TIMER
 // ─────────────────────────────────────────────
@@ -2170,7 +2697,8 @@ function openBreakModal(editId=null){state.breakModalEditId=editId;if(editId){co
 function saveBreak(){const name=document.getElementById('break-name-input').value.trim();if(!name){toast('Add a name',true);return;}const desc=document.getElementById('break-desc-input').value.trim();const link=document.getElementById('break-link-input').value.trim();const icon=document.getElementById('break-icon-input').value.trim()||'🌿';if(state.breakModalEditId){const b=state.breaks.find(x=>x.id===state.breakModalEditId);if(b){b.name=name;b.desc=desc;b.link=link;b.icon=icon;}}else state.breaks.push({id:Date.now(),name,desc,link,icon});closeModal('break-modal');renderBreaks();save();toast(state.breakModalEditId?'Activity updated!':'Activity added!');}
 async function removeBreak(id){if(!await confirmDialog('Delete this activity?'))return;const b=state.breaks.find(x=>x.id===id);if(b)moveToTrash('break',b);state.breaks=state.breaks.filter(x=>x.id!==id);renderBreaks();save();}
 function setTimer(mins){if(state.timer.running)toggleTimer();state.timer.remaining=mins*60;updateTimerDisplay();}
-function toggleTimer(){if(state.timer.running){clearInterval(state.timer.interval);state.timer.running=false;document.getElementById('timer-btn').innerHTML='<i class="ti ti-player-play"></i> Start';}else{state.timer.running=true;document.getElementById('timer-btn').innerHTML='<i class="ti ti-player-pause"></i> Pause';state.timer.interval=setInterval(()=>{state.timer.remaining--;updateTimerDisplay();if(state.timer.remaining<=0){clearInterval(state.timer.interval);state.timer.running=false;document.getElementById('timer-btn').innerHTML='<i class="ti ti-player-play"></i> Start';toast('Break over! 🌿');}},1000);}}
+function toggleTimer(){if(state.timer.running){clearInterval(state.timer.interval);state.timer.running=false;document.getElementById('timer-btn').innerHTML='<i class="ti ti-player-play"></i> Start';}else{state.timer.running=true;document.getElementById('timer-btn').innerHTML='<i class="ti ti-player-pause"></i> Pause';state.timer.interval=setInterval(()=>{state.timer.remaining--;updateTimerDisplay();if(state.timer.remaining<=0){clearInterval(state.timer.interval);state.timer.running=false;document.getElementById('timer-btn').innerHTML='<i class="ti ti-player-play"></i> Start';// Fire alarm ring like a real alarm
+startRinging({time:new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),label:'Break is over! 🌿'},'alarm');}},1000);}}
 function updateTimerDisplay(){const m=Math.floor(state.timer.remaining/60),s=state.timer.remaining%60;const el=document.getElementById('timer-display');if(el)el.textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');}
 
 // ─────────────────────────────────────────────
@@ -2249,6 +2777,51 @@ async function confirmDeleteAAY(key,idx){if(!await confirmDialog('Delete this it
 // ─────────────────────────────────────────────
 // WEEK HEATMAP
 // ─────────────────────────────────────────────
+// ─────────────────────────────────────────────
+// STREAK — derived from real activity, not a stored counter that drifts.
+// A day counts as "active" if the person wrote a diary entry, completed at
+// least one goal, or wrote a note on that calendar date. The streak is the
+// number of consecutive active days counting back from today (today only
+// counts once it has at least one activity; otherwise we count back from
+// yesterday so a streak isn't broken before the day is even over).
+// ─────────────────────────────────────────────
+function _dateKey(d) {
+  // Local-timezone YYYY-MM-DD key, not UTC — so "today" matches what the
+  // person actually sees on their own clock.
+  const y = d.getFullYear(), m = String(d.getMonth()+1).padStart(2,'0'), day = String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+}
+function _getActiveDayKeys() {
+  const keys = new Set();
+  (state.diaryEntries||[]).forEach(e => {
+    const t = e.savedAt ? new Date(e.savedAt) : null;
+    if (t && !isNaN(t)) keys.add(_dateKey(t));
+  });
+  (state.goals||[]).forEach(g => {
+    if (g.done && g.id) { const t = new Date(g.id); if (!isNaN(t)) keys.add(_dateKey(t)); }
+  });
+  (state.notes||[]).forEach(n => {
+    if (n.id) { const t = new Date(n.id); if (!isNaN(t)) keys.add(_dateKey(t)); }
+  });
+  return keys;
+}
+function recalculateStreak() {
+  const activeDays = _getActiveDayKeys();
+  const today = new Date();
+  let cursor = new Date(today);
+  // If today has no activity yet, start counting from yesterday — being
+  // mid-streak on a day that isn't over yet shouldn't read as "broken".
+  if (!activeDays.has(_dateKey(cursor))) cursor.setDate(cursor.getDate() - 1);
+  let streak = 0;
+  while (activeDays.has(_dateKey(cursor))) {
+    streak++;
+    cursor.setDate(cursor.getDate() - 1);
+  }
+  state.streak = streak;
+  updateProfileUI();
+  return streak;
+}
+
 function renderWeekHeatmap(elId){
   const el=document.getElementById(elId);if(!el)return;
   const days=['Mo','Tu','We','Th','Fr','Sa','Su'];
@@ -2297,19 +2870,32 @@ function replaceGalleryItem(type,idx){
 async function handleGalleryUpload(e,type){
   const file=e.target.files[0];e.target.value='';if(!file)return;
   const blobKey='gallery_'+type+'_'+Date.now()+'_'+Math.random().toString(36).slice(2);
-  const ok=await idbSet(blobKey,file);
-  if(!ok){toast('Could not save photo — storage may be full',true);return;}
-  const url=URL.createObjectURL(file);
+  // Store locally in IDB for immediate display
+  await idbSet(blobKey,file).catch(()=>{});
+  const localUrl=URL.createObjectURL(file);
+  // Upload to cloud storage (via Worker) for cross-device access
+  let storageUrl=null;
+  const ext=file.name.split('.').pop()||'jpg';
+  const storageKey=blobKey+'.'+ext;
+  if(_currentUser){
+    try{
+      const result = await storageUpload(file, storageKey);
+      storageUrl = result.url;
+      if(!storageUrl) toast('Saved on this device, but cloud sync failed: ' + (result.error || 'unknown error'), true);
+    }catch(err){console.warn('Gallery storage upload failed',err);toast('Saved on this device, but cloud sync failed: ' + (err.message || 'unknown error'), true);}
+  }
+  const url=storageUrl||localUrl;
   if(_galleryReplaceTarget&&_galleryReplaceTarget.type===type){
     const{idx}=_galleryReplaceTarget;_galleryReplaceTarget=null;
     const old=state.gallery[type][idx];
     if(old&&old.blobKey)idbDel(old.blobKey);
-    state.gallery[type][idx]={...old,img:url,blobKey};
+    if(old&&old.storageKey)storageDelete(old.storageKey);
+    state.gallery[type][idx]={...old,img:url,blobKey,storageUrl,storageKey};
     renderGallery(type);save();toast('Photo replaced!');
     return;
   }
   const caption=(await promptDialog('Add a caption','Optional caption…'))||'';
-  state.gallery[type].push({img:url,blobKey,caption});
+  state.gallery[type].push({img:url,blobKey,storageUrl,storageKey,caption});
   renderGallery(type);save();toast(type==='memories'?'Memory saved!':'Added to vision board!');
 }
 async function removeGalleryItem(type,idx){
@@ -2324,7 +2910,7 @@ async function removeGalleryItem(type,idx){
 // PLACES
 // ─────────────────────────────────────────────
 const PLACE_BGS=['#1a3a22','#1a2540','#261a3a','#3a2a10'];
-function renderPlaces(){const el=document.getElementById('places-grid');if(!el)return;el.innerHTML=state.places.map((p,i)=>`<div class="place-card"><div class="place-map" style="background:${PLACE_BGS[i%PLACE_BGS.length]}">${p.icon}</div><div class="place-body"><div class="place-name">${p.name}</div><div class="place-note">${p.note}</div>${p.photos&&p.photos.length?`<div style="margin-top:8px;display:grid;grid-template-columns:repeat(3,1fr);gap:4px">${p.photos.map(ph=>`<img src="${ph.url||ph}" style="width:100%;height:40px;border-radius:4px;object-fit:cover;cursor:pointer" onclick="event.stopPropagation();openLightbox('${(ph.url||ph).replace(/'/g,"\\'")}')"/>`).join('')}</div>`:''}</div><div style="padding:0 10px 10px;display:flex;gap:6px;justify-content:flex-end"><button class="btn btn-sm" onclick="editPlace(${p.id})"><i class="ti ti-edit"></i> Edit</button><button class="btn btn-sm" onclick="confirmDeletePlace(${p.id})" style="color:#f09090;border-color:rgba(240,144,144,0.3)"><i class="ti ti-trash"></i> Delete</button></div></div>`).join('');}
+function renderPlaces(){const el=document.getElementById('places-grid');if(!el)return;el.innerHTML=state.places.map((p,i)=>`<div class="place-card"><div class="place-map" style="background:${PLACE_BGS[i%PLACE_BGS.length]}">${p.icon}</div><div class="place-body"><div class="place-name">${p.name}</div><div class="place-note">${p.note}</div>${p.photos&&p.photos.length?`<div style="margin-top:8px;display:grid;grid-template-columns:repeat(3,1fr);gap:4px">${p.photos.map(ph=>{const src=(ph&&typeof ph==='object'?ph.url:ph)||'';if(!src)return'';const esc=String(src).replace(/'/g,"\\'");return`<img src="${src}" style="width:100%;height:40px;border-radius:4px;object-fit:cover;cursor:pointer" onclick="event.stopPropagation();openLightbox('${esc}')"/>`;}).join('')}</div>`:''}</div><div style="padding:0 10px 10px;display:flex;gap:6px;justify-content:flex-end"><button class="btn btn-sm" onclick="editPlace(${p.id})"><i class="ti ti-edit"></i> Edit</button><button class="btn btn-sm" onclick="confirmDeletePlace(${p.id})" style="color:#f09090;border-color:rgba(240,144,144,0.3)"><i class="ti ti-trash"></i> Delete</button></div></div>`).join('');}
 function openPlaceModal(){
   const pending={id:Date.now(),name:'',note:'',icon:'📍',photos:[]};
   state.places.push(pending);
@@ -2339,7 +2925,7 @@ function openPlaceModal(){
   openModal('place-modal');
 }
 function editPlace(id){const p=state.places.find(x=>x.id===id);if(!p)return;state.placeEditId=id;state._placeIsNew=false;document.getElementById('place-modal-title').textContent='Edit place';document.getElementById('place-name-input').value=p.name;document.getElementById('place-note-input').value=p.note;document.getElementById('place-icon-input').value=p.icon;document.getElementById('place-photos-row').style.display='';renderPlacePhotos(p);openModal('place-modal');}
-function renderPlacePhotos(p){const el=document.getElementById('place-photos-list');el.innerHTML=(p.photos||[]).map((ph,i)=>`<div style="position:relative;border-radius:6px;overflow:hidden;height:60px"><img src="${ph.url||ph}" style="width:100%;height:100%;object-fit:cover"/><button onclick="replacePlacePhoto(${i})" title="Replace" style="position:absolute;bottom:2px;left:2px;background:rgba(0,0,0,0.6);border:none;color:#fff;border-radius:50%;width:20px;height:20px;font-size:11px;cursor:pointer"><i class="ti ti-replace"></i></button><button onclick="removePlacePhoto(${i})" style="position:absolute;top:2px;right:2px;background:rgba(0,0,0,0.6);border:none;color:#f09090;border-radius:50%;width:20px;height:20px;font-size:11px;cursor:pointer"><i class="ti ti-x"></i></button></div>`).join('');}
+function renderPlacePhotos(p){const el=document.getElementById('place-photos-list');el.innerHTML=(p.photos||[]).map((ph,i)=>{const src=(ph&&typeof ph==='object'?ph.url:ph)||'';return`<div style="position:relative;border-radius:6px;overflow:hidden;height:60px">${src?`<img src="${src}" style="width:100%;height:100%;object-fit:cover"/>`:`<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:var(--bg2);color:var(--text3);font-size:10px">Failed to load</div>`}<button onclick="replacePlacePhoto(${i})" title="Replace" style="position:absolute;bottom:2px;left:2px;background:rgba(0,0,0,0.6);border:none;color:#fff;border-radius:50%;width:20px;height:20px;font-size:11px;cursor:pointer"><i class="ti ti-replace"></i></button><button onclick="removePlacePhoto(${i})" style="position:absolute;top:2px;right:2px;background:rgba(0,0,0,0.6);border:none;color:#f09090;border-radius:50%;width:20px;height:20px;font-size:11px;cursor:pointer"><i class="ti ti-x"></i></button></div>`;}).join('');}
 let _placePhotoReplaceIdx=null;
 function replacePlacePhoto(idx){_placePhotoReplaceIdx=idx;document.getElementById('place-photo-input').click();}
 async function handlePlacePhotoUpload(e){
@@ -2348,15 +2934,27 @@ async function handlePlacePhotoUpload(e){
   const blobKey='place_'+p.id+'_'+Date.now()+'_'+Math.random().toString(36).slice(2);
   const ok=await idbSet(blobKey,file);
   if(!ok){toast('Could not save photo — storage may be full',true);return;}
-  const url=URL.createObjectURL(file);
+  const localUrl=URL.createObjectURL(file);
+  let storageUrl=null;
+  const ext=(file.name.split('.').pop()||'jpg').toLowerCase();
+  const storageKey=blobKey+'.'+ext;
+  if(_currentUser){
+    try{
+      const result = await storageUpload(file, storageKey);
+      storageUrl = result.url;
+      if(!storageUrl) toast('Saved on this device, but cloud sync failed: ' + (result.error || 'unknown error'), true);
+    }catch(err){console.warn('Place photo storage upload failed',err);toast('Saved on this device, but cloud sync failed: ' + (err.message || 'unknown error'), true);}
+  }
+  const url=storageUrl||localUrl;
   if(!p.photos)p.photos=[];
   if(_placePhotoReplaceIdx!==null){
     const old=p.photos[_placePhotoReplaceIdx];
     if(old&&old.blobKey)idbDel(old.blobKey);
-    p.photos[_placePhotoReplaceIdx]={url,blobKey};
+    if(old&&old.storageKey)storageDelete(old.storageKey);
+    p.photos[_placePhotoReplaceIdx]={url,blobKey,storageUrl,storageKey};
     _placePhotoReplaceIdx=null;
   }else{
-    p.photos.push({url,blobKey});
+    p.photos.push({url,blobKey,storageUrl,storageKey});
   }
   renderPlacePhotos(p);save();
 }
@@ -2461,13 +3059,14 @@ function restoreFromTrash(trashId){
 }
 function idbDelFromTrashItem(t){
   if(!t)return;
-  if(t.type==='track'&&t.item.blobKey)idbDel(t.item.blobKey);
-  else if((t.type==='gallery_memories'||t.type==='gallery_visionboard')&&t.item.blobKey)idbDel(t.item.blobKey);
-  else if(t.type==='place'&&t.item.photos)t.item.photos.forEach(ph=>{if(ph&&ph.blobKey)idbDel(ph.blobKey);});
-  else if(t.type==='note'&&t.item.attachments)t.item.attachments.forEach(a=>{if(a&&a.blobKey)idbDel(a.blobKey);});
+  if(t.type==='track'&&t.item.blobKey){idbDel(t.item.blobKey);if(t.item.storageKey)storageDelete(t.item.storageKey);}
+  else if((t.type==='gallery_memories'||t.type==='gallery_visionboard')&&t.item.blobKey){idbDel(t.item.blobKey);if(t.item.storageKey)storageDelete(t.item.storageKey);}
+  else if(t.type==='place'&&t.item.photos)t.item.photos.forEach(ph=>{if(ph&&ph.blobKey){idbDel(ph.blobKey);if(ph.storageKey)storageDelete(ph.storageKey);}});
+  else if(t.type==='note'&&t.item.attachments)t.item.attachments.forEach(a=>{if(a&&a.blobKey){idbDel(a.blobKey);if(a.storageKey)storageDelete(a.storageKey);}});
 }
 async function deleteForever(trashId){if(!await confirmDialog('Permanently delete? Cannot be undone.'))return;const t=state.trash.find(x=>String(x.trashId)===String(trashId));idbDelFromTrashItem(t);state.trash=state.trash.filter(x=>String(x.trashId)!==String(trashId));renderTrash();save();}
 async function emptyTrash(){if(!state.trash||!state.trash.length){toast('Trash is already empty');return;}if(!await confirmDialog(`Permanently delete all ${state.trash.length} items?`))return;state.trash.forEach(idbDelFromTrashItem);state.trash=[];renderTrash();save();toast('Trash emptied');}
+
 
 // ─────────────────────────────────────────────
 // SEARCH
@@ -2606,8 +3205,18 @@ async function processAudioFiles(files){
     if(!ok){ failed++; continue; }
     const blobUrl=URL.createObjectURL(blob);
     const dur=await getAudioDuration(blobUrl);
+    let storageUrl=null;
+    const ext=(file.name.split('.').pop()||'mp3').toLowerCase();
+    const storageKey=blobKey+'.'+ext;
+    if(_currentUser){
+      try{
+        const result = await storageUpload(blob, storageKey);
+        storageUrl = result.url;
+        if(!storageUrl) toast('Saved on this device, but cloud sync failed: ' + (result.error || 'unknown error'), true);
+      }catch(err){console.warn('Music storage upload failed',err);toast('Saved on this device, but cloud sync failed: ' + (err.message || 'unknown error'), true);}
+    }
     const track={
-      id, blobKey, blobUrl, fingerprint:fp,
+      id, blobKey, blobUrl, fingerprint:fp, storageUrl, storageKey,
       title:file.name.replace(/\.[^.]+$/,''),
       artist:'Unknown artist',
       duration:dur, favourite:false, addedAt:Date.now()
@@ -2652,13 +3261,15 @@ function rebuildQueue(){
 // re-fetch the blob from IndexedDB right then. This is what actually fixes "shows up but won't play".
 async function ensureTrackBlob(track){
   if(track.blobUrl) return track.blobUrl;
-  if(!track.blobKey) return null;
-  try{
-    const blob=await idbGet(track.blobKey);
-    if(!blob) return null;
-    track.blobUrl=URL.createObjectURL(blob);
-    return track.blobUrl;
-  }catch(e){ return null; }
+  if(track.blobKey){
+    try{
+      const blob=await idbGet(track.blobKey);
+      if(blob){ track.blobUrl=URL.createObjectURL(blob); return track.blobUrl; }
+    }catch(e){}
+  }
+  // Not in local IndexedDB (e.g. new device) — fall back to the cloud copy.
+  if(track.storageUrl) return track.storageUrl;
+  return null;
 }
 async function playTrack(id){
   const track=state.music.tracks.find(t=>t.id===id);
@@ -2716,15 +3327,44 @@ function onTrackEnded(){
 
 // ── Seek / volume ──
 let _seeking=false;
+document.getElementById('np-seek').addEventListener('mousedown',()=>_seeking=true);
+document.getElementById('np-seek').addEventListener('mouseup',()=>_seeking=false);
+document.getElementById('mp-seek-bar').addEventListener('mousedown',()=>_seeking=true);
+document.getElementById('mp-seek-bar').addEventListener('mouseup',()=>_seeking=false);
+
+// Mobile seek — must NOT be passive so we can preventDefault and stop the
+// page from scrolling while the person is dragging the seek thumb.
 ['np-seek','mp-seek-bar'].forEach(id=>{
   const el=document.getElementById(id);
   if(!el)return;
-  el.addEventListener('mousedown',()=>_seeking=true);
-  el.addEventListener('mouseup',()=>{_seeking=false;seekTo(el.value);});
-  el.addEventListener('touchstart',()=>_seeking=true,{passive:true});
-  el.addEventListener('touchend',()=>{_seeking=false;seekTo(el.value);},{passive:true});
+  let _touchStartX=0, _touchStartVal=0;
+  el.addEventListener('touchstart',e=>{
+    _seeking=true;
+    _touchStartX=e.touches[0].clientX;
+    _touchStartVal=parseFloat(el.value)||0;
+    e.stopPropagation();
+  },{passive:true});
+  el.addEventListener('touchmove',e=>{
+    e.preventDefault(); // stops page scroll — requires non-passive
+    e.stopPropagation();
+    const touch=e.touches[0];
+    const rect=el.getBoundingClientRect();
+    const pct=Math.min(100,Math.max(0,((touch.clientX-rect.left)/rect.width)*100));
+    el.value=pct;
+    el.style.setProperty('--pct',pct.toFixed(1)+'%');
+    // Update time display live while dragging
+    if(audio.duration){
+      const t=(pct/100)*audio.duration;
+      ['np-cur','mp-cur-time'].forEach(tid=>{const tel=document.getElementById(tid);if(tel)tel.textContent=fmtTime(t);});
+    }
+  },{passive:false});
+  el.addEventListener('touchend',e=>{
+    const pct=parseFloat(el.value)||0;
+    if(audio.duration) audio.currentTime=(pct/100)*audio.duration;
+    _seeking=false;
+  },{passive:true});
 });
-function seekTo(val){ if(audio.duration&&isFinite(audio.duration)) audio.currentTime=(val/100)*audio.duration; }
+function seekTo(val){ if(audio.duration) audio.currentTime=(val/100)*audio.duration; }
 function setVolume(val){
   state.music.volume=val/100; audio.volume=state.music.volume;
   const el=document.getElementById('np-vol'); if(el)el.value=val;
@@ -2784,7 +3424,6 @@ function renderMusicLibrary(){
   else tracks=[...tracks].sort((a,b)=>(b.addedAt||0)-(a.addedAt||0));
 
   const dz=document.getElementById('music-drop-zone'); if(dz)dz.style.display=state.music.tracks.length?'none':'';
-  populateToneSelects();
 
   if(!tracks.length){
     el.innerHTML=`<div style="text-align:center;padding:32px;color:var(--text3);font-size:13px"><i class="ti ti-music-off" style="font-size:32px;display:block;margin-bottom:8px;opacity:0.4"></i>${state.music.tracks.length?'No tracks match.':'Upload audio files to start.'}</div>`;
@@ -2802,8 +3441,41 @@ function renderMusicLibrary(){
       <button class="track-fav ${t.favourite?'loved':''}" onclick="event.stopPropagation();toggleFav('${t.id}')"><i class="ti ${t.favourite?'ti-heart-filled':'ti-heart'}"></i></button>
       <button class="btn btn-sm" onclick="event.stopPropagation();addToPlaylist('${t.id}')" title="Add to playlist" style="font-size:11px;padding:3px 6px;opacity:0.5"><i class="ti ti-playlist-add"></i></button>
       <button class="track-del" onclick="event.stopPropagation();deleteTrack('${t.id}')"><i class="ti ti-trash"></i></button>
+      <button class="track-more" onclick="event.stopPropagation();openTrackActionSheet('${t.id}')" title="More"><i class="ti ti-dots-vertical"></i></button>
     </div>`;
   }).join('');
+}
+// Mobile-only overflow menu: "Add to playlist" and the delete button get
+// hidden from the track row on narrow screens (no room for 3 icon buttons
+// next to a title), and live here instead — same actions, just reached
+// through one tap on the kebab icon instead of competing for row space.
+function openTrackActionSheet(trackId){
+  const track=(state.music.tracks||[]).find(t=>t.id===trackId);
+  if(!track)return;
+  document.getElementById('prompt-modal-title').textContent=track.title;
+  const input=document.getElementById('prompt-modal-input');
+  input.style.display='none';
+  let sheet=document.getElementById('prompt-modal-track-actions');
+  if(!sheet){
+    sheet=document.createElement('div');
+    sheet.id='prompt-modal-track-actions';
+    sheet.style.cssText='display:flex;flex-direction:column;gap:6px';
+    input.parentNode.insertBefore(sheet,input);
+  }
+  sheet.style.display='';
+  sheet.innerHTML=`
+    <button class="btn" style="text-align:left;width:100%" id="tas-fav"><i class="ti ${track.favourite?'ti-heart-filled':'ti-heart'}"></i> ${track.favourite?'Remove from favourites':'Add to favourites'}</button>
+    <button class="btn" style="text-align:left;width:100%" id="tas-playlist"><i class="ti ti-playlist-add"></i> Add to playlist</button>
+    <button class="btn" style="text-align:left;width:100%;color:#f09090" id="tas-delete"><i class="ti ti-trash"></i> Delete track</button>`;
+  const okBtn=document.getElementById('prompt-modal-ok');
+  const cancelBtn=document.getElementById('prompt-modal-cancel');
+  okBtn.style.display='none';
+  const cleanup=()=>{ sheet.style.display='none'; input.style.display=''; okBtn.style.display=''; cancelBtn.onclick=null; closeModal('prompt-modal'); };
+  document.getElementById('tas-fav').onclick=()=>{ toggleFav(trackId); cleanup(); };
+  document.getElementById('tas-playlist').onclick=()=>{ cleanup(); addToPlaylist(trackId); };
+  document.getElementById('tas-delete').onclick=()=>{ cleanup(); deleteTrack(trackId); };
+  cancelBtn.onclick=cleanup;
+  openModal('prompt-modal');
 }
 function handleTrackRowClick(id){
   const cur=state.music.queue[state.music.currentIndex];
@@ -2836,7 +3508,12 @@ async function restoreTrackFromTrash(item){
   if(track.blobKey){
     const blob=await idbGet(track.blobKey);
     if(blob) track.blobUrl=URL.createObjectURL(blob);
-    else { toast('Track file is gone (storage was cleared)',true); return; }
+    else if(track.storageUrl) track.blobUrl=null; // will stream from cloud via ensureTrackBlob
+    else { toast('Track file is gone — it was never uploaded to cloud or has been cleared',true); return; }
+  } else if(track.storageUrl) {
+    track.blobUrl=null; // will stream from cloud via ensureTrackBlob
+  } else {
+    toast('Track file is gone (storage was cleared)',true); return;
   }
   state.music.tracks.push(track);
   rebuildQueue();renderMusicLibrary();renderPlaylists();save();
@@ -2887,8 +3564,8 @@ function renderPlaylists(){
   }).join('')+`<button class="new-playlist-btn" onclick="createPlaylist()"><i class="ti ti-plus"></i></button>`;
 }
 function selectPlaylist(id){ state.music.activePlaylistId=id; rebuildQueue(); renderPlaylists(); renderMusicLibrary(); save(); }
-function createPlaylist(){
-  const name=prompt('Playlist name:','My playlist'); if(!name)return;
+async function createPlaylist(){
+  const name=await promptDialog('New playlist','Playlist name…','My playlist'); if(!name)return;
   state.music.playlists.push({id:'pl_'+Date.now(),name,auto:false,trackIds:[]});
   renderPlaylists();save();toast('Playlist created');
 }
@@ -2900,12 +3577,41 @@ function deletePlaylist(id){
 function addToPlaylist(trackId){
   const custom=(state.music.playlists||[]).filter(p=>!p.auto);
   if(!custom.length){ toast('Create a playlist first'); return; }
-  const names=custom.map((p,i)=>`${i+1}. ${p.name}`).join('\n');
-  const pick=prompt(`Add to playlist:\n${names}\n\nEnter number:`,'');
-  const idx=parseInt(pick)-1;
-  if(isNaN(idx)||idx<0||idx>=custom.length)return;
-  const pl=custom[idx]; if(!pl.trackIds)pl.trackIds=[];
-  if(!pl.trackIds.includes(trackId)){ pl.trackIds.push(trackId); save(); toast(`Added to ${pl.name}`); renderPlaylists(); }
+  document.getElementById('prompt-modal-title').textContent='Add to playlist';
+  const input=document.getElementById('prompt-modal-input');
+  input.style.display='none';
+  let listWrap=document.getElementById('prompt-modal-playlist-list');
+  if(!listWrap){
+    listWrap=document.createElement('div');
+    listWrap.id='prompt-modal-playlist-list';
+    listWrap.style.cssText='display:flex;flex-direction:column;gap:6px;max-height:240px;overflow-y:auto';
+    input.parentNode.insertBefore(listWrap,input);
+  }
+  listWrap.style.display='';
+  listWrap.innerHTML=custom.map(p=>`<button class="btn" style="text-align:left;width:100%" data-pl-id="${p.id}">${p.name} <span style="color:var(--text3);font-size:11px">(${(p.trackIds||[]).length})</span></button>`).join('');
+  const cancelBtn=document.getElementById('prompt-modal-cancel');
+  const okBtn=document.getElementById('prompt-modal-ok');
+  okBtn.style.display='none';
+  const cleanup=()=>{
+    listWrap.style.display='none';
+    input.style.display='';
+    okBtn.style.display='';
+    cancelBtn.onclick=null;
+    closeModal('prompt-modal');
+  };
+  listWrap.querySelectorAll('button[data-pl-id]').forEach(btn=>{
+    btn.onclick=()=>{
+      const pl=custom.find(p=>p.id===btn.getAttribute('data-pl-id'));
+      if(pl){
+        if(!pl.trackIds)pl.trackIds=[];
+        if(!pl.trackIds.includes(trackId)){ pl.trackIds.push(trackId); save(); toast(`Added to ${pl.name}`); renderPlaylists(); }
+        else toast('Already in '+pl.name);
+      }
+      cleanup();
+    };
+  });
+  cancelBtn.onclick=cleanup;
+  openModal('prompt-modal');
 }
 // ─────────────────────────────────────────────
 // EPIC WATCH
@@ -2940,13 +3646,16 @@ function startWatchClock(){
 // ─────────────────────────────────────────────
 // ALARMS + REMINDERS
 // ─────────────────────────────────────────────
-let _alarmCheckInterval=null,_ringing=null,_ringInterval=null,_ringAudioCtx=null,_audioUnlocked=false,_ringMusicEl=null;
+let _alarmCheckInterval=null,_ringing=null,_ringInterval=null,_ringAudioCtx=null,_audioUnlocked=false,_vibrateInterval=null;
 
+// Audio in browsers is blocked until a real user gesture happens. Unlock on the very first
+// click/keydown/touch anywhere in the app so the alarm tone can actually play later.
 function unlockRingAudio(){
   if(_audioUnlocked)return;
   try{
     if(!_ringAudioCtx)_ringAudioCtx=new(window.AudioContext||window.webkitAudioContext)();
     if(_ringAudioCtx.state==='suspended')_ringAudioCtx.resume();
+    // Prime a silent buffer — this is what actually "unlocks" audio on iOS/Safari.
     const buffer=_ringAudioCtx.createBuffer(1,1,22050);
     const src=_ringAudioCtx.createBufferSource();
     src.buffer=buffer;src.connect(_ringAudioCtx.destination);src.start(0);
@@ -2955,18 +3664,14 @@ function unlockRingAudio(){
 }
 ['click','touchstart','keydown'].forEach(evt=>window.addEventListener(evt,unlockRingAudio,{once:false,passive:true}));
 
-// Populate tone selects with uploaded tracks whenever music library changes
-function populateToneSelects(){
-  const opts='<option value="default">Default tone</option>'+(state.music.tracks||[]).map(t=>`<option value="${t.id}">${t.title}</option>`).join('');
-  ['alarm-tone-select','reminder-tone-select'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=opts;});
-}
-
 function startAlarmChecker(){
   if(_alarmCheckInterval)return;
+  // Run on a 250ms tick so we never skip the :00 second even if the tab is busy/throttled.
   _alarmCheckInterval=setInterval(checkAlarms,250);
   checkAlarms();
-  document.addEventListener('visibilitychange',()=>{if(!document.hidden){unlockRingAudio();checkAlarms();}});
-  window.addEventListener('focus',()=>{unlockRingAudio();checkAlarms();});
+  // If the tab was backgrounded/suspended past the alarm time, catch up the instant it's visible again.
+  document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ unlockRingAudio(); checkAlarms(); } });
+  window.addEventListener('focus',()=>{ unlockRingAudio(); checkAlarms(); });
 }
 function checkAlarms(){
   const now=new Date(),hh=String(now.getHours()).padStart(2,'0'),mm=String(now.getMinutes()).padStart(2,'0'),timeStr=`${hh}:${mm}`;
@@ -2978,91 +3683,165 @@ function checkAlarms(){
 }
 function fireAlarm(a){startRinging(a,'alarm');}
 function fireReminder(r){startRinging(r,'reminder');}
-
-function startRinging(item,type){
+let _wakeLockHandle = null;
+async function startRinging(item,type){
   if(_ringInterval){clearInterval(_ringInterval);_ringInterval=null;}
-  _stopRingMusic();
   _ringing={item,type};
   document.getElementById('ring-title').textContent=type==='alarm'?'Alarm':'Reminder';
   document.getElementById('ring-icon').textContent=type==='alarm'?'⏰':'🔔';
-  document.getElementById('ring-time').textContent=item.time||'';
+  document.getElementById('ring-time').textContent=item.time;
   document.getElementById('ring-label').textContent=item.label||(type==='alarm'?'Alarm':'Reminder');
   const overlay=document.getElementById('alarm-ring-modal');
   if(overlay)overlay.style.display='flex';
-  // Use chosen track if set, else default tone
-  const toneId=item.toneId||'default';
-  if(toneId!=='default'){
-    const track=state.music.tracks.find(t=>t.id===toneId);
-    if(track&&track.blobUrl){_playRingMusic(track.blobUrl);return;}
+
+  // Keep the screen from sleeping/dimming while ringing — a dimmed phone
+  // is one of the most common real reasons people miss an alarm. Silently
+  // no-ops on browsers that don't support this (notably iOS Safari).
+  try {
+    if ('wakeLock' in navigator) _wakeLockHandle = await navigator.wakeLock.request('screen');
+  } catch(e) { _wakeLockHandle = null; }
+
+  // Vibrate in a repeating pattern where supported. Not supported at all on
+  // iOS Safari or modern Firefox — navigator.vibrate simply won't exist
+  // there, so this safely does nothing rather than erroring.
+  _startVibration();
+
+  const startedWithCustomTone = await _tryPlayCustomRingtone(item.ringtoneTrackId);
+  if (!startedWithCustomTone) {
+    // No custom ringtone set, or it couldn't be resolved/played — use the
+    // built-in tone so the alarm/reminder is never silent.
+    playRingTone();_ringInterval=setInterval(playRingTone,1200);
   }
-  // Fallback: default beep tone, repeated
-  playRingTone();_ringInterval=setInterval(playRingTone,1200);
 }
-
-function _playRingMusic(src){
-  _stopRingMusic();
-  _ringMusicEl=new Audio(src);
-  _ringMusicEl.loop=true;
-  // Clamp to 1.0 (max for HTMLAudioElement), boost via Web Audio to 1.5×
-  _ringMusicEl.volume=1.0;
-  try{
-    if(!_ringAudioCtx)_ringAudioCtx=new(window.AudioContext||window.webkitAudioContext)();
-    if(_ringAudioCtx.state==='suspended')_ringAudioCtx.resume();
-    const src_node=_ringAudioCtx.createMediaElementSource(_ringMusicEl);
-    const gain=_ringAudioCtx.createGain();
-    gain.gain.value=1.5; // 150%
-    src_node.connect(gain);gain.connect(_ringAudioCtx.destination);
-  }catch(e){/* if Web Audio fails, plain audio still plays */}
-  _ringMusicEl.play().catch(()=>{});
+function _startVibration() {
+  if (typeof navigator.vibrate !== 'function') return; // not supported here — no-op
+  try {
+    // Buzz-buzz-pause, repeating — vibrate() patterns don't loop on their
+    // own, so we keep re-issuing it. Calling vibrate() again simply
+    // restarts the pattern, which is exactly the repeating effect we want.
+    navigator.vibrate([400, 200, 400, 200, 400]);
+    _vibrateInterval = setInterval(() => {
+      try { navigator.vibrate([400, 200, 400, 200, 400]); } catch(e) {}
+    }, 2200);
+  } catch(e) {}
 }
-
-function _stopRingMusic(){
-  if(_ringMusicEl){try{_ringMusicEl.pause();_ringMusicEl.src='';}catch(e){}}_ringMusicEl=null;
+function _stopVibration() {
+  if (_vibrateInterval) { clearInterval(_vibrateInterval); _vibrateInterval = null; }
+  if (typeof navigator.vibrate === 'function') { try { navigator.vibrate(0); } catch(e) {} }
 }
-
+async function _releaseWakeLock() {
+  if (_wakeLockHandle) { try { await _wakeLockHandle.release(); } catch(e) {} _wakeLockHandle = null; }
+}
+// Attempts to play the person's chosen track as a ringtone, looping, on a
+// dedicated <audio> element separate from the music player. Returns true if
+// playback actually started; false means the caller should fall back to the
+// built-in tone (track missing, deleted, or failed to load/play).
+async function _tryPlayCustomRingtone(trackId) {
+  if (!trackId) return false;
+  const track = (state.music.tracks||[]).find(t => t.id === trackId);
+  if (!track) return false;
+  try {
+    const url = await ensureTrackBlob(track);
+    if (!url) return false;
+    const rt = document.getElementById('ringtone-audio');
+    rt.src = url;
+    rt.loop = true;
+    rt.volume = 1;
+    await rt.play();
+    return true;
+  } catch(e) {
+    console.warn('Custom ringtone failed to play, falling back to default tone', e);
+    return false;
+  }
+}
+function _stopRingtoneAudio() {
+  try {
+    const rt = document.getElementById('ringtone-audio');
+    rt.pause();
+    rt.removeAttribute('src');
+    rt.load();
+  } catch(e) {}
+}
 function playRingTone(){
   try{
     if(!_ringAudioCtx)_ringAudioCtx=new(window.AudioContext||window.webkitAudioContext)();
     if(_ringAudioCtx.state==='suspended')_ringAudioCtx.resume();
     const ctx=_ringAudioCtx;
-    // 1.5× gain node for default tone too
-    const master=ctx.createGain();master.gain.value=1.5;master.connect(ctx.destination);
-    [0,0.3,0.6].forEach(delay=>{
-      const osc=ctx.createOscillator(),gain=ctx.createGain();
-      osc.connect(gain);gain.connect(master);
-      osc.frequency.value=880;osc.type='sine';
-      gain.gain.setValueAtTime(0,ctx.currentTime+delay);
-      gain.gain.linearRampToValueAtTime(0.6,ctx.currentTime+delay+0.05);
-      gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+delay+0.4);
-      osc.start(ctx.currentTime+delay);osc.stop(ctx.currentTime+delay+0.45);
-    });
+    [0,0.3,0.6].forEach(delay=>{const osc=ctx.createOscillator(),gain=ctx.createGain();osc.connect(gain);gain.connect(ctx.destination);osc.frequency.value=880;osc.type='sine';gain.gain.setValueAtTime(0,ctx.currentTime+delay);gain.gain.linearRampToValueAtTime(0.6,ctx.currentTime+delay+0.05);gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+delay+0.4);osc.start(ctx.currentTime+delay);osc.stop(ctx.currentTime+delay+0.45);});
   }catch(e){}
 }
-
 function dismissRing(){
   if(_ringInterval){clearInterval(_ringInterval);_ringInterval=null;}
-  _stopRingMusic();
+  _stopRingtoneAudio();
+  _stopVibration();
+  _releaseWakeLock();
   if(_ringing){const{item,type}=_ringing;item.snoozeUntil=null;if(type==='reminder'){state.pastReminders.unshift({...item,firedAt:new Date().toISOString()});if(!item.repeat){state.reminders=state.reminders.filter(r=>r.id!==item.id);}renderReminders();}}
   _ringing=null;const _ro=document.getElementById('alarm-ring-modal');if(_ro)_ro.style.display='none';save();
 }
 function snoozeRing(){
   if(_ringing)_ringing.item.snoozeUntil=Date.now()+5*60000;
   if(_ringInterval){clearInterval(_ringInterval);_ringInterval=null;}
-  _stopRingMusic();
+  _stopRingtoneAudio();
+  _stopVibration();
+  _releaseWakeLock();
   _ringing=null;const _sro=document.getElementById('alarm-ring-modal');if(_sro)_sro.style.display='none';toast('Snoozed 5 min');save();
 }
+// Fills a ringtone <select> with the person's uploaded tracks, keeping
+// whichever option is already selected (or the built-in tone) if still valid.
+function _populateRingtoneSelect(selectId, currentValue) {
+  const sel = document.getElementById(selectId);
+  if (!sel) return;
+  const tracks = state.music.tracks || [];
+  sel.innerHTML = '<option value="">Default tone</option>' +
+    tracks.map(t => `<option value="${t.id}">${(t.title||'Untitled').replace(/"/g,'&quot;')}</option>`).join('');
+  sel.value = tracks.some(t => t.id === currentValue) ? currentValue : '';
+}
+
 // Alarms UI
 function addAlarm(){
-  const f=document.getElementById('alarm-form');f.style.display=f.style.display==='none'?'':'none';
-  if(f.style.display!=='none'){const now=new Date();document.getElementById('alarm-time-input').value=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');document.getElementById('alarm-label-input').value='';populateToneSelects();}
+  const f=document.getElementById('alarm-form');
+  f.style.display=f.style.display==='none'?'':'none';
+  if(f.style.display!=='none'){
+    const now=new Date();
+    document.getElementById('alarm-time-input').value=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+    document.getElementById('alarm-label-input').value='';
+    _populateRingtoneSelect('alarm-ringtone-input', '');
+  }
 }
-function saveAlarm(){const time=document.getElementById('alarm-time-input').value;if(!time){toast('Pick a time',true);return;}const label=document.getElementById('alarm-label-input').value.trim();const toneId=document.getElementById('alarm-tone-select').value;state.alarms.push({id:Date.now(),time,label,toneId,on:true});document.getElementById('alarm-form').style.display='none';renderAlarms();save();toast('Alarm set ⏰');}
+function saveAlarm(){
+  const time=document.getElementById('alarm-time-input').value;
+  if(!time){toast('Pick a time',true);return;}
+  const label=document.getElementById('alarm-label-input').value.trim();
+  const ringtoneTrackId=document.getElementById('alarm-ringtone-input').value||null;
+  state.alarms.push({id:Date.now(),time,label,on:true,ringtoneTrackId});
+  document.getElementById('alarm-form').style.display='none';
+  renderAlarms();save();toast('Alarm set ⏰');
+}
 function renderAlarms(){const el=document.getElementById('alarm-list');if(!el)return;if(!state.alarms.length){el.innerHTML='<div style="font-size:12px;color:var(--text3);padding:8px 0">No alarms set.</div>';return;}el.innerHTML=state.alarms.map(a=>`<div class="alarm-item"><div style="flex:1"><div class="alarm-time-lbl">${a.time}</div>${a.label?`<div style="font-size:12px;color:var(--text3)">${a.label}</div>`:''}</div><button class="alarm-toggle ${a.on?'on':''}" onclick="toggleAlarm(${a.id})"></button><button class="btn btn-sm" onclick="deleteAlarm(${a.id})" style="opacity:0.4;margin-left:6px"><i class="ti ti-trash"></i></button></div>`).join('');}
 function toggleAlarm(id){const a=state.alarms.find(x=>x.id===id);if(a){a.on=!a.on;renderAlarms();save();}}
 function deleteAlarm(id){const a=state.alarms.find(x=>x.id===id);if(a)moveToTrash('alarm',a);state.alarms=state.alarms.filter(x=>x.id!==id);renderAlarms();save();}
 // Reminders UI
-function addReminder(){const f=document.getElementById('reminder-form');f.style.display=f.style.display==='none'?'':'none';if(f.style.display!=='none'){const now=new Date();document.getElementById('reminder-time-input').value=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');document.getElementById('reminder-label-input').value='';document.getElementById('reminder-repeat-input').checked=false;}}
-function saveReminder(){const time=document.getElementById('reminder-time-input').value;if(!time){toast('Pick a time',true);return;}const label=document.getElementById('reminder-label-input').value.trim();const repeat=document.getElementById('reminder-repeat-input').checked;const toneId=document.getElementById('reminder-tone-select').value;state.reminders.push({id:Date.now(),time,label,on:true,repeat,toneId});document.getElementById('reminder-form').style.display='none';renderReminders();save();toast('Reminder set 🔔');}
+function addReminder(){
+  const f=document.getElementById('reminder-form');
+  f.style.display=f.style.display==='none'?'':'none';
+  if(f.style.display!=='none'){
+    const now=new Date();
+    document.getElementById('reminder-time-input').value=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+    document.getElementById('reminder-label-input').value='';
+    document.getElementById('reminder-repeat-input').checked=false;
+    _populateRingtoneSelect('reminder-ringtone-input', '');
+  }
+}
+function saveReminder(){
+  const time=document.getElementById('reminder-time-input').value;
+  if(!time){toast('Pick a time',true);return;}
+  const label=document.getElementById('reminder-label-input').value.trim();
+  const repeat=document.getElementById('reminder-repeat-input').checked;
+  const ringtoneTrackId=document.getElementById('reminder-ringtone-input').value||null;
+  state.reminders.push({id:Date.now(),time,label,on:true,repeat,ringtoneTrackId});
+  document.getElementById('reminder-form').style.display='none';
+  renderReminders();save();toast('Reminder set 🔔');
+}
 function renderReminders(){
   const el=document.getElementById('reminder-list');if(!el)return;
   const active=state.reminders.map(r=>`<div class="alarm-item"><div style="flex:1"><div class="alarm-time-lbl">${r.time}</div>${r.label?`<div style="font-size:12px;color:var(--text3)">${r.label}</div>`:''}<div style="margin-top:3px">${r.repeat?'<span style="background:rgba(76,175,110,0.2);color:var(--accent3);font-size:10px;padding:1px 7px;border-radius:99px">Repeats daily</span>':'<span style="background:var(--border);color:var(--text3);font-size:10px;padding:1px 7px;border-radius:99px">One-time</span>'}</div></div><button class="alarm-toggle ${r.on?'on':''}" onclick="toggleReminder(${r.id})"></button><button class="btn btn-sm" onclick="deleteReminder(${r.id})" style="opacity:0.4;margin-left:6px"><i class="ti ti-trash"></i></button></div>`).join('');
@@ -3090,5 +3869,1461 @@ function gameWrong(){_game.accepting=false;document.querySelectorAll('.game-pad'
 // ─────────────────────────────────────────────
 init();
 </script>
-</body>
-</html>
+
+<!-- SUPABASE -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<!-- AUTH SCREEN -->
+<div id="auth-screen" style="position:fixed;inset:0;background:#0b1410;z-index:99999;display:flex;align-items:center;justify-content:center">
+  <div style="background:#1a2b20;border:1px solid rgba(255,255,255,0.1);border-radius:18px;padding:36px 32px;width:100%;max-width:400px;box-shadow:0 24px 60px rgba(0,0,0,0.6)">
+    <div style="text-align:center;margin-bottom:24px">
+      <div style="width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,#2d7a4f,#4caf6e);display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 10px">🌿</div>
+      <div style="font-size:22px;font-weight:700;color:#e8f5ec">Sanctuary</div>
+      <div style="font-size:12px;color:rgba(232,245,236,0.35);margin-top:3px">Your personal sanctuary — everywhere you go</div>
+    </div>
+    <div style="display:flex;gap:4px;background:rgba(255,255,255,0.05);border-radius:8px;padding:3px;margin-bottom:20px">
+      <button id="tab-login" onclick="authSwitchTab('login')" style="flex:1;padding:7px;border:none;background:var(--accent2);color:#fff;font-size:13px;font-weight:600;border-radius:6px;cursor:pointer;font-family:inherit">Sign in</button>
+      <button id="tab-signup" onclick="authSwitchTab('signup')" style="flex:1;padding:7px;border:none;background:none;color:rgba(232,245,236,0.4);font-size:13px;font-weight:600;border-radius:6px;cursor:pointer;font-family:inherit">Create account</button>
+    </div>
+    <div id="auth-login-form">
+      <div style="margin-bottom:12px"><label style="display:block;font-size:11px;font-weight:600;color:rgba(232,245,236,0.35);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:5px">Email</label><input type="email" id="auth-email" placeholder="you@email.com" onkeydown="if(event.key==='Enter')authSubmit()" style="width:100%;background:#0f1c14;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#e8f5ec;font-size:14px;padding:10px 12px;font-family:inherit"></div>
+      <div style="margin-bottom:12px"><label style="display:block;font-size:11px;font-weight:600;color:rgba(232,245,236,0.35);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:5px">Password</label><div style="position:relative"><input type="password" id="auth-password" placeholder="••••••••" onkeydown="if(event.key==='Enter')authSubmit()" style="width:100%;background:#0f1c14;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#e8f5ec;font-size:14px;padding:10px 40px 10px 12px;font-family:inherit;box-sizing:border-box"><button type="button" onclick="togglePw('auth-password',this)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:rgba(232,245,236,0.4);cursor:pointer;font-size:16px;padding:4px;line-height:1">👁</button></div></div>
+      <button onclick="authSubmit()" id="auth-btn" style="width:100%;padding:12px;background:var(--accent2);border:none;border-radius:8px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:4px">Sign in</button>
+      <div id="auth-msg" style="font-size:12px;text-align:center;margin-top:10px;min-height:18px"></div>
+      <div style="text-align:center;font-size:11px;color:rgba(232,245,236,0.3);margin-top:14px">Forgot password? <span style="color:#4caf6e;cursor:pointer" onclick="authResetPassword()">Reset it</span></div>
+    </div>
+    <div id="auth-signup-form" style="display:none">
+      <div style="margin-bottom:12px"><label style="display:block;font-size:11px;font-weight:600;color:rgba(232,245,236,0.35);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:5px">Your name</label><input type="text" id="auth-name" placeholder="e.g. Alex" style="width:100%;background:#0f1c14;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#e8f5ec;font-size:14px;padding:10px 12px;font-family:inherit"></div>
+      <div style="margin-bottom:12px"><label style="display:block;font-size:11px;font-weight:600;color:rgba(232,245,236,0.35);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:5px">Email</label><input type="email" id="auth-email-2" placeholder="you@email.com" onkeydown="if(event.key==='Enter')authSubmit()" style="width:100%;background:#0f1c14;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#e8f5ec;font-size:14px;padding:10px 12px;font-family:inherit"></div>
+      <div style="margin-bottom:12px"><label style="display:block;font-size:11px;font-weight:600;color:rgba(232,245,236,0.35);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:5px">Password</label><div style="position:relative"><input type="password" id="auth-password-2" placeholder="Min 6 characters" onkeydown="if(event.key==='Enter')authSubmit()" style="width:100%;background:#0f1c14;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#e8f5ec;font-size:14px;padding:10px 40px 10px 12px;font-family:inherit;box-sizing:border-box"><button type="button" onclick="togglePw('auth-password-2',this)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:rgba(232,245,236,0.4);cursor:pointer;font-size:16px;padding:4px;line-height:1">👁</button></div></div>
+      <button onclick="authSubmit()" id="auth-btn-2" style="width:100%;padding:12px;background:var(--accent2);border:none;border-radius:8px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:4px">Create account</button>
+      <div id="auth-msg-2" style="font-size:12px;text-align:center;margin-top:10px;min-height:18px"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+// SUPABASE AUTH + SYNC
+// ─────────────────────────────────────────────
+const _supabase = supabase.createClient(
+  'https://hzbcerubdaldvapsajce.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh6YmNlcnViZGFsZHZhcHNhamNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyMjg1NTAsImV4cCI6MjA5NzgwNDU1MH0.lnd851sqdsVYe5x-736sb8St1XddZGBEVZxjCLrH4qA',
+  {
+    auth: {
+      // Use localStorage so the session survives the app being swiped away or
+      // backgrounded on mobile. sessionStorage was clearing it on app close.
+      persistSession: true,
+      storage: window.localStorage,
+      autoRefreshToken: true
+    }
+  }
+);
+
+// ─────────────────────────────────────────────
+// R2 STORAGE WORKER — replaces Supabase Storage for all files
+// (avatars, gallery photos, place photos, note attachments, music).
+// Supabase still handles auth + the database; this Worker only
+// handles big binary files, so they sync across devices without
+// eating into Supabase's small free file-storage quota.
+// ─────────────────────────────────────────────
+// 1. Replace this with YOUR Worker's URL after you deploy it
+//    (Cloudflare gives you this after `wrangler deploy` — looks like
+//    https://sanctuary-storage.yourname.workers.dev)
+const STORAGE_WORKER_URL = 'https://sanctuary-storage.myapp2026.workers.dev';
+// 2. Replace this with the SAME secret you set as APP_SECRET on the Worker
+//    (see setup guide — this is not a real secret key, just a shared password
+//    between your app and your own Worker)
+const STORAGE_APP_SECRET = 'dde88852407a6efc510e742d4dcb80b2032020a90cf704612cdf2d029556dd81';
+
+// Uploads a File/Blob to R2 via the Worker. Returns the public URL, or null on failure.
+async function storageUpload(file, keyName) {
+  if (!_currentUser) return { url: null, error: 'Not signed in' };
+  try {
+    const safeKey = keyName.replace(/[^a-zA-Z0-9._\-]/g, '_');
+    const res = await fetch(`${STORAGE_WORKER_URL}/upload/${_currentUser.id}/${encodeURIComponent(safeKey)}`, {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + STORAGE_APP_SECRET,
+        'Content-Type': file.type || 'application/octet-stream'
+      },
+      body: file
+    });
+    if (!res.ok) {
+      const bodyText = await res.text().catch(()=>'');
+      console.warn('Storage upload failed', res.status, bodyText);
+      return { url: null, error: `Upload failed (HTTP ${res.status})${bodyText ? ': ' + bodyText.slice(0,120) : ''}` };
+    }
+    const data = await res.json();
+    return { url: data.url || null, error: data.url ? null : 'Worker returned no URL' };
+  } catch (err) {
+    console.warn('Storage upload error', err);
+    return { url: null, error: err.message || 'Network error reaching storage' };
+  }
+}
+
+// Deletes a file from R2 via the Worker (best-effort — failures are not fatal).
+async function storageDelete(keyName) {
+  if (!_currentUser || !keyName) return;
+  try {
+    const safeKey = keyName.replace(/[^a-zA-Z0-9._\-]/g, '_');
+    await fetch(`${STORAGE_WORKER_URL}/file/${_currentUser.id}/${encodeURIComponent(safeKey)}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': 'Bearer ' + STORAGE_APP_SECRET }
+    });
+  } catch (err) { console.warn('R2 delete error', err); }
+}
+
+let _authMode = 'login'; // 'login' | 'signup'
+let _currentUser = null;
+let _syncTimeout = null;
+
+function authSwitchTab(mode) {
+  _authMode = mode;
+  document.getElementById('auth-login-form').style.display = mode === 'login' ? '' : 'none';
+  document.getElementById('auth-signup-form').style.display = mode === 'signup' ? '' : 'none';
+  document.getElementById('tab-login').style.background = mode === 'login' ? 'var(--accent2)' : 'none';
+  document.getElementById('tab-login').style.color = mode === 'login' ? '#fff' : 'rgba(232,245,236,0.4)';
+  document.getElementById('tab-signup').style.background = mode === 'signup' ? 'var(--accent2)' : 'none';
+  document.getElementById('tab-signup').style.color = mode === 'signup' ? '#fff' : 'rgba(232,245,236,0.4)';
+  document.getElementById('auth-msg').textContent = '';
+  document.getElementById('auth-msg-2').textContent = '';
+}
+
+function _authMsg(msg, isErr, form) {
+  const el = document.getElementById(form === 'signup' ? 'auth-msg-2' : 'auth-msg');
+  if (!el) return;
+  el.textContent = msg;
+  el.style.color = isErr ? '#f09090' : '#7de09e';
+}
+
+async function authSubmit() {
+  if (_authMode === 'login') {
+    const email = document.getElementById('auth-email').value.trim();
+    const pass  = document.getElementById('auth-password').value;
+    if (!email || !pass) { _authMsg('Enter email and password', true); return; }
+    const btn = document.getElementById('auth-btn');
+    btn.disabled = true; btn.textContent = 'Signing in…';
+    const { error } = await _supabase.auth.signInWithPassword({ email, password: pass });
+    btn.disabled = false; btn.textContent = 'Sign in';
+    if (error) { _authMsg(error.message, true); return; }
+  } else {
+    const name  = document.getElementById('auth-name').value.trim();
+    const email = document.getElementById('auth-email-2').value.trim();
+    const pass  = document.getElementById('auth-password-2').value;
+    if (!email || !pass) { _authMsg('Enter email and password', true, 'signup'); return; }
+    const btn = document.getElementById('auth-btn-2');
+    btn.disabled = true; btn.textContent = 'Creating account…';
+    const { error } = await _supabase.auth.signUp({
+      email, password: pass,
+      options: {
+        data: { name: name || email.split('@')[0] },
+        emailRedirectTo: window.location.origin
+      }
+    });
+    btn.disabled = false; btn.textContent = 'Create account';
+    if (error) { _authMsg(error.message, true, 'signup'); return; }
+    _authMsg('Check your email to confirm your account!', false, 'signup');
+    return;
+  }
+}
+
+async function authResetPassword() {
+  const email = document.getElementById('auth-email').value.trim();
+  if (!email) { _authMsg('Enter your email first', true); return; }
+  const { error } = await _supabase.auth.resetPasswordForEmail(email);
+  if (error) _authMsg(error.message, true);
+  else _authMsg('Password reset email sent!', false);
+}
+
+async function authSignOut() {
+  // Stop everything audio-related before anything else — a track must never
+  // keep playing once the person has signed out, especially on a shared device.
+  try {
+    audio.pause();
+    audio.removeAttribute('src');
+    audio.load();
+  } catch(e) {}
+  if (state.music.sleepTimerInterval) { clearInterval(state.music.sleepTimerInterval); state.music.sleepTimerInterval = null; }
+  state.music.sleepTimerEnd = null;
+  state.music.currentIndex = -1;
+  updateNowPlayingUI(null);
+  closeMiniPlayer();
+  document.getElementById('nav-music-badge').style.display = 'none';
+  // Also stop any alarm/reminder that's actively ringing right now (including
+  // a custom-track ringtone, vibration, and screen wake lock), and close its
+  // overlay rather than leaving it ringing at someone who just signed out.
+  if (_ringInterval) { clearInterval(_ringInterval); _ringInterval = null; }
+  _stopRingtoneAudio();
+  _stopVibration();
+  _releaseWakeLock();
+  _ringing = null;
+  const ringOverlay = document.getElementById('alarm-ring-modal');
+  if (ringOverlay) ringOverlay.style.display = 'none';
+
+  await syncToSupabase();
+  await _supabase.auth.signOut();
+  clearLocalState();
+  _currentUser = null;
+  document.getElementById('auth-screen').style.display = 'flex';
+  document.getElementById('auth-email').value = '';
+  document.getElementById('auth-password').value = '';
+  _authMsg('', false);
+  setSyncStatus('idle');
+}
+
+// ── Sync helpers ──
+function setSyncStatus(s) {
+  const dot = document.getElementById('sync-dot');
+  const lbl = document.getElementById('sync-label');
+  if (!dot || !lbl) return;
+  dot.className = 'sync-dot' + (s === 'syncing' ? ' syncing' : s === 'err' ? ' err' : '');
+  lbl.textContent = s === 'syncing' ? 'Syncing…' : s === 'err' ? 'Sync error' : 'Saved';
+}
+
+// Called after every local save() — debounced 2s so we don't hammer Supabase
+function scheduleSyncToSupabase() {
+  if (!_currentUser) return;
+  clearTimeout(_syncTimeout);
+  setSyncStatus('syncing');
+  _syncTimeout = setTimeout(syncToSupabase, 2000);
+}
+
+async function syncToSupabase() {
+  if (!_currentUser) return;
+  try {
+    const payload = {
+      id: _currentUser.id,
+      goals: state.goals,
+      notes: state.notes.map(n => ({...n, attachments: (n.attachments||[]).map(a => ({name:a.name,type:a.type,blobKey:a.blobKey,storageUrl:a.storageUrl,storageKey:a.storageKey,url:a.storageUrl||undefined}))})),
+      diary_entries: state.diaryEntries,
+      projects: state.projects,
+      breaks: state.breaks,
+      aay: state.aay,
+      achievements: state.achievements,
+      growth: state.growth,
+      milestones: state.milestones,
+      places: state.places.map(p => ({...p, photos: (p.photos||[]).map(ph => ({blobKey:ph.blobKey, storageUrl:ph.storageUrl, storageKey:ph.storageKey}))})),
+      gallery: { memories: state.gallery.memories.map(i=>({blobKey:i.blobKey,storageUrl:i.storageUrl,storageKey:i.storageKey,caption:i.caption})), visionboard: state.gallery.visionboard.map(i=>({blobKey:i.blobKey,storageUrl:i.storageUrl,storageKey:i.storageKey,caption:i.caption})) },
+      alarms: state.alarms,
+      reminders: state.reminders,
+      trash: state.trash,
+      music_tracks: state.music.tracks.map(t=>({...t,blobUrl:undefined})),
+      music_playlists: (state.music.playlists||[]).filter(p=>!p.auto),
+      streak: state.streak,
+      profile: {name:state.profile.name,tagline:state.profile.tagline,initials:state.profile.initials,avatarStorageUrl:state.profile.avatarStorageUrl},
+      app_theme: state.appTheme,
+      hero_theme: state.heroTheme,
+      notes_layout: state.notesLayout,
+      updated_at: new Date().toISOString()
+    };
+    const { error } = await _supabase.from('sanctuary_data').upsert(payload);
+    if (error) { setSyncStatus('err'); console.warn('Sync error', error); }
+    else setSyncStatus('idle');
+  } catch(e) { setSyncStatus('err'); console.warn('Sync failed', e); }
+}
+
+async function loadFromSupabase() {
+  if (!_currentUser) return;
+  try {
+    const { data, error } = await _supabase
+      .from('sanctuary_data')
+      .select('*')
+      .eq('id', _currentUser.id)
+      .single();
+    if (error || !data) return; // no remote data yet — use local
+    // Merge remote into state (remote wins for text data; blobs stay local via IDB)
+    if (data.goals?.length)          state.goals = data.goals;
+    if (data.notes?.length)          state.notes = data.notes.map(n => ({...n, attachments: (n.attachments||[]).map(a => ({...a, url: a.storageUrl || a.url}))}));
+    if (data.diary_entries?.length)  state.diaryEntries = data.diary_entries;
+    if (data.projects?.length)       state.projects = data.projects.map(p=>{if(!p.steps)p.steps=[];return p;});
+    if (data.breaks?.length)         state.breaks = data.breaks;
+    if (data.aay)                    state.aay = {...state.aay, ...data.aay};
+    if (data.achievements?.length)   state.achievements = data.achievements;
+    if (data.growth?.length)         state.growth = data.growth;
+    if (data.milestones?.length)     state.milestones = data.milestones;
+    if (data.places?.length) {
+      state.places = data.places.map(p => ({
+        ...p,
+        photos: (p.photos||[]).map(ph => ({...ph, url: ph.storageUrl || ph.url}))
+      }));
+    }
+    if (data.gallery)                {
+      // Restore storageUrl as img so cross-device photos display immediately
+      const restoreGal = arr => (arr||[]).map(i=>({...i, img: i.storageUrl||i.img}));
+      state.gallery = { memories: restoreGal(data.gallery.memories), visionboard: restoreGal(data.gallery.visionboard) };
+    }
+    if (data.alarms?.length)         state.alarms = data.alarms;
+    if (data.reminders?.length)      state.reminders = data.reminders;
+    if (data.trash?.length)          state.trash = data.trash;
+    if (data.profile) {
+      if(data.profile.name) state.profile.name = data.profile.name;
+      if(data.profile.tagline) state.profile.tagline = data.profile.tagline;
+      if(data.profile.initials) state.profile.initials = data.profile.initials;
+      // Always apply the cloud avatar URL — it is the authoritative cross-device source.
+      // A local blob:/data: URL only works on the device that created it; the cloud URL works everywhere.
+      if(data.profile.avatarStorageUrl) {
+        state.profile.avatarStorageUrl = data.profile.avatarStorageUrl;
+        state.profile.avatar = data.profile.avatarStorageUrl;
+        updateAvatarUI(data.profile.avatarStorageUrl);
+      }
+    }
+    if (data.app_theme)  applyAppTheme(data.app_theme, null, true);
+    if (data.hero_theme) { state.heroTheme = data.hero_theme; applyHeroTheme(data.hero_theme, true); }
+    if (data.notes_layout) { state.notesLayout = data.notes_layout; setNotesLayout(data.notes_layout); }
+    if (data.music_tracks?.length) {
+      // Merge: keep tracks that exist locally (have blobUrl); add new ones from remote (they'll need re-upload)
+      const localIds = new Set(state.music.tracks.map(t=>t.id));
+      data.music_tracks.forEach(t => { if(!localIds.has(t.id)) state.music.tracks.push(t); });
+    }
+    if (data.music_playlists?.length) {
+      const auto = state.music.playlists.filter(p=>p.auto);
+      state.music.playlists = [...auto, ...data.music_playlists.filter(p=>!p.auto)];
+    }
+    // Streak is derived from real activity (diary/goals/notes), never trusted
+    // as a stored number — recompute now that cloud activity has merged in,
+    // so a streak built on another device is correctly reflected here too.
+    recalculateStreak();
+    // Re-render everything with fresh data
+    updateProfileUI(); renderDashTasks(); renderDashProjects(); renderWeekHeatmap('week-heatmap');
+    renderGoals(); renderGoalsWeek(); renderNotes(); renderDiary(); renderProjects();
+    renderBreaks(); renderAAY(state.aayFilterMode||'all'); renderAchievements();
+    renderGrowth(); renderTimeline(); renderAnalytics(); renderAlarms(); renderReminders();
+    renderTrash(); rebuildQueue(); renderMusicLibrary(); renderPlaylists();
+    // Restore blobs for remote data (places/gallery/notes will have blobKeys; IDB may or may not have them)
+    await restoreGalleryBlobs().catch(()=>{});
+    await restorePlacesBlobs().catch(()=>{});
+    await restoreNoteAttachmentBlobs().catch(()=>{});
+    await restoreAudioBlobs(true).catch(()=>{});
+    setSyncStatus('idle');
+  } catch(e) { console.warn('loadFromSupabase failed', e); }
+}
+
+// Hook save() to also schedule a cloud sync
+const _origSave = save;
+window.save = function() {
+  _origSave();
+  scheduleSyncToSupabase();
+};
+
+// Add sync status bar to topbar
+function injectSyncBar() {
+  const topbar = document.querySelector('.topbar');
+  if (!topbar || document.getElementById('sync-status-bar')) return;
+  const bar = document.createElement('div');
+  bar.id = 'sync-status-bar';
+  bar.style.cssText = 'display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3)';
+  bar.innerHTML = `
+    <div id="sync-dot" style="width:7px;height:7px;border-radius:50%;background:var(--accent);flex-shrink:0"></div>
+    <span id="sync-label">Saved</span>
+    <button onclick="authSignOut()" style="background:none;border:1px solid var(--border);border-radius:var(--radius-sm);padding:3px 8px;font-size:11px;color:var(--text3);cursor:pointer;margin-left:4px;font-family:inherit">Sign out</button>`;
+  topbar.appendChild(bar);
+}
+
+function togglePw(id, btn) {
+  const inp = document.getElementById(id);
+  if (!inp) return;
+  if (inp.type === 'password') { inp.type = 'text'; btn.style.color = '#4caf6e'; }
+  else { inp.type = 'password'; btn.style.color = 'rgba(232,245,236,0.4)'; }
+}
+
+// Boot auth
+// Wipes all local state and localStorage — called on sign-out and before
+// loading a different user's data, so no previous session bleeds through.
+function clearLocalState() {
+  localStorage.removeItem(LS_KEY);
+  state.goals = []; state.notes = []; state.diaryEntries = []; state.projects = [];
+  state.breaks = [
+    {id:1,name:'Evening walk',desc:'20–30 min outside',icon:'🚶',link:''},
+    {id:2,name:'Chess',desc:'chess.com · quick game',icon:'♟',link:'https://chess.com'},
+    {id:3,name:'Ambient music',desc:'Lofi focus playlist',icon:'🎵',link:''},
+    {id:4,name:'Nature videos',desc:'YouTube · BBC Earth',icon:'📺',link:'https://youtube.com/@BBCEarth'},
+    {id:5,name:'Meditation',desc:'10 min breathwork',icon:'🧘',link:''},
+    {id:6,name:'Reading',desc:'Continue current book',icon:'📚',link:''}
+  ];
+  state.aay = {hobbies:[],books:[],movies:[],games:[],channels:[],websites:[],skills:[],dreams:[],values:[],quotes:[],calming:[],creators:[],routines:[],habits:[],inspirations:[],comfort:[],learning:[],memorable:[],links:[]};
+  state.profile = {name:'You',initials:'Y',tagline:'Curious mind. Creative soul.',avatarKey:null,avatar:null,avatarStorageUrl:null};
+  state.streak = 0;
+  state.achievements = []; state.growth = []; state.milestones = [];
+  state.gallery = {memories:[],visionboard:[]};
+  state.places = []; state.trash = [];
+  state.alarms = []; state.reminders = []; state.pastReminders = [];
+  state.music = {
+    tracks:[],
+    playlists:[{id:'all',name:'All tracks',auto:true},{id:'favs',name:'Favourites',auto:true}],
+    activePlaylistId:'all',queue:[],currentIndex:-1,
+    shuffle:false,repeat:'off',volume:0.8,
+    sleepTimerEnd:null,sleepTimerInterval:null
+  };
+  state.gameBest = 0; state.heroTheme = 'night'; state.appTheme = 'forest';
+  state.notesLayout = 'grid'; state.miniPlayerVisible = true;
+  updateProfileUI();
+}
+
+(async () => {
+  const { data: { session } } = await _supabase.auth.getSession();
+  document.getElementById('main-app').style.visibility = 'visible';
+  if (session) {
+    _currentUser = session.user;
+    document.getElementById('auth-screen').style.display = 'none';
+    injectSyncBar();
+    await loadFromSupabase();
+    // Set profile name from auth metadata if not set
+    if ((!state.profile.name || state.profile.name === 'You') && _currentUser.user_metadata?.name) {
+      state.profile.name = _currentUser.user_metadata.name;
+      state.profile.initials = _currentUser.user_metadata.name[0].toUpperCase();
+      updateProfileUI();
+    }
+  }
+
+  // Listen for sign-in / sign-out events
+  _supabase.auth.onAuthStateChange(async (event, session) => {
+    if (event === 'SIGNED_IN' && session) {
+      // Clear any previous user's data before loading the new user's data.
+      // Without this, a new user with no Supabase data yet would see the
+      // previous user's localStorage data still in state.
+      clearLocalState();
+      _currentUser = session.user;
+      document.getElementById('auth-screen').style.display = 'none';
+      injectSyncBar();
+      if ((!state.profile.name || state.profile.name === 'You') && _currentUser.user_metadata?.name) {
+        state.profile.name = _currentUser.user_metadata.name;
+        state.profile.initials = _currentUser.user_metadata.name[0].toUpperCase();
+        updateProfileUI();
+      }
+      await loadFromSupabase();
+    }
+    if (event === 'SIGNED_OUT') {
+      clearLocalState();
+      _currentUser = null;
+    }
+  });
+})();
+</script>
+
+<!-- ══ MOBILE DRAWER OVERLAY ══ -->
+<div id="mob-drawer-overlay" onclick="mobDrawerClose()"></div>
+
+<!-- ══ MOBILE DRAWER ══ -->
+<div id="mob-drawer">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 12px 8px;border-bottom:1px solid var(--border);flex-shrink:0">
+    <div style="display:flex;align-items:center;gap:10px">
+      <div class="logo-icon">🌿</div>
+      <div class="logo-text"><div class="name">Sanctuary</div><div class="sub">Your Best Friend</div></div>
+    </div>
+    <button onclick="mobDrawerClose()" style="background:none;border:none;color:var(--text3);font-size:22px;cursor:pointer;padding:4px;line-height:1"><i class="ti ti-x"></i></button>
+  </div>
+  <nav class="nav-area" style="flex:1;overflow-y:auto">
+    <div class="nav-section-label">Home</div>
+    <div class="nav-item" data-mob-section="dashboard" onclick="mobNavGo('dashboard',this)"><i class="ti ti-layout-dashboard"></i><span>Dashboard</span></div>
+    <div class="nav-section-label">Create</div>
+    <div class="nav-item" data-mob-section="diary" onclick="mobNavGo('diary',this)"><i class="ti ti-book"></i><span>Diary</span><span class="nav-badge">Today</span></div>
+    <div class="nav-item" data-mob-section="notes" onclick="mobNavGo('notes',this)"><i class="ti ti-notes"></i><span>Notebook</span></div>
+    <div class="nav-section-label">Plan</div>
+    <div class="nav-item" data-mob-section="goals" onclick="mobNavGo('goals',this)"><i class="ti ti-target"></i><span>Daily ambitions</span></div>
+    <div class="nav-item" data-mob-section="projects" onclick="mobNavGo('projects',this)"><i class="ti ti-layout-kanban"></i><span>Projects</span></div>
+    <div class="nav-section-label">Discover</div>
+    <div class="nav-item" data-mob-section="journey" onclick="mobNavGo('journey',this)"><i class="ti ti-route"></i><span>Life journey</span></div>
+    <div class="nav-item" data-mob-section="gallery" onclick="mobNavGo('gallery',this)"><i class="ti ti-photo"></i><span>Gallery</span></div>
+    <div class="nav-item" data-mob-section="analytics" onclick="mobNavGo('analytics',this)"><i class="ti ti-chart-dots"></i><span>Analytics</span></div>
+    <div class="nav-section-label">Restore</div>
+    <div class="nav-item" data-mob-section="breaks" onclick="mobNavGo('breaks',this)"><i class="ti ti-leaf"></i><span>Breaks</span></div>
+    <div class="nav-item" data-mob-section="music" onclick="mobNavGo('music',this)"><i class="ti ti-music"></i><span>Music</span></div>
+    <div class="nav-section-label">Play</div>
+    <div class="nav-item" data-mob-section="watch" onclick="mobNavGo('watch',this)"><i class="ti ti-clock-hour-4"></i><span>Watch</span></div>
+    <div class="nav-item" data-mob-section="game" onclick="mobNavGo('game',this)"><i class="ti ti-device-gamepad-2"></i><span>Mind game</span></div>
+    <div class="nav-section-label">Identity</div>
+    <div class="nav-item" data-mob-section="aay" onclick="mobNavGo('aay',this)"><i class="ti ti-sparkles"></i><span>All about you</span></div>
+    <div class="nav-section-label">More</div>
+    <div class="nav-item" data-mob-section="trash" onclick="mobNavGo('trash',this)"><i class="ti ti-trash"></i><span>Trash</span></div>
+  </nav>
+  <div class="profile-area">
+    <div class="prof-inner" onclick="mobNavGo('aay',document.querySelector('[data-mob-section=aay]'))">
+      <div class="avatar-circle" id="mob-drawer-avatar">S</div>
+      <div>
+        <div class="prof-name" id="mob-drawer-name">You</div>
+        <div class="prof-streak">🔥 <span id="mob-drawer-streak">0</span> day streak</div>
+      </div>
+    </div>
+    <button onclick="authSignOut();mobDrawerClose()" style="width:100%;margin-top:8px;padding:9px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;color:var(--text2);font-size:12px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px">
+      <i class="ti ti-logout"></i> Sign out
+    </button>
+  </div>
+</div>
+
+<!-- ══ MOBILE BOTTOM NAV ══ -->
+<nav id="mob-bottom-nav">
+  <button class="mob-nav-btn active" data-mob-bottom="dashboard" onclick="mobNavGo('dashboard',this)">
+    <i class="ti ti-layout-dashboard"></i>Home
+  </button>
+  <button class="mob-nav-btn" data-mob-bottom="diary" onclick="mobNavGo('diary',this)">
+    <i class="ti ti-book"></i>Diary
+  </button>
+  <button class="mob-nav-btn" data-mob-bottom="goals" onclick="mobNavGo('goals',this)">
+    <i class="ti ti-target"></i>Goals
+  </button>
+  <button class="mob-nav-btn" data-mob-bottom="notes" onclick="mobNavGo('notes',this)">
+    <i class="ti ti-notes"></i>Notes
+  </button>
+  <button class="mob-nav-btn" data-mob-bottom="music" onclick="mobNavGo('music',this)">
+    <i class="ti ti-music"></i>Music
+  </button>
+</nav>
+
+<script>
+function mobDrawerOpen() {
+  document.getElementById('mob-drawer').classList.add('open');
+  document.getElementById('mob-drawer-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function mobDrawerClose() {
+  document.getElementById('mob-drawer').classList.remove('open');
+  document.getElementById('mob-drawer-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function mobNavGo(section, el) {
+  var desktopNavEl = document.querySelector('.nav-item[data-section="' + section + '"]');
+  switchSection(section, desktopNavEl);
+  // Mark drawer nav items active
+  document.querySelectorAll('#mob-drawer .nav-item').forEach(function(i){i.classList.remove('active');});
+  var drawerEl = document.querySelector('#mob-drawer .nav-item[data-mob-section="' + section + '"]');
+  if (drawerEl) drawerEl.classList.add('active');
+  // Mark bottom nav active
+  document.querySelectorAll('.mob-nav-btn').forEach(function(b){b.classList.remove('active');});
+  var bottomEl = document.querySelector('.mob-nav-btn[data-mob-bottom="' + section + '"]');
+  if (bottomEl) bottomEl.classList.add('active');
+  mobDrawerClose();
+}
+// Sync drawer profile info
+function mobSyncProfile() {
+  var sa = document.getElementById('sidebar-avatar');
+  var da = document.getElementById('mob-drawer-avatar');
+  if (sa && da) da.innerHTML = sa.innerHTML;
+  var sn = document.getElementById('sidebar-name');
+  var dn = document.getElementById('mob-drawer-name');
+  if (sn && dn) dn.textContent = sn.textContent;
+  var ss = document.getElementById('sidebar-streak');
+  var ds = document.getElementById('mob-drawer-streak');
+  if (ss && ds) ds.textContent = ss.textContent;
+}
+// Patch updateProfileUI to also update drawer..
+(function() {
+  var _orig = window.updateProfileUI;
+  if (typeof _orig === 'function') {
+    window.updateProfileUI = function() {
+      _orig.apply(this, arguments);
+      mobSyncProfile();
+    };
+  }
+})();
+</script>
+
+<script>
+// FIX 6B: Image zoom (pinch, double-tap) for gallery + profile photo
+function openImageViewer(src) {
+  if (!src || src === '' || src === 'undefined') return;
+  var viewer = document.createElement('div');
+  viewer.id = 'img-zoom-viewer';
+  viewer.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:9998;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.25s ease;touch-action:none;';
+  var img = document.createElement('img');
+  img.src = src;
+  img.style.cssText = 'max-width:95vw;max-height:90vh;object-fit:contain;border-radius:8px;transition:transform 0.15s ease;transform-origin:center;user-select:none;-webkit-user-drag:none;';
+  var scale = 1, lastDist = 0, tapCount = 0, tapTimer = null;
+  // Pinch-to-zoom
+  viewer.addEventListener('touchmove', function(e) {
+    if (e.touches.length === 2) {
+      e.preventDefault();
+      var dx = e.touches[0].clientX - e.touches[1].clientX;
+      var dy = e.touches[0].clientY - e.touches[1].clientY;
+      var dist = Math.sqrt(dx*dx + dy*dy);
+      if (lastDist) { scale *= dist / lastDist; scale = Math.min(Math.max(scale, 1), 4); img.style.transform = 'scale('+scale+')'; }
+      lastDist = dist;
+    }
+  }, {passive: false});
+  viewer.addEventListener('touchend', function(e) { if (e.touches.length < 2) lastDist = 0; });
+  // Double-tap to zoom
+  img.addEventListener('click', function(e) {
+    e.stopPropagation();
+    tapCount++;
+    clearTimeout(tapTimer);
+    if (tapCount >= 2) { scale = (scale > 1) ? 1 : 2; img.style.transform = 'scale('+scale+')'; tapCount = 0; }
+    else { tapTimer = setTimeout(function(){ tapCount = 0; }, 280); }
+  });
+  // Close on backdrop
+  viewer.addEventListener('click', function(e) {
+    if (e.target === viewer) { viewer.style.opacity = '0'; setTimeout(function(){ if (viewer.parentNode) viewer.parentNode.removeChild(viewer); }, 250); }
+  });
+  // Swipe down to close
+  var startY = 0;
+  viewer.addEventListener('touchstart', function(e) { if (e.touches.length === 1) startY = e.touches[0].clientY; }, {passive: true});
+  viewer.addEventListener('touchend', function(e) {
+    if (e.changedTouches.length === 1 && scale <= 1) {
+      var dy = e.changedTouches[0].clientY - startY;
+      if (dy > 80) { viewer.style.opacity = '0'; setTimeout(function(){ if (viewer.parentNode) viewer.parentNode.removeChild(viewer); }, 250); }
+    }
+  }, {passive: true});
+  viewer.appendChild(img);
+  document.body.appendChild(viewer);
+  requestAnimationFrame(function(){ viewer.style.opacity = '1'; });
+}
+
+// Mark gallery and profile images zoomable on load + after dynamic renders
+function applyImageZoom() {
+  // Gallery images
+  document.querySelectorAll('.gallery-item img').forEach(function(img) {
+    if (!img.dataset.zoomBound) {
+      img.dataset.zoomBound = '1';
+      img.style.cursor = 'zoom-in';
+      img.addEventListener('click', function(e) {
+        e.stopPropagation();
+        openImageViewer(img.src);
+      });
+    }
+  });
+  // Profile avatar in AAY section....
+  var profAvatar = document.getElementById('profile-avatar-display');
+  if (profAvatar && !profAvatar.dataset.zoomBound) {
+    profAvatar.dataset.zoomBound = '1';
+    var profImg = profAvatar.querySelector('img');
+    if (profImg) {
+      profImg.style.cursor = 'zoom-in';
+      profImg.addEventListener('click', function(e) { e.stopPropagation(); openImageViewer(profImg.src); });
+    }
+  }
+}
+
+// Re-apply after any render (MutationObserver)...
+(function() {
+  var obs = new MutationObserver(function() { applyImageZoom(); });
+  document.addEventListener('DOMContentLoaded', function() {
+    obs.observe(document.getElementById('memories-grid') || document.body, {childList: true, subtree: true});
+    obs.observe(document.getElementById('visionboard-grid') || document.body, {childList: true, subtree: true});
+    applyImageZoom();
+  });
+  window.addEventListener('load', applyImageZoom);
+})();
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('/sw.js').catch(function(e){ console.log('SW:', e); });
+  });
+}
+
+// PWA install prompt — works on Chrome/Edge desktop and Android Chrome.
+// The button appears in the topbar only when the browser fires
+// beforeinstallprompt (i.e. the app is installable but not yet installed).
+let _pwaPrompt = null;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  _pwaPrompt = e;
+  // Show install button in topbar
+  let btn = document.getElementById('pwa-install-btn');
+  if (!btn) {
+    btn = document.createElement('button');
+    btn.id = 'pwa-install-btn';
+    btn.className = 'btn btn-sm topbar-btn';
+    btn.title = 'Install Sanctuary as an app';
+    btn.innerHTML = '<i class="ti ti-download"></i><span class="topbar-btn-label"> Install</span>';
+    btn.onclick = async () => {
+      if (!_pwaPrompt) return;
+      _pwaPrompt.prompt();
+      const { outcome } = await _pwaPrompt.userChoice;
+      if (outcome === 'accepted') { btn.remove(); _pwaPrompt = null; }
+    };
+    // Insert before the theme button (last button in topbar)
+    const topbar = document.querySelector('.topbar');
+    const themeBtn = topbar.querySelector('[onclick*="theme-modal"]');
+    if (themeBtn) topbar.insertBefore(btn, themeBtn);
+    else topbar.appendChild(btn);
+  }
+  btn.style.display = '';
+});
+// Hide install button if app is already installed
+window.addEventListener('appinstalled', () => {
+  const btn = document.getElementById('pwa-install-btn');
+  if (btn) btn.remove();
+  _pwaPrompt = null;
+});
+</script>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// PULL-TO-REFRESH — intentional only (no accidental scroll trigger)
+// ═══════════════════════════════════════════════════════
+(function(){
+  // Keyframes injected once
+  const ks=document.createElement('style');
+  ks.textContent=`
+    @keyframes ptr-spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+    @keyframes ptr-bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(4px)}}
+    #ptr-indicator{
+      position:fixed;top:8px;left:50%;transform:translateX(-50%) translateY(-80px);
+      background:rgba(30,50,36,0.92);
+      backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+      border:1px solid rgba(76,175,110,0.35);
+      color:var(--accent3);font-size:12px;font-weight:600;
+      padding:7px 18px;border-radius:99px;z-index:10000;
+      display:flex;align-items:center;gap:7px;
+      box-shadow:0 4px 20px rgba(0,0,0,0.4);
+      transition:transform 0.22s cubic-bezier(.2,.8,.3,1),opacity 0.2s,border-color 0.2s;
+      white-space:nowrap;pointer-events:none;opacity:0;
+    }
+    #ptr-indicator.ready{border-color:rgba(76,175,110,0.7);color:#fff}
+    #ptr-indicator.visible{transform:translateX(-50%) translateY(0);opacity:1}
+    #ptr-icon.spin{animation:ptr-spin 0.7s linear infinite}
+    #ptr-icon.bounce{animation:ptr-bounce 0.6s ease-in-out infinite}
+  `;
+  document.head.appendChild(ks);
+
+  let startY=0,currentY=0,pulling=false,indicator=null;
+  const THRESHOLD=115;
+
+  function getIndicator(){
+    if(!indicator){
+      indicator=document.createElement('div');
+      indicator.id='ptr-indicator';
+      indicator.innerHTML='<i class="ti ti-arrow-down" id="ptr-icon"></i><span id="ptr-label">Pull to refresh</span>';
+      document.body.appendChild(indicator);
+    }
+    return indicator;
+  }
+
+  function setProgress(pct){
+    const el=getIndicator();
+    const icon=document.getElementById('ptr-icon');
+    const lbl=document.getElementById('ptr-label');
+    const c=Math.min(pct,1);
+    el.style.transform=`translateX(-50%) translateY(${-80+(80*c)}px)`;
+    el.style.opacity=Math.min(c*2,1).toString();
+    el.classList.toggle('ready',c>=1);
+    if(icon){icon.className='ti ti-arrow-down';icon.style.transform=`rotate(${c*180}deg)`;icon.style.transition='transform 0.1s';}
+    if(lbl) lbl.textContent=c>=1?'Release to refresh':'Pull to refresh';
+  }
+
+  function setRefreshing(){
+    const el=getIndicator();
+    el.style.transform='translateX(-50%) translateY(0)';
+    el.style.opacity='1';
+    el.classList.add('ready');
+    const icon=document.getElementById('ptr-icon');
+    const lbl=document.getElementById('ptr-label');
+    if(icon){icon.className='ti ti-refresh spin';icon.style.transform='';icon.style.transition='';}
+    if(lbl) lbl.textContent='Refreshing…';
+  }
+
+  function hide(){
+    const el=getIndicator();
+    el.style.transform='translateX(-50%) translateY(-80px)';
+    el.style.opacity='0';
+    el.classList.remove('ready');
+    setTimeout(()=>{
+      const icon=document.getElementById('ptr-icon');
+      if(icon){icon.className='ti ti-arrow-down';icon.style.transform='';}
+    },300);
+  }
+
+  document.addEventListener('touchstart',e=>{
+    const ca=document.querySelector('.content-area');
+    if((ca?ca.scrollTop:window.scrollY)>0) return; // not at top — ignore
+    if(e.touches.length!==1) return;
+    startY=e.touches[0].clientY;
+    currentY=startY;
+    pulling=true;
+    getIndicator(); // pre-create
+  },{passive:true});
+
+  document.addEventListener('touchmove',e=>{
+    if(!pulling) return;
+    currentY=e.touches[0].clientY;
+    const dy=currentY-startY;
+    if(dy<=0){pulling=false;hide();return;}
+    setProgress(dy/THRESHOLD);
+  },{passive:true});
+
+  document.addEventListener('touchend',async ()=>{
+    if(!pulling) return;
+    pulling=false;
+    const dy=currentY-startY;
+    if(dy>=THRESHOLD){
+      setRefreshing();
+      if(typeof _currentUser!=='undefined'&&_currentUser){
+        await loadFromSupabase().catch(()=>{});
+      } else {
+        loadFromStorage();renderDashTasks();renderNotes();renderGoals();
+      }
+      // Brief pause so user sees the "Refreshing" state
+      await new Promise(r=>setTimeout(r,600));
+    }
+    hide();
+  },{passive:true});
+})();
+
+// ═══════════════════════════════════════════════════════
+// FILE VIEWER — clean styles for PDF / Word / Excel
+// ═══════════════════════════════════════════════════════
+(function(){
+  const style=document.createElement('style');
+  style.textContent=`
+    /* Header: always horizontal, filename wraps, never cuts off */
+    #attachment-viewer > div > div:first-child{
+      flex-wrap:wrap!important;gap:8px!important;padding:10px 14px!important;
+    }
+    #att-viewer-name{
+      white-space:normal!important;word-break:break-all!important;
+      font-size:13px!important;line-height:1.4!important;
+      flex:1 1 100%!important;order:0!important;
+    }
+    #att-viewer-pdf-nav,#att-viewer-download-btn,
+    #attachment-viewer button[onclick*="closeAttachmentViewer"]{flex-shrink:0!important;}
+    /* PDF — pure white background, no bleed from dark theme */
+    #att-viewer-pdf-wrap{
+      background:#ffffff!important;min-height:300px;
+      display:flex!important;align-items:flex-start!important;
+      justify-content:center!important;padding:16px!important;
+    }
+    #att-viewer-canvas{
+      background:#ffffff!important;display:block!important;
+      margin:0 auto!important;box-shadow:0 2px 16px rgba(0,0,0,0.25)!important;
+      border-radius:4px!important;max-width:100%!important;
+    }
+    /* Word doc — white page feel */
+    #att-viewer-docx{
+      background:#fff!important;overflow:auto!important;
+    }
+    /* Excel / CSV */
+    #att-viewer-excel{overflow:auto!important;max-width:100%!important;}
+    /* Plain text */
+    #att-viewer-text{
+      white-space:pre-wrap!important;word-break:break-word!important;
+      font-size:13px!important;line-height:1.6!important;overflow:auto!important;
+    }
+    @media(max-width:600px){
+      #att-viewer-name{font-size:12px!important}
+      #att-viewer-download-btn span{display:none}
+    }
+  `;
+  document.head.appendChild(style);
+
+  // Override PDF page renderer — crisp DPI-aware rendering, white fill first
+  window._attRenderPdfPage = async function(pageNum){
+    if(!window._attPdfDoc) return;
+    const page=await window._attPdfDoc.getPage(pageNum);
+    const canvas=document.getElementById('att-viewer-canvas');
+    const wrap=document.getElementById('att-viewer-pdf-wrap');
+    // Use actual rendered width for scale; wait a frame if wrap is 0
+    const wrapW=wrap.clientWidth||document.getElementById('att-viewer-body').clientWidth||700;
+    const dpr=window.devicePixelRatio||1;
+    const baseVp=page.getViewport({scale:1});
+    const baseScale=Math.min(3,Math.max(1,(wrapW-32)/baseVp.width));
+    const vp=page.getViewport({scale:baseScale*dpr});
+    canvas.width=vp.width;
+    canvas.height=vp.height;
+    canvas.style.width=(vp.width/dpr)+'px';
+    canvas.style.height=(vp.height/dpr)+'px';
+    const ctx=canvas.getContext('2d');
+    // White fill prevents dark-theme bleed through transparent PDF areas
+    ctx.fillStyle='#ffffff';
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    await page.render({canvasContext:ctx,viewport:vp,background:'#ffffff'}).promise;
+    const nav=document.getElementById('att-viewer-pdf-page');
+    if(nav) nav.textContent=`${pageNum} / ${window._attPdfDoc.numPages}`;
+  };
+})();
+
+// ═══════════════════════════════════════════════════════
+// OFFLINE LOGIN — cache last-signed-in user for offline access
+// ═══════════════════════════════════════════════════════
+(function(){
+  const OFFLINE_KEY='sanctuary_offline_users';
+  function saveOfflineUser(user){
+    try{
+      const ex=JSON.parse(localStorage.getItem(OFFLINE_KEY)||'[]');
+      if(!ex.find(u=>u.id===user.id)){
+        ex.push({id:user.id,email:user.email,name:user.user_metadata?.name||''});
+        localStorage.setItem(OFFLINE_KEY,JSON.stringify(ex));
+      }
+    }catch(e){}
+  }
+  function getOfflineUsers(){
+    try{return JSON.parse(localStorage.getItem(OFFLINE_KEY)||'[]');}catch(e){return[];}
+  }
+  window._saveOfflineUser=saveOfflineUser;
+  window._getOfflineUsers=getOfflineUsers;
+
+  async function checkAndShowOfflineOption(){
+    if(navigator.onLine) return;
+    const users=getOfflineUsers();if(!users.length)return;
+    let picker=document.getElementById('offline-user-picker');if(picker)return;
+    picker=document.createElement('div');
+    picker.id='offline-user-picker';
+    picker.style.cssText='background:rgba(76,175,110,0.08);border:1px solid rgba(76,175,110,0.2);border-radius:10px;padding:12px;margin-bottom:14px';
+    picker.innerHTML=`<div style="font-size:11px;font-weight:700;color:var(--accent3);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px">📶 Offline — quick access</div>`+
+      users.map(u=>`<div onclick="offlineSignIn('${u.id}','${u.email}')" style="display:flex;align-items:center;gap:10px;padding:8px;border-radius:8px;cursor:pointer;background:rgba(255,255,255,0.04);margin-bottom:6px">
+        <div style="width:32px;height:32px;border-radius:8px;background:var(--accent2);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff">${(u.name||u.email)[0].toUpperCase()}</div>
+        <div><div style="font-size:13px;font-weight:600;color:var(--text)">${u.name||u.email}</div><div style="font-size:11px;color:var(--text3)">${u.email}</div></div>
+      </div>`).join('');
+    const loginForm=document.getElementById('auth-login-form');
+    if(loginForm) loginForm.parentNode.insertBefore(picker,loginForm);
+  }
+  window.offlineSignIn=async function(userId,email){
+    loadFromStorage();
+    _currentUser={id:userId,email,user_metadata:{name:localStorage.getItem('sanctuary_uid_name_'+userId)||''}};
+    document.getElementById('auth-screen').style.display='none';
+    injectSyncBar();updateProfileUI();
+    toast('Offline mode — showing last synced data');
+    window.addEventListener('online',async()=>{
+      const{data:{session}}=await _supabase.auth.getSession().catch(()=>({data:{session:null}}));
+      if(session){await loadFromSupabase();toast('Back online — data synced ✓');}
+    },{once:true});
+  };
+  window.addEventListener('online',()=>{const p=document.getElementById('offline-user-picker');if(p)p.remove();});
+  window.addEventListener('offline',checkAndShowOfflineOption);
+  setTimeout(checkAndShowOfflineOption,1000);
+
+  const _origSave2=window.save;
+  window.save=function(){
+    _origSave2.apply(this,arguments);
+    if(typeof _currentUser!=='undefined'&&_currentUser){
+      try{localStorage.setItem('sanctuary_uid_name_'+_currentUser.id,state.profile.name||'');}catch(e){}
+    }
+  };
+})();
+
+// Hook into auth to save offline user record on each sign-in
+(function(){
+  const boot=window._supabase;if(!boot)return;
+  boot.auth.onAuthStateChange((event,session)=>{
+    if(event==='SIGNED_IN'&&session&&window._saveOfflineUser) window._saveOfflineUser(session.user);
+  });
+})();
+
+// ═══════════════════════════════════════════════════════
+// BACK BUTTON — section history + overlay dismissal
+// ═══════════════════════════════════════════════════════
+(function(){
+  // Two separate stacks:
+  // _sectionHistory  — sections visited (e.g. dashboard → diary → notes)
+  // _overlayStack    — overlays/modals opened on top of the current section
+  const _sectionHistory=[];
+  const _overlayStack=[];
+
+  // Seed with dashboard as the root so there's always something to go back to
+  _sectionHistory.push('dashboard');
+  // Push one history entry per "page" so the OS back button fires popstate
+  history.replaceState({sanctuary:true,type:'section',section:'dashboard'},'');
+
+  // ── Patch switchSection to record navigation ──
+  const _origSwitch=window.switchSection;
+  window.switchSection=function(id,navEl){
+    _origSwitch.apply(this,arguments);
+    // Don't stack the same section twice in a row
+    if(_sectionHistory[_sectionHistory.length-1]===id) return;
+    _sectionHistory.push(id);
+    history.pushState({sanctuary:true,type:'section',section:id},'');
+  };
+
+  // ── Patch mobNavGo to also push history ──
+  const _origMobNavGo=window.mobNavGo;
+  window.mobNavGo=function(section,el){
+    // Close drawer first (without pushing a history entry for it)
+    mobDrawerClose();
+    const desktopNavEl=document.querySelector('.nav-item[data-section="'+section+'"]');
+    _origSwitch.call(window,section,desktopNavEl);
+    // Mark drawer + bottom nav active
+    document.querySelectorAll('#mob-drawer .nav-item').forEach(function(i){i.classList.remove('active');});
+    const drawerEl=document.querySelector('#mob-drawer .nav-item[data-mob-section="'+section+'"]');
+    if(drawerEl) drawerEl.classList.add('active');
+    document.querySelectorAll('.mob-nav-btn').forEach(function(b){b.classList.remove('active');});
+    const bottomEl=document.querySelector('.mob-nav-btn[data-mob-bottom="'+section+'"]');
+    if(bottomEl) bottomEl.classList.add('active');
+    if(_sectionHistory[_sectionHistory.length-1]!==section){
+      _sectionHistory.push(section);
+      history.pushState({sanctuary:true,type:'section',section:section},'');
+    }
+  };
+
+  // ── Overlay helpers ──
+  function pushOverlay(closeFn){
+    _overlayStack.push(closeFn);
+    history.pushState({sanctuary:true,type:'overlay'},'');
+  }
+
+  // ── popstate handler ──
+  window.addEventListener('popstate',function(e){
+    const state=e.state;
+    // 1. An overlay is open — close it, regardless of what history says
+    if(_overlayStack.length){
+      const fn=_overlayStack.pop();
+      try{fn();}catch(ex){}
+      return;
+    }
+    // 2. It's a section entry — go back to the previous section
+    if(state&&state.sanctuary&&state.type==='section'){
+      _sectionHistory.pop(); // remove current
+      const prev=_sectionHistory[_sectionHistory.length-1]||'dashboard';
+      const navEl=document.querySelector('.nav-item[data-section="'+prev+'"]');
+      _origSwitch.call(window,prev,navEl);
+      // Sync mobile nav
+      document.querySelectorAll('.mob-nav-btn').forEach(function(b){b.classList.remove('active');});
+      const bottomEl=document.querySelector('.mob-nav-btn[data-mob-bottom="'+prev+'"]');
+      if(bottomEl) bottomEl.classList.add('active');
+      document.querySelectorAll('#mob-drawer .nav-item').forEach(function(i){i.classList.remove('active');});
+      const drawerEl=document.querySelector('#mob-drawer .nav-item[data-mob-section="'+prev+'"]');
+      if(drawerEl) drawerEl.classList.add('active');
+    }
+    // 3. Non-sanctuary entry — let browser do its thing (e.g. auth redirect)
+  });
+
+  // ── Patch overlays to push their own history entry ──
+  const _origOpenLightbox=window.openLightbox;
+  window.openLightbox=function(){
+    _origOpenLightbox.apply(this,arguments);
+    pushOverlay(()=>closeLightbox());
+  };
+
+  const _origOpenSearch=window.openSearch;
+  window.openSearch=function(){
+    _origOpenSearch.apply(this,arguments);
+    pushOverlay(()=>closeSearch());
+  };
+
+  const _origOpenModal=window.openModal;
+  window.openModal=function(id){
+    _origOpenModal.apply(this,arguments);
+    pushOverlay(()=>{ if(id==='place-modal') cancelPlaceModal(); else closeModal(id); });
+  };
+
+  const _origOpenImageViewer=window.openImageViewer;
+  if(typeof _origOpenImageViewer==='function'){
+    window.openImageViewer=function(){
+      _origOpenImageViewer.apply(this,arguments);
+      pushOverlay(()=>{
+        const v=document.getElementById('img-zoom-viewer');
+        if(v){v.style.opacity='0';setTimeout(()=>{if(v.parentNode)v.parentNode.removeChild(v);},250);}
+      });
+    };
+  }
+
+  // Drawer open — push overlay so back closes it, not navigates away
+  const _origMobDrawerOpen=window.mobDrawerOpen;
+  if(typeof _origMobDrawerOpen==='function'){
+    window.mobDrawerOpen=function(){
+      _origMobDrawerOpen.apply(this,arguments);
+      pushOverlay(()=>mobDrawerClose());
+    };
+  }
+})();
+
+// ═══════════════════════════════════════════════════════
+// MUSIC PLAYER PATCH — Boomplay-style UI
+// ═══════════════════════════════════════════════════════
+(function () {
+  const style = document.createElement('style');
+  style.textContent = `
+    .bp-np-card {
+      background: linear-gradient(160deg,#0a1f13 0%,#0d2b1a 55%,#102415 100%);
+      border: 1px solid rgba(76,175,110,0.18);
+      border-radius: 20px;
+      padding: 22px 20px 18px;
+      margin-bottom: 14px;
+      position: relative;
+      overflow: hidden;
+    }
+    .bp-np-card::before {
+      content: '';
+      position: absolute;
+      top: -60px; right: -60px;
+      width: 180px; height: 180px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(76,175,110,0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .bp-art-wrap {
+      width: 110px; height: 110px;
+      border-radius: 16px;
+      background: linear-gradient(135deg,#0d2818,#1a3a26);
+      border: 1px solid rgba(76,175,110,0.25);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 42px;
+      margin: 0 auto 16px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 0 4px rgba(76,175,110,0.07);
+      flex-shrink: 0;
+      position: relative;
+      overflow: hidden;
+    }
+    .bp-art-spin {
+      animation: bp-rotate 8s linear infinite;
+      animation-play-state: paused;
+    }
+    .bp-art-spin.playing {
+      animation-play-state: running;
+    }
+    @keyframes bp-rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .bp-track-info {
+      text-align: center;
+      margin-bottom: 14px;
+    }
+    .bp-track-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 3px;
+    }
+    .bp-track-artist {
+      font-size: 12px;
+      color: var(--text3);
+    }
+    .bp-seek-wrap {
+      margin: 0 0 6px;
+      padding: 0 2px;
+    }
+    .bp-seek-track {
+      position: relative;
+      height: 4px;
+      border-radius: 99px;
+      background: rgba(255,255,255,0.12);
+      cursor: pointer;
+      padding: 10px 0;
+      margin: -10px 0;
+      box-sizing: content-box;
+    }
+    .bp-seek-track:hover .bp-seek-fill { background: var(--accent); }
+    .bp-seek-fill {
+      position: absolute;
+      top: 10px; left: 0;
+      height: 4px;
+      border-radius: 99px;
+      background: var(--accent3);
+      width: 0%;
+      pointer-events: none;
+      transition: background 0.15s;
+    }
+    .bp-seek-thumb {
+      position: absolute;
+      top: 50%; left: 0%;
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: #fff;
+      transform: translate(-50%, calc(-50% + 10px));
+      box-shadow: 0 1px 6px rgba(0,0,0,0.4);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s, transform 0.05s;
+    }
+    .bp-seek-track:hover .bp-seek-thumb,
+    .bp-seek-track.dragging .bp-seek-thumb {
+      opacity: 1;
+    }
+    .bp-seek-track.dragging .bp-seek-thumb {
+      transform: translate(-50%, calc(-50% + 10px)) scale(1.25);
+    }
+    .bp-time-row {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 4px;
+    }
+    .bp-time {
+      font-size: 10px;
+      color: var(--text3);
+      font-variant-numeric: tabular-nums;
+    }
+    .bp-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 2px 4px;
+      margin-bottom: 14px;
+    }
+    .bp-ctrl-btn {
+      background: none; border: none;
+      color: var(--text2); cursor: pointer;
+      padding: 8px; border-radius: 10px;
+      font-size: 20px;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s;
+    }
+    .bp-ctrl-btn:hover { color: var(--text); background: rgba(255,255,255,0.07); }
+    .bp-ctrl-btn.active-ctrl { color: var(--accent3); }
+    .bp-play-btn {
+      width: 52px; height: 52px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent2), var(--accent));
+      color: #fff;
+      font-size: 22px;
+      border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 18px rgba(76,175,110,0.4);
+      transition: all 0.15s;
+      flex-shrink: 0;
+    }
+    .bp-play-btn:hover { transform: scale(1.06); box-shadow: 0 6px 22px rgba(76,175,110,0.55); }
+    .bp-play-btn:active { transform: scale(0.96); }
+    .bp-vol-row {
+      display: flex; align-items: center; gap: 8px;
+      padding: 0 2px; margin-bottom: 10px;
+    }
+    .bp-vol-icon { font-size: 14px; color: var(--text3); flex-shrink: 0; }
+    @media (max-width: 768px) {
+      .bp-art-wrap { width: 130px; height: 130px; font-size: 52px; }
+      .bp-track-title { font-size: 16px; }
+      .bp-np-card { padding: 24px 18px 18px; }
+      .bp-play-btn { width: 58px; height: 58px; font-size: 24px; }
+    }
+  `;
+  document.head.appendChild(style);
+
+  const npCard = document.querySelector('.np-card');
+  if (npCard) {
+    npCard.outerHTML = `
+      <div class="bp-np-card" id="bp-np-card">
+        <div class="bp-art-wrap">
+          <div class="bp-art-spin" id="bp-art">🎵</div>
+        </div>
+        <div class="bp-track-info">
+          <div class="bp-track-title" id="bp-title">No track selected</div>
+          <div class="bp-track-artist" id="bp-artist">—</div>
+        </div>
+        <div class="bp-seek-wrap">
+          <div class="bp-seek-track" id="bp-seek-track">
+            <div class="bp-seek-fill" id="bp-seek-fill"></div>
+            <div class="bp-seek-thumb" id="bp-seek-thumb"></div>
+          </div>
+          <div class="bp-time-row">
+            <span class="bp-time" id="bp-cur">0:00</span>
+            <span class="bp-time" id="bp-dur">0:00</span>
+          </div>
+        </div>
+        <div class="bp-controls">
+          <button class="bp-ctrl-btn" id="bp-shuffle-btn" onclick="toggleShuffle()" title="Shuffle">
+            <i class="ti ti-arrows-shuffle"></i>
+          </button>
+          <button class="bp-ctrl-btn" onclick="prevTrack()">
+            <i class="ti ti-player-skip-back-filled"></i>
+          </button>
+          <button class="bp-play-btn" id="bp-play-btn" onclick="togglePlay()">
+            <i class="ti ti-player-play-filled" id="bp-play-icon"></i>
+          </button>
+          <button class="bp-ctrl-btn" onclick="nextTrack()">
+            <i class="ti ti-player-skip-forward-filled"></i>
+          </button>
+          <button class="bp-ctrl-btn" id="bp-repeat-btn" onclick="cycleRepeat()" title="Repeat">
+            <i class="ti ti-repeat" id="bp-repeat-icon"></i>
+          </button>
+        </div>
+        <div class="bp-vol-row">
+          <i class="ti ti-volume bp-vol-icon"></i>
+          <input type="range" id="bp-vol" min="0" max="100" value="80" oninput="setVolume(this.value)" style="flex:1;accent-color:var(--accent3)">
+        </div>
+        <div class="sleep-timer-row">
+          <i class="ti ti-moon"></i>
+          <span>Sleep:</span>
+          <select id="sleep-select" onchange="setSleepTimer(this.value)" style="flex:1">
+            <option value="0">Off</option>
+            <option value="10">10 min</option>
+            <option value="20">20 min</option>
+            <option value="30">30 min</option>
+            <option value="60">60 min</option>
+          </select>
+          <span id="sleep-countdown" class="sleep-timer-active" style="display:none"></span>
+        </div>
+      </div>`;
+  }
+
+  const audio = document.getElementById('global-audio');
+  function bpFmt(s) {
+    if (!s || isNaN(s) || !isFinite(s)) return '0:00';
+    const m = Math.floor(s / 60), sec = Math.floor(s % 60);
+    return m + ':' + String(sec).padStart(2, '0');
+  }
+
+  function bpSetPos(pct) {
+    pct = Math.min(100, Math.max(0, pct));
+    const fill = document.getElementById('bp-seek-fill');
+    const thumb = document.getElementById('bp-seek-thumb');
+    if (fill) fill.style.width = pct + '%';
+    if (thumb) thumb.style.left = pct + '%';
+    const mpBar = document.getElementById('mp-seek-bar');
+    if (mpBar) {
+      mpBar.value = pct;
+      mpBar.style.setProperty('--pct', pct.toFixed(2) + '%');
+    }
+  }
+
+  let _bpSeeking = false;
+  audio.addEventListener('timeupdate', function () {
+    if (_bpSeeking || !audio.duration) return;
+    const pct = (audio.currentTime / audio.duration) * 100;
+    bpSetPos(pct);
+    const cur = bpFmt(audio.currentTime);
+    const dur = bpFmt(audio.duration);
+    const c1 = document.getElementById('bp-cur'); if (c1) c1.textContent = cur;
+    const d1 = document.getElementById('bp-dur'); if (d1) d1.textContent = dur;
+    const mc = document.getElementById('mp-cur-time'); if (mc) mc.textContent = cur;
+    const md = document.getElementById('mp-dur-time'); if (md) md.textContent = dur;
+    const art = document.getElementById('bp-art');
+    if (art) art.classList.toggle('playing', !audio.paused);
+  });
+
+  const seekTrack = document.getElementById('bp-seek-track');
+  if (seekTrack) {
+    function pctFromEvent(e) {
+      const rect = seekTrack.getBoundingClientRect();
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      return Math.min(100, Math.max(0, ((clientX - rect.left) / rect.width) * 100));
+    }
+
+    function commitSeek(pct) {
+      if (audio.duration && isFinite(audio.duration)) {
+        audio.currentTime = (pct / 100) * audio.duration;
+      }
+      _bpSeeking = false;
+      seekTrack.classList.remove('dragging');
+    }
+
+    seekTrack.addEventListener('mousedown', function (e) {
+      e.preventDefault();
+      _bpSeeking = true;
+      seekTrack.classList.add('dragging');
+      const pct = pctFromEvent(e);
+      bpSetPos(pct);
+      if (audio.duration) {
+        const t = (pct / 100) * audio.duration;
+        const c = document.getElementById('bp-cur'); if (c) c.textContent = bpFmt(t);
+      }
+      function onMove(ev) {
+        const p = pctFromEvent(ev);
+        bpSetPos(p);
+        if (audio.duration) {
+          const t = (p / 100) * audio.duration;
+          const c = document.getElementById('bp-cur'); if (c) c.textContent = bpFmt(t);
+        }
+      }
+      function onUp(ev) {
+        window.removeEventListener('mousemove', onMove);
+        window.removeEventListener('mouseup', onUp);
+        commitSeek(pctFromEvent(ev));
+      }
+      window.addEventListener('mousemove', onMove);
+      window.addEventListener('mouseup', onUp);
+    });
+
+    seekTrack.addEventListener('touchstart', function (e) {
+      e.preventDefault();
+      _bpSeeking = true;
+      seekTrack.classList.add('dragging');
+      bpSetPos(pctFromEvent(e));
+    }, { passive: false });
+
+    seekTrack.addEventListener('touchmove', function (e) {
+      e.preventDefault();
+      const p = pctFromEvent(e);
+      bpSetPos(p);
+      if (audio.duration) {
+        const t = (p / 100) * audio.duration;
+        const c = document.getElementById('bp-cur'); if (c) c.textContent = bpFmt(t);
+      }
+    }, { passive: false });
+
+    seekTrack.addEventListener('touchend', function (e) {
+      const rect = seekTrack.getBoundingClientRect();
+      const clientX = e.changedTouches[0].clientX;
+      const finalPct = Math.min(100, Math.max(0, ((clientX - rect.left) / rect.width) * 100));
+      commitSeek(finalPct);
+    }, { passive: true });
+  }
+
+  const mpBar = document.getElementById('mp-seek-bar');
+  if (mpBar) {
+    mpBar.removeAttribute('oninput');
+    let _mpDragging = false;
+    mpBar.addEventListener('mousedown', () => { _bpSeeking = true; _mpDragging = true; });
+    mpBar.addEventListener('touchstart', () => { _bpSeeking = true; _mpDragging = true; }, { passive: true });
+    function mpCommit() {
+      if (_mpDragging && audio.duration) {
+        audio.currentTime = (parseFloat(mpBar.value) / 100) * audio.duration;
+      }
+      _mpDragging = false;
+      _bpSeeking = false;
+    }
+    mpBar.addEventListener('mouseup', mpCommit);
+    mpBar.addEventListener('touchend', mpCommit, { passive: true });
+    mpBar.addEventListener('input', function () {
+      const pct = parseFloat(this.value);
+      mpBar.style.setProperty('--pct', pct.toFixed(2) + '%');
+      bpSetPos(pct);
+      if (audio.duration) {
+        const t = (pct / 100) * audio.duration;
+        const c = document.getElementById('mp-cur-time'); if (c) c.textContent = bpFmt(t);
+        const c2 = document.getElementById('bp-cur'); if (c2) c2.textContent = bpFmt(t);
+      }
+    });
+  }
+
+  const npSeek = document.getElementById('np-seek');
+  if (npSeek) npSeek.style.display = 'none';
+
+  const _origUpdateNP = window.updateNowPlayingUI;
+  window.updateNowPlayingUI = function (track) {
+    _origUpdateNP && _origUpdateNP(track);
+    const t = document.getElementById('bp-title'); if (t) t.textContent = track ? track.title : 'No track selected';
+    const a = document.getElementById('bp-artist'); if (a) a.textContent = track ? track.artist : '—';
+    bpSetPos(0);
+    const cur = document.getElementById('bp-cur'); if (cur) cur.textContent = '0:00';
+    const dur = document.getElementById('bp-dur'); if (dur) dur.textContent = track && track.duration ? bpFmt(track.duration) : '0:00';
+  };
+
+  const _origPlayIcons = window.updatePlayIcons;
+  window.updatePlayIcons = function () {
+    _origPlayIcons && _origPlayIcons();
+    const playing = !audio.paused && !!audio.src;
+    const icon = document.getElementById('bp-play-icon');
+    if (icon) icon.className = playing ? 'ti ti-player-pause-filled' : 'ti ti-player-play-filled';
+    const art = document.getElementById('bp-art');
+    if (art) art.classList.toggle('playing', playing);
+  };
+
+  const _origShuffle = window.updateShuffleUI;
+  window.updateShuffleUI = function () {
+    _origShuffle && _origShuffle();
+    const btn = document.getElementById('bp-shuffle-btn');
+    if (btn) btn.classList.toggle('active-ctrl', !!(window.state && window.state.music && window.state.music.shuffle));
+  };
+
+  const _origRepeat = window.updateRepeatUI;
+  window.updateRepeatUI = function () {
+    _origRepeat && _origRepeat();
+    const btn = document.getElementById('bp-repeat-btn');
+    const icon = document.getElementById('bp-repeat-icon');
+    if (!btn || !icon) return;
+    const mode = window.state && window.state.music ? window.state.music.repeat : 'off';
+    btn.classList.toggle('active-ctrl', mode !== 'off');
+    icon.className = mode === 'one' ? 'ti ti-repeat-once' : 'ti ti-repeat';
+  };
+
+  const _origVol = window.setVolume;
+  window.setVolume = function (val) {
+    _origVol && _origVol(val);
+    const bpVol = document.getElementById('bp-vol');
+    if (bpVol) bpVol.value = val;
+  };
+
+  (function init() {
+    if (window.state && window.state.music) {
+      const bpVol = document.getElementById('bp-vol');
+      if (bpVol) bpVol.value = (window.state.music.volume || 0.8) * 100;
+    }
+    window.updatePlayIcons && window.updatePlayIcons();
+    window.updateShuffleUI && window.updateShuffleUI();
+    window.updateRepeatUI && window.updateRepeatUI();
+  })();
+
+})();
+</script>
