@@ -539,42 +539,126 @@ input[type=range]::-moz-range-progress{background:var(--accent3);border-radius:9
   .sanctuary-watch-wrap { width: 100% !important; max-width: 280px !important; height: auto !important; aspect-ratio: 1; }
   #watch-canvas { width: 100% !important; height: auto !important; aspect-ratio: 1; }
 
-  /* ───────── MUSIC — rebuilt for mobile, not just shrunk ───────── */
-  #music-grid-layout { display: flex !important; flex-direction: column !important; gap: 14px !important; }
-  .music-sidebar-panel, .np-card { width: 100% !important; box-sizing: border-box !important; }
-  .np-art { width: 64px !important; height: 64px !important; font-size: 28px !important; }
-  .np-controls { gap: 4px !important; }
-  .np-play { width: 46px !important; height: 46px !important; }
+  /* ═══════════════════════════════════════════
+     MUSIC — full mobile rewrite
+  ═══════════════════════════════════════════ */
+  #music-grid-layout {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0 !important;
+  }
 
-  /* Search + sort + upload row: stop forcing 3 fixed-width controls onto
-     one line. Search takes the full first row; sort + upload share the
-     second row, sized by content instead of a hardcoded 130px. */
-  #music-controls-row { flex-wrap: wrap !important; gap: 8px !important; }
+  /* ── Now Playing card ── */
+  .np-card {
+    background: linear-gradient(160deg,#0c2216,#152d1c) !important;
+    border-radius: 20px !important;
+    padding: 20px 18px 16px !important;
+    margin-bottom: 12px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  .np-art {
+    width: 100px !important;
+    height: 100px !important;
+    font-size: 44px !important;
+    border-radius: 16px !important;
+    margin: 0 auto 12px !important;
+  }
+  .np-title {
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    text-align: center !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    padding: 0 4px !important;
+  }
+  .np-artist {
+    font-size: 12px !important;
+    text-align: center !important;
+    margin-bottom: 14px !important;
+  }
+
+  /* ── Seek bar ── */
+  .np-seek-wrap {
+    gap: 8px !important;
+    margin: 0 0 14px !important;
+    align-items: center !important;
+  }
+  .np-time { font-size: 10px !important; width: 28px !important; flex-shrink: 0 !important; }
+
+  /* Make the thumb bigger so it's easy to grab on mobile */
+  #np-seek::-webkit-slider-thumb { width: 18px !important; height: 18px !important; margin-top: -7px !important; }
+  #np-seek::-moz-range-thumb { width: 18px !important; height: 18px !important; }
+  #np-seek::-webkit-slider-runnable-track { height: 5px !important; }
+  #mp-seek-bar::-webkit-slider-thumb { width: 18px !important; height: 18px !important; margin-top: -7px !important; }
+  #mp-seek-bar::-moz-range-thumb { width: 18px !important; height: 18px !important; }
+
+  /* ── Controls ── */
+  .np-controls {
+    gap: 0 !important;
+    justify-content: space-between !important;
+    padding: 0 4px !important;
+    margin-bottom: 14px !important;
+  }
+  .np-btn { font-size: 22px !important; padding: 8px !important; }
+  .np-play {
+    width: 54px !important;
+    height: 54px !important;
+    font-size: 22px !important;
+  }
+
+  /* ── Volume ── */
+  .np-card > div[style*="border-top"] {
+    margin-top: 0 !important;
+    padding-top: 12px !important;
+    margin-bottom: 10px !important;
+  }
+
+  /* ── Sleep timer ── */
+  .sleep-timer-row { flex-wrap: nowrap !important; font-size: 11px !important; }
+  .sleep-timer-row select { font-size: 11px !important; }
+
+  /* ── Playlists panel ── */
+  .music-sidebar-panel {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    border-radius: 16px !important;
+    margin-bottom: 12px !important;
+  }
+
+  /* ── Controls row: search full width, sort+upload on one line below ── */
+  #music-controls-row {
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
   #music-search { flex: 1 1 100% !important; min-width: 0 !important; }
-  #music-sort { flex: 1 1 0 !important; width: auto !important; min-width: 0 !important; }
+  #music-sort { flex: 1 1 0 !important; min-width: 0 !important; width: auto !important; }
   #music-controls-row .btn { flex-shrink: 0 !important; white-space: nowrap !important; }
 
-  .playlist-tabs { overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; }
-  .music-upload-zone { padding: 16px !important; }
+  /* ── Playlist tabs ── */
+  .playlist-tabs {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+    margin-bottom: 10px !important;
+  }
+  .playlist-tabs::-webkit-scrollbar { display: none !important; }
 
-  /* Track row: the real fix, not a font-size shrink. Two-line layout —
-     art + title/artist + favourite on the main line (the three things
-     that matter every time), duration hidden (low-value on a phone where
-     screen space is scarce), and "add to playlist" + delete tucked into
-     a single overflow menu instead of three permanently-visible icon
-     buttons fighting the title for space. */
-  .track-row { padding: 9px 6px !important; gap: 8px !important; }
+  /* ── Upload zone ── */
+  .music-upload-zone { padding: 20px 16px !important; border-radius: 14px !important; }
+
+  /* ── Track rows ── */
+  .track-row { padding: 10px 8px !important; gap: 10px !important; border-radius: 10px !important; }
   .track-num { display: none !important; }
   .track-dur { display: none !important; }
+  .track-art { width: 40px !important; height: 40px !important; font-size: 18px !important; flex-shrink: 0 !important; }
   .track-title { font-size: 13px !important; }
   .track-artist { font-size: 11px !important; }
-  .track-fav { font-size: 17px !important; padding: 6px !important; }
-  /* "Add to playlist" and delete collapse into the kebab overflow menu on
-     mobile (openTrackActionSheet) — only favourite stays inline, since
-     it's the one action people reach for constantly while browsing. */
+  .track-fav { font-size: 18px !important; padding: 6px !important; }
   .track-row > .btn.btn-sm[title="Add to playlist"] { display: none !important; }
   .track-del { display: none !important; }
-  .track-more { display: flex !important; align-items: center; justify-content: center; }
+  .track-more { display: flex !important; align-items: center !important; justify-content: center !important; font-size: 18px !important; padding: 6px !important; }
 
   /* AAY section — prevent content escaping topbar */
   #s-aay { overflow-x: hidden !important; }
@@ -3247,23 +3331,37 @@ document.getElementById('np-seek').addEventListener('mousedown',()=>_seeking=tru
 document.getElementById('np-seek').addEventListener('mouseup',()=>_seeking=false);
 document.getElementById('mp-seek-bar').addEventListener('mousedown',()=>_seeking=true);
 document.getElementById('mp-seek-bar').addEventListener('mouseup',()=>_seeking=false);
-// Touch support for seek bars on mobile
+
+// Mobile seek — must NOT be passive so we can preventDefault and stop the
+// page from scrolling while the person is dragging the seek thumb.
 ['np-seek','mp-seek-bar'].forEach(id=>{
   const el=document.getElementById(id);
   if(!el)return;
-  el.addEventListener('touchstart',()=>_seeking=true,{passive:true});
-  el.addEventListener('touchend',e=>{
-    _seeking=false;
-    const range=e.target;
-    seekTo(range.value);
+  let _touchStartX=0, _touchStartVal=0;
+  el.addEventListener('touchstart',e=>{
+    _seeking=true;
+    _touchStartX=e.touches[0].clientX;
+    _touchStartVal=parseFloat(el.value)||0;
+    e.stopPropagation();
   },{passive:true});
   el.addEventListener('touchmove',e=>{
+    e.preventDefault(); // stops page scroll — requires non-passive
+    e.stopPropagation();
     const touch=e.touches[0];
     const rect=el.getBoundingClientRect();
-    const pct=Math.min(1,Math.max(0,(touch.clientX-rect.left)/rect.width));
-    el.value=pct*100;
-    el.style.setProperty('--pct',(pct*100).toFixed(1)+'%');
-    if(audio.duration) audio.currentTime=pct*audio.duration;
+    const pct=Math.min(100,Math.max(0,((touch.clientX-rect.left)/rect.width)*100));
+    el.value=pct;
+    el.style.setProperty('--pct',pct.toFixed(1)+'%');
+    // Update time display live while dragging
+    if(audio.duration){
+      const t=(pct/100)*audio.duration;
+      ['np-cur','mp-cur-time'].forEach(tid=>{const tel=document.getElementById(tid);if(tel)tel.textContent=fmtTime(t);});
+    }
+  },{passive:false});
+  el.addEventListener('touchend',e=>{
+    const pct=parseFloat(el.value)||0;
+    if(audio.duration) audio.currentTime=(pct/100)*audio.duration;
+    _seeking=false;
   },{passive:true});
 });
 function seekTo(val){ if(audio.duration) audio.currentTime=(val/100)*audio.duration; }
