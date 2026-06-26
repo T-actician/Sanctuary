@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#0b1410">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -10,8 +10,6 @@
   <style>body{overscroll-behavior-y:none}.content-area{overscroll-behavior-y:auto}</style>
   <meta name="apple-mobile-web-app-title" content="Sanctuary">
   <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
-  <meta name="msapplication-TileColor" content="#0b1410">
-  <style>@media (display-mode: standalone),(display-mode: window-controls-overlay){.topbar{padding-top:env(safe-area-inset-top,0)!important;}body{padding-top:env(safe-area-inset-top,0);}}</style>
   <!-- Inline SVG favicon — works without any external icon files -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23152019'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-size='18'%3E🌿%3C/text%3E%3C/svg%3E">
 <title>Sanctuary</title>
@@ -1677,7 +1675,6 @@ async function init() {
   renderTrash();
   initMusicPlayer();
   startAlarmChecker();
-  _requestNotificationPermission();
   // Restore blobs from IDB, then render blob-dependent sections.
   // Each step is isolated — if one fails, the others (especially audio) still run.
   await restoreAvatarBlob().catch(e=>console.warn('avatar restore failed',e));
@@ -3593,14 +3590,11 @@ async function startRinging(item,type){
   // there, so this safely does nothing rather than erroring.
   _startVibration();
 
-  // Fire a Web Notification so the alert appears even if the tab/window is in background
-  _fireBackgroundNotification(item, type);
-
   const startedWithCustomTone = await _tryPlayCustomRingtone(item.ringtoneTrackId);
   if (!startedWithCustomTone) {
     // No custom ringtone set, or it couldn't be resolved/played — use the
     // built-in tone so the alarm/reminder is never silent.
-    playRingTone();_ringInterval=setInterval(playRingTone,900);
+    playRingTone();_ringInterval=setInterval(playRingTone,1200);
   }
 }
 function _startVibration() {
@@ -3657,35 +3651,7 @@ function playRingTone(){
     if(!_ringAudioCtx)_ringAudioCtx=new(window.AudioContext||window.webkitAudioContext)();
     if(_ringAudioCtx.state==='suspended')_ringAudioCtx.resume();
     const ctx=_ringAudioCtx;
-    // Route through a DynamicsCompressorNode to push perceived loudness to maximum
-    const comp=ctx.createDynamicsCompressor();
-    comp.threshold.value=-6;comp.knee.value=0;comp.ratio.value=20;comp.attack.value=0;comp.release.value=0.1;
-    comp.connect(ctx.destination);
-    [0,0.25,0.5,0.75].forEach(delay=>{
-      const osc=ctx.createOscillator(),gain=ctx.createGain();
-      osc.connect(gain);gain.connect(comp);
-      osc.frequency.value=delay%0.5===0?1046:880; // alternate C6/A5 for piercing alert
-      osc.type='square'; // square wave is much louder/harsher than sine
-      gain.gain.setValueAtTime(0,ctx.currentTime+delay);
-      gain.gain.linearRampToValueAtTime(1.0,ctx.currentTime+delay+0.04);
-      gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+delay+0.35);
-      osc.start(ctx.currentTime+delay);osc.stop(ctx.currentTime+delay+0.4);
-    });
-  }catch(e){}
-}
-
-// ── Web Notifications: fires even when tab is in background ──
-function _requestNotificationPermission(){
-  if(!('Notification' in window))return;
-  if(Notification.permission==='default') Notification.requestPermission();
-}
-function _fireBackgroundNotification(item,type){
-  if(!('Notification' in window)||Notification.permission!=='granted')return;
-  try{
-    const title=type==='alarm'?'⏰ Alarm — '+item.time:'🔔 Reminder — '+item.time;
-    const body=item.label||(type==='alarm'?'Your alarm is ringing':'Your reminder is due');
-    const n=new Notification(title,{body,icon:'/icons/apple-touch-icon.png',requireInteraction:true,silent:false,vibrate:[400,200,400,200,400]});
-    n.onclick=()=>{window.focus();n.close();};
+    [0,0.3,0.6].forEach(delay=>{const osc=ctx.createOscillator(),gain=ctx.createGain();osc.connect(gain);gain.connect(ctx.destination);osc.frequency.value=880;osc.type='sine';gain.gain.setValueAtTime(0,ctx.currentTime+delay);gain.gain.linearRampToValueAtTime(0.6,ctx.currentTime+delay+0.05);gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+delay+0.4);osc.start(ctx.currentTime+delay);osc.stop(ctx.currentTime+delay+0.45);});
   }catch(e){}
 }
 function dismissRing(){
@@ -3785,22 +3751,6 @@ function gameWrong(){_game.accepting=false;document.querySelectorAll('.game-pad'
 // ─────────────────────────────────────────────
 // BOOT
 // ─────────────────────────────────────────────
-// Override manifest to use window-controls-overlay so the browser URL bar
-// is hidden when Sanctuary is installed as a PWA on desktop.
-(function(){
-  try{
-    const manifest={name:'Sanctuary',short_name:'Sanctuary',start_url:'/',scope:'/',
-      display:'standalone',display_override:['window-controls-overlay','standalone','minimal-ui'],
-      background_color:'#0b1410',theme_color:'#0b1410',
-      icons:[{src:'/icons/apple-touch-icon.png',sizes:'192x192',type:'image/png'},{src:'/icons/apple-touch-icon.png',sizes:'512x512',type:'image/png'}]
-    };
-    const blob=new Blob([JSON.stringify(manifest)],{type:'application/manifest+json'});
-    const url=URL.createObjectURL(blob);
-    let link=document.querySelector('link[rel="manifest"]');
-    if(!link){link=document.createElement('link');link.rel='manifest';document.head.appendChild(link);}
-    link.href=url;
-  }catch(e){}
-})();
 init();
 </script>
 
@@ -4798,7 +4748,7 @@ if ('serviceWorker' in navigator) {
       const drawerEl=document.querySelector('#mob-drawer .nav-item[data-mob-section="'+prev+'"]');
       if(drawerEl) drawerEl.classList.add('active');
     }
-    // 3. Non-sanctuary entry — let browser do its thing (e.g. auth redirect)....
+    // 3. Non-sanctuary entry — let browser do its thing (e.g. auth redirect)
   });
 
   // ── Patch overlays to push their own history entry ──
