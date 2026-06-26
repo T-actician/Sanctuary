@@ -549,9 +549,10 @@ input[type=range]::-moz-range-progress{background:var(--accent3);border-radius:9
   /* Search + sort + upload row: stop forcing 3 fixed-width controls onto
      one line. Search takes the full first row; sort + upload share the
      second row, sized by content instead of a hardcoded 130px. */
-  #music-controls-row { flex-wrap: wrap !important; }
+  #music-controls-row { flex-wrap: wrap !important; gap: 8px !important; }
   #music-search { flex: 1 1 100% !important; min-width: 0 !important; }
-  #music-sort { flex: 1 !important; width: auto !important; min-width: 0 !important; }
+  #music-sort { flex: 1 1 0 !important; width: auto !important; min-width: 0 !important; }
+  #music-controls-row .btn { flex-shrink: 0 !important; white-space: nowrap !important; }
 
   .playlist-tabs { overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; }
   .music-upload-zone { padding: 16px !important; }
@@ -3246,6 +3247,25 @@ document.getElementById('np-seek').addEventListener('mousedown',()=>_seeking=tru
 document.getElementById('np-seek').addEventListener('mouseup',()=>_seeking=false);
 document.getElementById('mp-seek-bar').addEventListener('mousedown',()=>_seeking=true);
 document.getElementById('mp-seek-bar').addEventListener('mouseup',()=>_seeking=false);
+// Touch support for seek bars on mobile
+['np-seek','mp-seek-bar'].forEach(id=>{
+  const el=document.getElementById(id);
+  if(!el)return;
+  el.addEventListener('touchstart',()=>_seeking=true,{passive:true});
+  el.addEventListener('touchend',e=>{
+    _seeking=false;
+    const range=e.target;
+    seekTo(range.value);
+  },{passive:true});
+  el.addEventListener('touchmove',e=>{
+    const touch=e.touches[0];
+    const rect=el.getBoundingClientRect();
+    const pct=Math.min(1,Math.max(0,(touch.clientX-rect.left)/rect.width));
+    el.value=pct*100;
+    el.style.setProperty('--pct',(pct*100).toFixed(1)+'%');
+    if(audio.duration) audio.currentTime=pct*audio.duration;
+  },{passive:true});
+});
 function seekTo(val){ if(audio.duration) audio.currentTime=(val/100)*audio.duration; }
 function setVolume(val){
   state.music.volume=val/100; audio.volume=state.music.volume;
@@ -4392,6 +4412,42 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js').catch(function(e){ console.log('SW:', e); });
   });
 }
+
+// PWA install prompt — works on Chrome/Edge desktop and Android Chrome.
+// The button appears in the topbar only when the browser fires
+// beforeinstallprompt (i.e. the app is installable but not yet installed).
+let _pwaPrompt = null;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  _pwaPrompt = e;
+  // Show install button in topbar
+  let btn = document.getElementById('pwa-install-btn');
+  if (!btn) {
+    btn = document.createElement('button');
+    btn.id = 'pwa-install-btn';
+    btn.className = 'btn btn-sm topbar-btn';
+    btn.title = 'Install Sanctuary as an app';
+    btn.innerHTML = '<i class="ti ti-download"></i><span class="topbar-btn-label"> Install</span>';
+    btn.onclick = async () => {
+      if (!_pwaPrompt) return;
+      _pwaPrompt.prompt();
+      const { outcome } = await _pwaPrompt.userChoice;
+      if (outcome === 'accepted') { btn.remove(); _pwaPrompt = null; }
+    };
+    // Insert before the theme button (last button in topbar)
+    const topbar = document.querySelector('.topbar');
+    const themeBtn = topbar.querySelector('[onclick*="theme-modal"]');
+    if (themeBtn) topbar.insertBefore(btn, themeBtn);
+    else topbar.appendChild(btn);
+  }
+  btn.style.display = '';
+});
+// Hide install button if app is already installed
+window.addEventListener('appinstalled', () => {
+  const btn = document.getElementById('pwa-install-btn');
+  if (btn) btn.remove();
+  _pwaPrompt = null;
+});
 </script>
 
 <script>
