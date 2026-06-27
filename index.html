@@ -436,6 +436,47 @@ select option{background:var(--bg2)}
 .new-playlist-btn:hover{border-color:var(--accent2);color:var(--accent)}
 .music-sidebar-panel{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px}
 
+/* MOBILE MUSIC STYLES */
+.music-tab{background:none;border:none;color:var(--text3);font-size:13px;padding:12px 16px;cursor:pointer;font-family:inherit;font-weight:600;border-bottom:2px solid transparent;transition:all var(--trans);flex:1;text-align:center}
+.music-tab:hover{color:var(--text2)}
+.music-tab.active{color:var(--accent3);border-bottom-color:var(--accent)}
+
+.mob-music-control{background:none;border:none;color:var(--text3);cursor:pointer;font-size:24px;padding:6px;transition:all var(--trans);display:flex;align-items:center;justify-content:center}
+.mob-music-control:hover{color:var(--text)}
+.mob-music-control.active{color:var(--accent3)}
+
+.mob-music-play{width:56px;height:56px;border-radius:50%;background:var(--accent2);border:none;color:#fff;cursor:pointer;font-size:24px;display:flex;align-items:center;justify-content:center;transition:all var(--trans);flex-shrink:0}
+.mob-music-play:hover{background:var(--accent);transform:scale(1.08)}
+.mob-music-play:active{transform:scale(0.95)}
+
+#mob-music-library{display:flex;flex-direction:column;gap:8px}
+
+.mob-music-track{display:flex;align-items:center;gap:12px;padding:10px;background:var(--card);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all var(--trans)}
+.mob-music-track:active{background:var(--card2);transform:scale(0.98)}
+.mob-music-track.playing{background:rgba(76,175,110,0.1);border-color:rgba(76,175,110,0.3)}
+
+.mob-music-art{width:48px;height:48px;border-radius:6px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+
+.mob-music-info{flex:1;min-width:0}
+.mob-music-title{font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mob-music-artist{font-size:11px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+
+.mob-music-heart{background:none;border:none;color:var(--text3);cursor:pointer;font-size:18px;padding:6px;transition:color var(--trans);flex-shrink:0}
+.mob-music-heart.loved{color:#f09090}
+
+.mob-music-menu{background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px;padding:6px;transition:color var(--trans);flex-shrink:0}
+
+@media screen and (max-width:768px){
+  #music-desktop{display:none !important;}
+  #music-mobile{display:flex !important;}
+  #music-library,#music-controls-row,#playlist-tabs,#music-drop-zone,#music-status,.music-sidebar-panel{display:none !important;}
+}
+
+@media screen and (min-width:769px){
+  #music-mobile{display:none !important;}
+  #music-desktop{display:grid !important;}
+}
+
 /* Sleep timer */
 .sleep-timer-row{display:flex;align-items:center;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);font-size:11px;color:var(--text3)}
 .sleep-timer-row select{width:auto;padding:4px 7px;font-size:11px}
@@ -909,7 +950,8 @@ input[type=range]::-moz-range-progress{background:var(--accent3);border-radius:9
 
       <!-- MUSIC -->
       <section class="section" id="s-music">
-        <div style="display:grid;grid-template-columns:220px 1fr;gap:16px;align-items:start" id="music-grid-layout">
+        <!-- DESKTOP LAYOUT (unchanged) -->
+        <div id="music-desktop" style="display:grid;grid-template-columns:220px 1fr;gap:16px;align-items:start">
           <div>
             <div class="np-card">
               <div class="np-art" id="np-art">🎵</div>
@@ -972,6 +1014,80 @@ input[type=range]::-moz-range-progress{background:var(--accent3);border-radius:9
             </div>
             <div id="music-status" style="font-size:11px;color:var(--text3);margin:-4px 0 10px;display:none"></div>
             <div id="music-library"></div>
+          </div>
+        </div>
+        <div id="music-mobile" style="display:flex;flex-direction:column;height:100%;gap:0">
+          <!-- Header with tabs -->
+          <div style="padding:16px 12px 0;flex-shrink:0">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+              <div style="font-size:20px;font-weight:700;color:var(--text)">Music</div>
+              <div style="display:flex;gap:8px">
+                <button onclick="mobMusicSearch()" style="background:none;border:none;color:var(--text);font-size:20px;cursor:pointer;padding:4px"><i class="ti ti-search"></i></button>
+                <button onclick="mobMusicMenu()" style="background:none;border:none;color:var(--text);font-size:20px;cursor:pointer;padding:4px"><i class="ti ti-dots-vertical"></i></button>
+              </div>
+            </div>
+            <!-- Tabs -->
+            <div id="music-tabs" style="display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:0">
+              <button class="music-tab active" data-tab="songs" onclick="mobMusicTab('songs',this)">Songs</button>
+              <button class="music-tab" data-tab="artists" onclick="mobMusicTab('artists',this)">Artists</button>
+              <button class="music-tab" data-tab="albums" onclick="mobMusicTab('albums',this)">Albums</button>
+              <button class="music-tab" data-tab="playlists" onclick="mobMusicTab('playlists',this)">Playlists</button>
+            </div>
+          </div>
+
+          <!-- Now Playing Card -->
+          <div id="music-now-playing" style="padding:12px;flex-shrink:0">
+            <div style="background:rgba(76,175,110,0.08);border:1px solid rgba(76,175,110,0.2);border-radius:12px;padding:16px;position:relative">
+              <button onclick="mobMusicExpand()" style="position:absolute;top:12px;left:12px;background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer;padding:4px"><i class="ti ti-chevron-down"></i></button>
+              <button id="mob-music-heart" onclick="mobMusicToggleFav()" style="position:absolute;top:12px;right:12px;background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer;padding:4px"><i class="ti ti-heart"></i></button>
+              
+              <!-- Album Art -->
+              <div style="aspect-ratio:1;border-radius:10px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:48px;margin:20px 0 0;margin-bottom:16px" id="mob-np-art">🎵</div>
+              
+              <!-- Title & Artist -->
+              <div style="text-align:center;margin-bottom:16px">
+                <div style="font-size:18px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis" id="mob-np-title">No track selected</div>
+                <div style="font-size:13px;color:var(--text3);margin-top:4px" id="mob-np-artist">—</div>
+              </div>
+
+              <!-- Progress Bar -->
+              <div style="margin-bottom:14px">
+                <input type="range" class="mp-range" id="mob-np-seek" value="0" min="0" max="100" step="0.1" oninput="seekTo(this.value)" style="width:100%;cursor:pointer">
+                <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-top:6px">
+                  <span id="mob-np-cur">0:00</span>
+                  <span id="mob-np-dur">0:00</span>
+                </div>
+              </div>
+
+              <!-- Playback Controls -->
+              <div style="display:flex;align-items:center;justify-content:center;gap:24px;margin-bottom:16px">
+                <button onclick="toggleShuffle()" class="mob-music-control" id="mob-np-shuffle" title="Shuffle"><i class="ti ti-arrows-shuffle"></i></button>
+                <button onclick="prevTrack()" class="mob-music-control"><i class="ti ti-player-skip-back"></i></button>
+                <button onclick="togglePlay()" class="mob-music-play" id="mob-np-play"><i class="ti ti-player-play" id="mob-np-play-icon"></i></button>
+                <button onclick="nextTrack()" class="mob-music-control"><i class="ti ti-player-skip-forward"></i></button>
+                <button onclick="cycleRepeat()" class="mob-music-control" id="mob-np-repeat" title="Repeat"><i class="ti ti-repeat" id="mob-np-repeat-icon"></i></button>
+              </div>
+
+              <!-- Volume -->
+              <div style="display:flex;align-items:center;gap:8px">
+                <i class="ti ti-volume-2" style="font-size:14px;color:var(--text3)"></i>
+                <input type="range" class="mp-range" id="mob-np-vol" value="80" min="0" max="100" oninput="setVolume(this.value)" style="flex:1;cursor:pointer">
+                <i class="ti ti-volume" style="font-size:14px;color:var(--text3)"></i>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tracks List -->
+          <div style="flex:1;overflow-y:auto;padding:12px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+              <div style="font-size:15px;font-weight:700;color:var(--text)">Tracks</div>
+              <select id="mob-music-sort" onchange="renderMusicLibrary()" style="background:none;border:1px solid var(--border);color:var(--text3);font-size:12px;padding:4px 8px;border-radius:6px;cursor:pointer;font-family:inherit">
+                <option value="added">Recently added</option>
+                <option value="title">Title A–Z</option>
+                <option value="duration">Duration</option>
+              </select>
+            </div>
+            <div id="mob-music-library"></div>
           </div>
         </div>
       </section>
@@ -3082,10 +3198,12 @@ function initMusicPlayer(){
   audio.addEventListener('timeupdate',onTimeUpdate);
   audio.addEventListener('ended',onTrackEnded);
   document.getElementById('np-vol').value=state.music.volume*100;
+  document.getElementById('mob-np-vol').value=state.music.volume*100;
   updateRepeatUI();updateShuffleUI();
   rebuildQueue();
   renderPlaylists();
   renderMusicLibrary();
+  updateMobNowPlayingUI(null);
 }
 
 // Fingerprint identifies a file by name+size+lastModified so the SAME upload is never added twice,
@@ -3504,7 +3622,195 @@ function addToPlaylist(trackId){
   openModal('prompt-modal');
 }
 // ─────────────────────────────────────────────
-// EPIC WATCH
+// MOBILE MUSIC UI
+// ─────────────────────────────────────────────
+function mobMusicTab(tab, el) {
+  document.querySelectorAll('.music-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  // Tab switching logic here — for now just highlight
+}
+
+function mobMusicSearch() {
+  openSearch();
+}
+
+function mobMusicMenu() {
+  document.getElementById('prompt-modal-title').textContent = 'Music';
+  const input = document.getElementById('prompt-modal-input');
+  input.style.display = 'none';
+  let sheet = document.getElementById('mob-music-actions');
+  if (!sheet) {
+    sheet = document.createElement('div');
+    sheet.id = 'mob-music-actions';
+    sheet.style.cssText = 'display:flex;flex-direction:column;gap:6px';
+    input.parentNode.insertBefore(sheet, input);
+  }
+  sheet.style.display = '';
+  sheet.innerHTML = `
+    <button class="btn" style="text-align:left;width:100%"><i class="ti ti-upload"></i> Upload music</button>
+    <button class="btn" style="text-align:left;width:100%"><i class="ti ti-clock"></i> Sleep timer</button>
+    <button class="btn" style="text-align:left;width:100%"><i class="ti ti-list"></i> Create playlist</button>
+  `;
+  sheet.querySelector('button:first-child').onclick = () => {
+    document.getElementById('music-file-input').click();
+    closeModal('prompt-modal');
+  };
+  sheet.querySelector('button:nth-child(2)').onclick = () => {
+    document.getElementById('sleep-select').focus();
+    closeModal('prompt-modal');
+  };
+  sheet.querySelector('button:nth-child(3)').onclick = () => {
+    createPlaylist();
+    closeModal('prompt-modal');
+  };
+  const cancelBtn = document.getElementById('prompt-modal-cancel');
+  const okBtn = document.getElementById('prompt-modal-ok');
+  okBtn.style.display = 'none';
+  cancelBtn.onclick = () => { sheet.style.display = 'none'; input.style.display = ''; okBtn.style.display = ''; closeModal('prompt-modal'); };
+  openModal('prompt-modal');
+}
+
+function mobMusicExpand() {
+  // Full screen player — for now just show the card
+  toast('Full screen player');
+}
+
+function mobMusicToggleFav() {
+  const cur = state.music.queue[state.music.currentIndex];
+  if (!cur) return;
+  toggleFav(cur.id);
+  const heart = document.getElementById('mob-music-heart');
+  const t = state.music.tracks.find(x => x.id === cur.id);
+  if (t) {
+    heart.className = t.favourite ? 'ti ti-heart-filled' : 'ti ti-heart';
+    heart.style.color = t.favourite ? '#f09090' : 'var(--text3)';
+  }
+}
+
+// Update mobile now playing UI
+function updateMobNowPlayingUI(track) {
+  document.getElementById('mob-np-art').textContent = '🎵';
+  document.getElementById('mob-np-title').textContent = track ? track.title : 'No track selected';
+  document.getElementById('mob-np-artist').textContent = track ? track.artist : '—';
+  
+  const heart = document.getElementById('mob-music-heart');
+  if (track) {
+    heart.className = track.favourite ? 'ti ti-heart-filled' : 'ti ti-heart';
+    heart.style.color = track.favourite ? '#f09090' : 'var(--text3)';
+  }
+  
+  updateMobPlayIcons();
+}
+
+function updateMobPlayIcons() {
+  const playing = !audio.paused && !!audio.src;
+  const icon = document.getElementById('mob-np-play-icon');
+  if (icon) icon.className = playing ? 'ti ti-player-pause' : 'ti ti-player-play';
+}
+
+// Override renderMusicLibrary to also render mobile version
+const _origRenderMusicLibrary = window.renderMusicLibrary;
+window.renderMusicLibrary = function() {
+  _origRenderMusicLibrary.apply(this, arguments);
+  
+  const el = document.getElementById('mob-music-library');
+  if (!el) return;
+  
+  const q = (document.getElementById('music-search') || {}).value || '';
+  const sortMode = (document.getElementById('mob-music-sort') || {}).value || 'added';
+  let tracks = getPlaylistTracks(state.music.activePlaylistId);
+  
+  if (q) tracks = tracks.filter(t => t.title.toLowerCase().includes(q.toLowerCase()) || t.artist.toLowerCase().includes(q.toLowerCase()));
+  if (sortMode === 'title') tracks = [...tracks].sort((a, b) => a.title.localeCompare(b.title));
+  else if (sortMode === 'duration') tracks = [...tracks].sort((a, b) => (b.duration || 0) - (a.duration || 0));
+  else tracks = [...tracks].sort((a, b) => (b.addedAt || 0) - (a.addedAt || 0));
+
+  if (!tracks.length) {
+    el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--text3);font-size:13px"><i class="ti ti-music-off" style="font-size:28px;display:block;margin-bottom:6px;opacity:0.4"></i>No tracks</div>';
+    return;
+  }
+
+  const cur = state.music.queue[state.music.currentIndex];
+  const playing = !audio.paused && !!audio.src;
+  
+  el.innerHTML = tracks.map((t, i) => {
+    const isPlaying = cur && cur.id === t.id;
+    return `<div class="mob-music-track ${isPlaying ? 'playing' : ''}" onclick="playTrack('${t.id}')">
+      <div class="mob-music-art">🎵</div>
+      <div class="mob-music-info">
+        <div class="mob-music-title">${t.title}</div>
+        <div class="mob-music-artist">${t.artist}</div>
+      </div>
+      <button class="mob-music-heart ${t.favourite ? 'loved' : ''}" onclick="event.stopPropagation();toggleFav('${t.id}');renderMusicLibrary()"><i class="ti ${t.favourite ? 'ti-heart-filled' : 'ti-heart'}"></i></button>
+      <button class="mob-music-menu" onclick="event.stopPropagation();openTrackActionSheet('${t.id}')"><i class="ti ti-dots-vertical"></i></button>
+    </div>`;
+  }).join('');
+};
+
+// Override onTimeUpdate to also update mobile seek
+const _origOnTimeUpdate = window.onTimeUpdate;
+window.onTimeUpdate = function() {
+  _origOnTimeUpdate.apply(this, arguments);
+  
+  if (_seeking || !audio.duration) return;
+  const pct = (audio.currentTime / audio.duration) * 100;
+  const cur = fmtTime(audio.currentTime), dur = fmtTime(audio.duration);
+  
+  const mobSeek = document.getElementById('mob-np-seek');
+  if (mobSeek) {
+    mobSeek.value = pct;
+    mobSeek.style.setProperty('--pct', pct.toFixed(1) + '%');
+  }
+  
+  const mobCur = document.getElementById('mob-np-cur');
+  if (mobCur) mobCur.textContent = cur;
+  
+  const mobDur = document.getElementById('mob-np-dur');
+  if (mobDur) mobDur.textContent = dur;
+  
+  updateMobPlayIcons();
+};
+
+// Update shuffle UI for mobile
+const _origUpdateShuffleUI = window.updateShuffleUI;
+window.updateShuffleUI = function() {
+  _origUpdateShuffleUI.apply(this, arguments);
+  const btn = document.getElementById('mob-np-shuffle');
+  if (btn) btn.classList.toggle('active', state.music.shuffle);
+};
+
+// Update repeat UI for mobile
+const _origUpdateRepeatUI = window.updateRepeatUI;
+window.updateRepeatUI = function() {
+  _origUpdateRepeatUI.apply(this, arguments);
+  const btn = document.getElementById('mob-np-repeat');
+  const icon = document.getElementById('mob-np-repeat-icon');
+  if (btn) btn.classList.toggle('active', state.music.repeat !== 'off');
+  if (icon) icon.className = state.music.repeat === 'one' ? 'ti ti-repeat-once' : 'ti ti-repeat';
+};
+
+// Override updateNowPlayingUI
+const _origUpdateNowPlayingUI = window.updateNowPlayingUI;
+window.updateNowPlayingUI = function(track) {
+  _origUpdateNowPlayingUI.apply(this, arguments);
+  updateMobNowPlayingUI(track);
+};
+
+// Hook playTrack
+const _origPlayTrack = window.playTrack;
+window.playTrack = async function(id) {
+  await _origPlayTrack.apply(this, arguments);
+  renderMusicLibrary();
+};
+
+// Hook togglePlay
+const _origTogglePlay = window.togglePlay;
+window.togglePlay = function() {
+  _origTogglePlay.apply(this, arguments);
+  updateMobPlayIcons();
+};
+
+// ─────────────────────────────────────────────
 // ─────────────────────────────────────────────
 let _watchActive=false;
 function startWatchClock(){
