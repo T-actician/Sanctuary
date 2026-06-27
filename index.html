@@ -3368,11 +3368,45 @@ function onTrackEnded(){
 
 // ── Seek / volume ──
 let _seeking=false;
-document.getElementById('np-seek').addEventListener('mousedown',()=>_seeking=true);
-document.getElementById('np-seek').addEventListener('mouseup',()=>_seeking=false);
-document.getElementById('mp-seek-bar').addEventListener('mousedown',()=>_seeking=true);
-document.getElementById('mp-seek-bar').addEventListener('mouseup',()=>_seeking=false);
-function seekTo(val){ if(audio.duration) audio.currentTime=(val/100)*audio.duration; }
+['np-seek','mp-seek-bar','mob-np-seek'].forEach(id=>{
+  const el=document.getElementById(id);
+  if(el){
+    el.addEventListener('mousedown',()=>_seeking=true,{passive:true});
+    el.addEventListener('touchstart',()=>_seeking=true,{passive:true});
+    el.addEventListener('mouseup',()=>_seeking=false,{passive:true});
+    el.addEventListener('touchend',()=>_seeking=false,{passive:true});
+  }
+});
+function seekTo(val){ 
+  if(audio.duration){ 
+    audio.currentTime=(val/100)*audio.duration; 
+    audio.play().catch(()=>{}); 
+  } 
+}
+
+// Real-time slider input handlers for all platforms (desktop + mobile)
+['np-seek','mp-seek-bar','mob-np-seek'].forEach(id=>{
+  const el=document.getElementById(id);
+  if(el){
+    // Input event fires continuously as user drags
+    el.addEventListener('input', (e) => {
+      const val = e.target.value;
+      if(audio.duration){
+        audio.currentTime = (val/100) * audio.duration;
+        // Update display immediately
+        ['np-cur','mp-cur','mob-np-cur'].forEach(cid => {
+          const c = document.getElementById(cid);
+          if(c) c.textContent = formatTime(audio.currentTime);
+        });
+      }
+    }, {passive: true});
+    
+    // When user releases, ensure playback continues
+    el.addEventListener('change', (e) => {
+      if(!audio.paused) audio.play().catch(()=>{});
+    }, {passive: true});
+  }
+});
 function setVolume(val){
   state.music.volume=val/100; audio.volume=state.music.volume;
   const el=document.getElementById('np-vol'); if(el)el.value=val;
@@ -4730,7 +4764,9 @@ async function requestNotificationPermission() {
   if (!('Notification' in window)) return;
   if (Notification.permission === 'granted') return;
   if (Notification.permission === 'denied') return;
-  await Notification.requestPermission();
+  try {
+    await Notification.requestPermission();
+  } catch(e) {}
 }
 // Request on first real gesture so browser allows the prompt
 ['click','touchstart','keydown'].forEach(evt => window.addEventListener(evt, requestNotificationPermission, {once: true, passive: true}));
@@ -4756,9 +4792,17 @@ function postAlarmsToSW() {
   _swReg.active.postMessage({ type: 'SCHEDULE_ALARMS', alarms: items });
 }
 
-// Re-export save so every save also refreshes the SW schedule
-const _swOrigSave = window.save;
-window.save = function() { _swOrigSave.apply(this, arguments); postAlarmsToSW(); };
+// Re-hook save to sync with SW
+let _swSaveHooked = false;
+function _hookSwSave() {
+  if (_swSaveHooked) return;
+  _swSaveHooked = true;
+  const _swOrigSave = window.save;
+  window.save = function() {
+    _swOrigSave.apply(this, arguments);
+    postAlarmsToSW();
+  };
+}
 
 // Listen for SW message telling us an alarm fired while tab was closed/hidden
 if ('serviceWorker' in navigator) {
@@ -4775,7 +4819,9 @@ if ('serviceWorker' in navigator) {
 
   window.addEventListener('load', async function() {
     try {
-      _swReg = await navigator.serviceWorker.register('/sw.js');
+      _swReg = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+      _hookSwSave();
+
       // Wait for it to become active (handles first install)
       if (!_swReg.active) {
         await new Promise(res => {
@@ -4982,71 +5028,300 @@ if ('serviceWorker' in navigator) {
   };
 })();
 
-// ═══════════════════════════════════════════════════════
-// OFFLINE LOGIN — cache last-signed-in user for offline access
-// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
+// OFFLINE SYNC — IndexedDB for complete offline access + sync
+// ═══════════════════════════════════════════════════════════
 (function(){
-  const OFFLINE_KEY='sanctuary_offline_users';
-  function saveOfflineUser(user){
-    try{
-      const ex=JSON.parse(localStorage.getItem(OFFLINE_KEY)||'[]');
-      if(!ex.find(u=>u.id===user.id)){
-        ex.push({id:user.id,email:user.email,name:user.user_metadata?.name||''});
-        localStorage.setItem(OFFLINE_KEY,JSON.stringify(ex));
-      }
-    }catch(e){}
-  }
-  function getOfflineUsers(){
-    try{return JSON.parse(localStorage.getItem(OFFLINE_KEY)||'[]');}catch(e){return[];}
-  }
-  window._saveOfflineUser=saveOfflineUser;
-  window._getOfflineUsers=getOfflineUsers;
+  const DB_NAME = 'sanctuary_offline';
+  const DB_VERSION = 2;
+  const STORE_NAME = 'user_data';
+  
+  let db = null;
 
-  async function checkAndShowOfflineOption(){
-    if(navigator.onLine) return;
-    const users=getOfflineUsers();if(!users.length)return;
-    let picker=document.getElementById('offline-user-picker');if(picker)return;
-    picker=document.createElement('div');
-    picker.id='offline-user-picker';
-    picker.style.cssText='background:rgba(76,175,110,0.08);border:1px solid rgba(76,175,110,0.2);border-radius:10px;padding:12px;margin-bottom:14px';
-    picker.innerHTML=`<div style="font-size:11px;font-weight:700;color:var(--accent3);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px">📶 Offline — quick access</div>`+
-      users.map(u=>`<div onclick="offlineSignIn('${u.id}','${u.email}')" style="display:flex;align-items:center;gap:10px;padding:8px;border-radius:8px;cursor:pointer;background:rgba(255,255,255,0.04);margin-bottom:6px">
-        <div style="width:32px;height:32px;border-radius:8px;background:var(--accent2);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff">${(u.name||u.email)[0].toUpperCase()}</div>
-        <div><div style="font-size:13px;font-weight:600;color:var(--text)">${u.name||u.email}</div><div style="font-size:11px;color:var(--text3)">${u.email}</div></div>
-      </div>`).join('');
-    const loginForm=document.getElementById('auth-login-form');
-    if(loginForm) loginForm.parentNode.insertBefore(picker,loginForm);
+  async function initDB() {
+    return new Promise((resolve, reject) => {
+      const req = indexedDB.open(DB_NAME, DB_VERSION);
+      
+      req.onerror = () => reject(req.error);
+      req.onsuccess = () => {
+        db = req.result;
+        resolve(db);
+      };
+      
+      req.onupgradeneeded = (e) => {
+        const idb = e.target.result;
+        if (!idb.objectStoreNames.contains(STORE_NAME)) {
+          idb.createObjectStore(STORE_NAME);
+        }
+      };
+    });
   }
-  window.offlineSignIn=async function(userId,email){
-    loadFromStorage();
-    _currentUser={id:userId,email,user_metadata:{name:localStorage.getItem('sanctuary_uid_name_'+userId)||''}};
-    document.getElementById('auth-screen').style.display='none';
-    injectSyncBar();updateProfileUI();
-    toast('Offline mode — showing last synced data');
-    window.addEventListener('online',async()=>{
-      const{data:{session}}=await _supabase.auth.getSession().catch(()=>({data:{session:null}}));
-      if(session){await loadFromSupabase();toast('Back online — data synced ✓');}
-    },{once:true});
-  };
-  window.addEventListener('online',()=>{const p=document.getElementById('offline-user-picker');if(p)p.remove();});
-  window.addEventListener('offline',checkAndShowOfflineOption);
-  setTimeout(checkAndShowOfflineOption,1000);
 
-  const _origSave2=window.save;
-  window.save=function(){
-    _origSave2.apply(this,arguments);
-    if(typeof _currentUser!=='undefined'&&_currentUser){
-      try{localStorage.setItem('sanctuary_uid_name_'+_currentUser.id,state.profile.name||'');}catch(e){}
-    }
+  async function saveOfflineState() {
+    if (!db) await initDB();
+    if (!_currentUser) return;
+    
+    return new Promise((resolve) => {
+      const tx = db.transaction([STORE_NAME], 'readwrite');
+      const store = tx.objectStore(STORE_NAME);
+      
+      const data = {
+        userId: _currentUser.id,
+        email: _currentUser.email,
+        userName: _currentUser.user_metadata?.name || state.profile.name || '',
+        state: state,
+        savedAt: new Date().toISOString(),
+        version: DB_VERSION
+      };
+      
+      store.put(data, 'current_user');
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => resolve();
+    });
+  }
+
+  async function loadOfflineState(userId) {
+    if (!db) await initDB();
+    
+    return new Promise((resolve) => {
+      const tx = db.transaction([STORE_NAME], 'readonly');
+      const store = tx.objectStore(STORE_NAME);
+      const req = store.get('current_user');
+      
+      req.onsuccess = () => {
+        const data = req.result;
+        if (data && (data.userId === userId || !userId)) {
+          resolve(data);
+        } else {
+          resolve(null);
+        }
+      };
+      req.onerror = () => resolve(null);
+    });
+  }
+
+  // Expose functions
+  window._offlineDB = {
+    init: initDB,
+    save: saveOfflineState,
+    load: loadOfflineState
   };
+
+  // Initialize on load
+  window.addEventListener('load', () => {
+    initDB().catch(e => console.log('IndexedDB init (non-critical):', e));
+  });
+
+  // Hook save to persist offline
+  let _hooked = false;
+  function hookSave() {
+    if (_hooked) return;
+    _hooked = true;
+    const orig = window.save;
+    window.save = function() {
+      orig.apply(this, arguments);
+      saveOfflineState().catch(() => {});
+    };
+  }
+  
+  setTimeout(hookSave, 500);
 })();
 
-// Hook into auth to save offline user record on each sign-in
+// ═══════════════════════════════════════════════════════
+// OFFLINE LOGIN — cache emails for offline access + security
+// ═══════════════════════════════════════════════════════
 (function(){
-  const boot=window._supabase;if(!boot)return;
-  boot.auth.onAuthStateChange((event,session)=>{
-    if(event==='SIGNED_IN'&&session&&window._saveOfflineUser) window._saveOfflineUser(session.user);
+  const OFFLINE_USERS_KEY = 'sanctuary_offline_users';
+  const OFFLINE_SESSION_KEY = 'sanctuary_offline_session';
+
+  function saveOfflineUser(user) {
+    try {
+      const existing = JSON.parse(localStorage.getItem(OFFLINE_USERS_KEY) || '[]');
+      if (!existing.find(u => u.id === user.id)) {
+        existing.push({
+          id: user.id,
+          email: user.email,
+          name: user.user_metadata?.name || '',
+          savedAt: Date.now()
+        });
+        localStorage.setItem(OFFLINE_USERS_KEY, JSON.stringify(existing));
+      }
+    } catch(e) {}
+  }
+
+  function getOfflineUsers() {
+    try {
+      return JSON.parse(localStorage.getItem(OFFLINE_USERS_KEY) || '[]');
+    } catch(e) {
+      return [];
+    }
+  }
+
+  window._saveOfflineUser = saveOfflineUser;
+  window._getOfflineUsers = getOfflineUsers;
+
+  async function checkAndShowOfflineOption() {
+    if (navigator.onLine) return;
+    const users = getOfflineUsers();
+    if (!users.length) return;
+
+    let picker = document.getElementById('offline-user-picker');
+    if (picker) return;
+
+    picker = document.createElement('div');
+    picker.id = 'offline-user-picker';
+    picker.style.cssText = 'background:rgba(76,175,110,0.08);border:1px solid rgba(76,175,110,0.2);border-radius:10px;padding:12px;margin-bottom:14px';
+    picker.innerHTML = `<div style="font-size:11px;font-weight:700;color:var(--accent3);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px">📶 Offline mode available</div>` +
+      users.map(u => `
+        <div onclick="offlineSignIn('${u.id}','${u.email}')" style="display:flex;align-items:center;gap:10px;padding:8px;border-radius:8px;cursor:pointer;background:rgba(255,255,255,0.04);margin-bottom:6px;transition:all 0.15s">
+          <div style="width:32px;height:32px;border-radius:8px;background:var(--accent2);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff">${(u.name || u.email)[0].toUpperCase()}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${u.name || u.email}</div>
+            <div style="font-size:11px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${u.email}</div>
+          </div>
+        </div>
+      `).join('');
+
+    const loginForm = document.getElementById('auth-login-form');
+    if (loginForm) loginForm.parentNode.insertBefore(picker, loginForm);
+  }
+
+  window.offlineSignIn = async function(userId, email) {
+    // Load last known state from IndexedDB
+    try {
+      if (window._offlineDB && window._offlineDB.load) {
+        const offlineData = await window._offlineDB.load(userId);
+        if (offlineData && offlineData.state) {
+          // Restore entire state from IndexedDB
+          Object.assign(state, offlineData.state);
+        }
+      }
+    } catch(e) {
+      console.log('IndexedDB load failed, trying localStorage fallback:', e);
+      // Fallback to localStorage if IndexedDB fails
+      const userDataKey = 'sanctuary_offline_' + userId;
+      try {
+        const saved = localStorage.getItem(userDataKey);
+        if (saved) {
+          const data = JSON.parse(saved);
+          state.goals = data.goals || [];
+          state.notes = data.notes || [];
+          state.diaryEntries = data.diaryEntries || [];
+          state.projects = data.projects || [];
+          state.breaks = data.breaks || state.breaks;
+          state.aay = data.aay || state.aay;
+          state.streak = data.streak || 0;
+          state.profile = data.profile || state.profile;
+          state.achievements = data.achievements || [];
+          state.growth = data.growth || [];
+          state.milestones = data.milestones || [];
+          state.gallery = data.gallery || state.gallery;
+          state.places = data.places || [];
+          state.alarms = data.alarms || [];
+          state.reminders = data.reminders || [];
+          state.trash = data.trash || [];
+          state.music = data.music || state.music;
+          if (data.appTheme) applyAppTheme(data.appTheme, null, true);
+          if (data.heroTheme) { state.heroTheme = data.heroTheme; applyHeroTheme(data.heroTheme, true); }
+        }
+      } catch(e2) {}
+    }
+
+    _currentUser = { id: userId, email, user_metadata: { name: localStorage.getItem('sanctuary_uid_name_' + userId) || '' } };
+    document.getElementById('auth-screen').style.display = 'none';
+    injectSyncBar();
+    updateProfileUI();
+    renderDashTasks();
+    renderNotes();
+    renderGoals();
+    renderProjects();
+    renderBreaks();
+    renderAAY('all');
+    renderAchievements();
+    renderGrowth();
+    renderTimeline();
+    renderAnalytics();
+    renderAlarms();
+    renderReminders();
+    renderTrash();
+    renderMusicLibrary();
+    toast('📶 Offline mode — data loaded. Will sync when online.');
+
+    // Try to sync when online again
+    window.addEventListener('online', async () => {
+      try {
+        const { data: { session } } = await _supabase.auth.signInWithPassword({
+          email: email,
+          password: localStorage.getItem('sanctuary_offline_pass_' + userId) || ''
+        }).catch(() => ({ data: { session: null } }));
+
+        if (session) {
+          _currentUser = session.user;
+          await loadFromSupabase();
+          toast('✅ Back online — data synced');
+        }
+      } catch(e) {
+        console.warn('Auto-sync on online failed:', e);
+      }
+    }, { once: true });
+  };
+      } catch(e) {
+        console.warn('Auto-sync on online failed', e);
+      }
+    }, { once: true });
+  };
+
+  window.addEventListener('online', () => {
+    const p = document.getElementById('offline-user-picker');
+    if (p) p.remove();
   });
+
+  window.addEventListener('offline', checkAndShowOfflineOption);
+  setTimeout(checkAndShowOfflineOption, 1000);
+
+  // Hook save() to also cache user data for offline
+  const _origSaveLast = window.save;
+  window.save = function() {
+    _origSaveLast.apply(this, arguments);
+    if (typeof _currentUser !== 'undefined' && _currentUser) {
+      try {
+        localStorage.setItem('sanctuary_uid_name_' + _currentUser.id, state.profile.name || '');
+        const offlineData = {
+          goals: state.goals,
+          notes: state.notes,
+          diaryEntries: state.diaryEntries,
+          projects: state.projects,
+          breaks: state.breaks,
+          aay: state.aay,
+          streak: state.streak,
+          profile: state.profile,
+          achievements: state.achievements,
+          growth: state.growth,
+          milestones: state.milestones,
+          gallery: state.gallery,
+          places: state.places,
+          alarms: state.alarms,
+          reminders: state.reminders,
+          trash: state.trash,
+          music: state.music,
+          appTheme: state.appTheme,
+          heroTheme: state.heroTheme,
+          notesLayout: state.notesLayout,
+          savedAt: new Date().toISOString()
+        };
+        localStorage.setItem('sanctuary_offline_' + _currentUser.id, JSON.stringify(offlineData));
+      } catch(e) {}
+    }
+  };
+
+  // Hook auth to save offline user record on sign-in
+  if (typeof _supabase !== 'undefined' && _supabase.auth) {
+    _supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session && window._saveOfflineUser) {
+        window._saveOfflineUser(session.user);
+      }
+    });
+  }
 })();
 
 // ═══════════════════════════════════════════════════════
