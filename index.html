@@ -5266,11 +5266,6 @@ if ('serviceWorker' in navigator) {
       }
     }, { once: true });
   };
-      } catch(e) {
-        console.warn('Auto-sync on online failed', e);
-      }
-    }, { once: true });
-  };
 
   window.addEventListener('online', () => {
     const p = document.getElementById('offline-user-picker');
