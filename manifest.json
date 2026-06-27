@@ -21,17 +21,17 @@
   ],
   "screenshots": [
     {
-      "src": "/icons/icon-512x512.png",
-      "sizes": "512x512",
+      "src": "/icons/screenshot-mobile.png",
+      "sizes": "390x844",
       "type": "image/png",
-      "label": "Sanctuary Dashboard"
+      "label": "Sanctuary on mobile"
     },
     {
-      "src": "/icons/icon-512x512.png",
-      "sizes": "512x512",
+      "src": "/icons/screenshot-wide.png",
+      "sizes": "1280x800",
       "type": "image/png",
       "form_factor": "wide",
-      "label": "Sanctuary on Desktop"
+      "label": "Sanctuary on desktop"
     }
   ]
 }
