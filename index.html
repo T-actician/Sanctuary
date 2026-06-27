@@ -489,6 +489,7 @@ input[type=range]::-moz-range-progress{background:var(--accent3);border-radius:9
 #mob-drawer { display: none !important; }
 #mob-drawer-overlay { display: none !important; }
 #mob-bottom-nav { display: none !important; }
+#mob-music-view { display: none !important; }
 
 /* MOBILE ONLY (max-width: 768px) */
 @media screen and (max-width: 768px) {
@@ -540,125 +541,297 @@ input[type=range]::-moz-range-progress{background:var(--accent3);border-radius:9
   #watch-canvas { width: 100% !important; height: auto !important; aspect-ratio: 1; }
 
   /* ═══════════════════════════════════════════
-     MUSIC — full mobile rewrite
+     MUSIC — Spotify-style mobile layout
   ═══════════════════════════════════════════ */
-  #music-grid-layout {
+
+  /* Hide desktop two-column layout; show mobile stack */
+  #music-grid-layout { display: none !important; }
+  #mob-music-view { display: flex !important; }
+
+  /* ── Tabs: Songs / Artists / Albums / Playlists ── */
+  .mob-music-tabs {
     display: flex !important;
-    flex-direction: column !important;
     gap: 0 !important;
+    border-bottom: 1px solid var(--border) !important;
+    margin-bottom: 0 !important;
+    overflow-x: auto !important;
+    scrollbar-width: none !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  .mob-music-tabs::-webkit-scrollbar { display: none !important; }
+  .mob-music-tab {
+    flex-shrink: 0 !important;
+    background: none !important;
+    border: none !important;
+    border-bottom: 2px solid transparent !important;
+    color: var(--text3) !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    padding: 10px 16px !important;
+    cursor: pointer !important;
+    font-family: inherit !important;
+    transition: all 0.15s !important;
+    margin-bottom: -1px !important;
+  }
+  .mob-music-tab.active {
+    color: var(--accent3) !important;
+    border-bottom-color: var(--accent) !important;
   }
 
-  /* ── Now Playing card ── */
-  .np-card {
-    background: linear-gradient(160deg,#0c2216,#152d1c) !important;
+  /* ── Now Playing card — big album art, centered ── */
+  .mob-np-card {
+    background: linear-gradient(160deg, #071510 0%, #0d2018 50%, #152d1c 100%) !important;
     border-radius: 20px !important;
-    padding: 20px 18px 16px !important;
-    margin-bottom: 12px !important;
-    width: 100% !important;
-    box-sizing: border-box !important;
+    padding: 20px 20px 18px !important;
+    margin: 12px 0 !important;
+    position: relative !important;
   }
-  .np-art {
-    width: 100px !important;
-    height: 100px !important;
-    font-size: 44px !important;
-    border-radius: 16px !important;
-    margin: 0 auto 12px !important;
+  .mob-np-art {
+    width: calc(100vw - 104px) !important;
+    max-width: 300px !important;
+    aspect-ratio: 1 !important;
+    border-radius: 14px !important;
+    background: var(--bg3) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 72px !important;
+    margin: 0 auto 16px !important;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.5) !important;
+    overflow: hidden !important;
+    flex-shrink: 0 !important;
   }
-  .np-title {
-    font-size: 15px !important;
+  .mob-np-art img { width: 100% !important; height: 100% !important; object-fit: cover !important; border-radius: 14px !important; }
+
+  /* Title row: title + artist left, heart right */
+  .mob-np-meta {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 10px !important;
+    margin-bottom: 14px !important;
+  }
+  .mob-np-title {
+    font-size: 18px !important;
     font-weight: 700 !important;
-    text-align: center !important;
+    color: var(--text) !important;
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
-    padding: 0 4px !important;
+    line-height: 1.2 !important;
   }
-  .np-artist {
-    font-size: 12px !important;
-    text-align: center !important;
-    margin-bottom: 14px !important;
+  .mob-np-artist {
+    font-size: 13px !important;
+    color: var(--text3) !important;
+    margin-top: 2px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
   }
+  .mob-np-fav {
+    background: none !important;
+    border: none !important;
+    color: var(--text3) !important;
+    font-size: 22px !important;
+    cursor: pointer !important;
+    flex-shrink: 0 !important;
+    padding: 4px !important;
+    transition: color 0.15s !important;
+  }
+  .mob-np-fav.loved { color: var(--accent3) !important; }
 
   /* ── Seek bar ── */
-  .np-seek-wrap {
-    gap: 8px !important;
-    margin: 0 0 14px !important;
+  .mob-seek-wrap {
+    display: flex !important;
     align-items: center !important;
+    gap: 8px !important;
+    margin-bottom: 18px !important;
   }
-  .np-time { font-size: 10px !important; width: 28px !important; flex-shrink: 0 !important; }
+  .mob-seek-time { font-size: 11px !important; color: var(--text3) !important; flex-shrink: 0 !important; width: 32px !important; }
+  .mob-seek-time.right { text-align: right !important; }
+  #mob-np-seek {
+    flex: 1 !important;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    height: 4px !important;
+    border-radius: 99px !important;
+    background: var(--border2) !important;
+    outline: none !important;
+    cursor: pointer !important;
+    padding: 0 !important;
+  }
+  #mob-np-seek::-webkit-slider-thumb {
+    -webkit-appearance: none !important;
+    width: 16px !important; height: 16px !important;
+    border-radius: 50% !important;
+    background: var(--accent3) !important;
+    cursor: pointer !important;
+    margin-top: -6px !important;
+  }
+  #mob-np-seek::-moz-range-thumb {
+    width: 16px !important; height: 16px !important;
+    border-radius: 50% !important;
+    background: var(--accent3) !important;
+    cursor: pointer !important; border: none !important;
+  }
+  #mob-np-seek::-webkit-slider-runnable-track {
+    height: 4px !important; border-radius: 99px !important;
+    background: linear-gradient(to right, var(--accent3) var(--pct,0%), var(--border2) var(--pct,0%)) !important;
+  }
 
-  /* Make the thumb bigger so it's easy to grab on mobile */
-  #np-seek::-webkit-slider-thumb { width: 18px !important; height: 18px !important; margin-top: -7px !important; }
-  #np-seek::-moz-range-thumb { width: 18px !important; height: 18px !important; }
-  #np-seek::-webkit-slider-runnable-track { height: 5px !important; }
-  #mp-seek-bar::-webkit-slider-thumb { width: 18px !important; height: 18px !important; margin-top: -7px !important; }
-  #mp-seek-bar::-moz-range-thumb { width: 18px !important; height: 18px !important; }
-
-  /* ── Controls ── */
-  .np-controls {
-    gap: 0 !important;
+  /* ── Controls: shuffle prev PLAY next repeat ── */
+  .mob-np-controls {
+    display: flex !important;
+    align-items: center !important;
     justify-content: space-between !important;
     padding: 0 4px !important;
-    margin-bottom: 14px !important;
+    margin-bottom: 20px !important;
   }
-  .np-btn { font-size: 22px !important; padding: 8px !important; }
-  .np-play {
-    width: 54px !important;
-    height: 54px !important;
-    font-size: 22px !important;
+  .mob-ctrl-btn {
+    background: none !important; border: none !important;
+    color: var(--text2) !important; cursor: pointer !important;
+    font-size: 22px !important; padding: 8px !important;
+    border-radius: 8px !important; transition: all 0.15s !important;
+    line-height: 1 !important;
   }
+  .mob-ctrl-btn:active { opacity: 0.6 !important; transform: scale(0.92) !important; }
+  .mob-ctrl-btn.active-ctrl { color: var(--accent3) !important; }
+  .mob-play-btn {
+    width: 56px !important; height: 56px !important;
+    border-radius: 50% !important;
+    background: var(--accent3) !important;
+    border: none !important; cursor: pointer !important;
+    display: flex !important; align-items: center !important; justify-content: center !important;
+    font-size: 22px !important; color: #071510 !important;
+    transition: all 0.15s !important; flex-shrink: 0 !important;
+  }
+  .mob-play-btn:active { transform: scale(0.92) !important; }
 
   /* ── Volume ── */
-  .np-card > div[style*="border-top"] {
-    margin-top: 0 !important;
-    padding-top: 12px !important;
-    margin-bottom: 10px !important;
+  .mob-vol-row {
+    display: flex !important; align-items: center !important; gap: 8px !important;
+    margin-bottom: 14px !important;
+  }
+  .mob-vol-row i { font-size: 16px !important; color: var(--text3) !important; flex-shrink: 0 !important; }
+  #mob-np-vol {
+    flex: 1 !important; -webkit-appearance: none !important; appearance: none !important;
+    height: 4px !important; border-radius: 99px !important;
+    background: var(--border2) !important; outline: none !important; cursor: pointer !important; padding: 0 !important;
+  }
+  #mob-np-vol::-webkit-slider-thumb {
+    -webkit-appearance: none !important;
+    width: 14px !important; height: 14px !important; border-radius: 50% !important;
+    background: var(--accent3) !important; cursor: pointer !important; margin-top: -5px !important;
+  }
+  #mob-np-vol::-moz-range-thumb {
+    width: 14px !important; height: 14px !important; border-radius: 50% !important;
+    background: var(--accent3) !important; cursor: pointer !important; border: none !important;
+  }
+  #mob-np-vol::-webkit-slider-runnable-track {
+    height: 4px !important; border-radius: 99px !important;
+    background: linear-gradient(to right, var(--accent3) var(--pct,0%), var(--border2) var(--pct,0%)) !important;
   }
 
-  /* ── Sleep timer ── */
-  .sleep-timer-row { flex-wrap: nowrap !important; font-size: 11px !important; }
-  .sleep-timer-row select { font-size: 11px !important; }
+  /* ── Sleep timer row ── */
+  .mob-sleep-row {
+    display: flex !important; align-items: center !important; gap: 8px !important;
+    font-size: 11px !important; color: var(--text3) !important; padding-top: 10px !important;
+    border-top: 1px solid var(--border) !important;
+  }
+  .mob-sleep-row select { width: auto !important; padding: 4px 7px !important; font-size: 11px !important; flex: 1 !important; }
 
-  /* ── Playlists panel ── */
-  .music-sidebar-panel {
-    width: 100% !important;
-    box-sizing: border-box !important;
-    border-radius: 16px !important;
-    margin-bottom: 12px !important;
+  /* ── Tracks section ── */
+  .mob-tracks-header {
+    display: flex !important; align-items: center !important;
+    justify-content: space-between !important;
+    padding: 14px 0 10px !important;
+  }
+  .mob-tracks-title { font-size: 16px !important; font-weight: 700 !important; color: var(--text) !important; }
+
+  /* ── Track row: thumbnail + info + heart + kebab ── */
+  .mob-track-row {
+    display: flex !important; align-items: center !important; gap: 12px !important;
+    padding: 10px 0 !important;
+    border-bottom: 1px solid rgba(255,255,255,0.04) !important;
+    cursor: pointer !important;
+  }
+  .mob-track-row:last-child { border-bottom: none !important; }
+  .mob-track-row.playing .mob-track-thumb { border: 2px solid var(--accent) !important; }
+  .mob-track-thumb {
+    width: 46px !important; height: 46px !important; border-radius: 8px !important;
+    background: var(--bg3) !important; flex-shrink: 0 !important;
+    display: flex !important; align-items: center !important; justify-content: center !important;
+    font-size: 20px !important; overflow: hidden !important; position: relative !important;
+  }
+  .mob-track-thumb img { width: 100% !important; height: 100% !important; object-fit: cover !important; border-radius: 8px !important; }
+  .mob-track-eq {
+    position: absolute !important; bottom: 5px !important; left: 50% !important; transform: translateX(-50%) !important;
+    display: none !important; align-items: flex-end !important; gap: 2px !important; height: 12px !important;
+  }
+  .mob-track-row.playing .mob-track-eq { display: flex !important; }
+  .mob-track-row.playing .mob-track-thumb > span { opacity: 0.3 !important; }
+  .mob-eq-bar {
+    width: 3px !important; border-radius: 2px !important; background: var(--accent3) !important;
+    animation: eqAnim 0.8s infinite alternate !important;
+  }
+  .mob-eq-bar:nth-child(1) { height: 6px !important; }
+  .mob-eq-bar:nth-child(2) { height: 10px !important; animation-delay: .15s !important; }
+  .mob-eq-bar:nth-child(3) { height: 8px !important; animation-delay: .3s !important; }
+  .mob-track-info { flex: 1 !important; min-width: 0 !important; }
+  .mob-track-title {
+    font-size: 14px !important; font-weight: 600 !important;
+    color: var(--text) !important;
+    white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important;
+  }
+  .mob-track-row.playing .mob-track-title { color: var(--accent3) !important; }
+  .mob-track-artist { font-size: 12px !important; color: var(--text3) !important; margin-top: 2px !important; }
+  .mob-track-fav {
+    background: none !important; border: none !important;
+    color: var(--text3) !important; font-size: 20px !important;
+    cursor: pointer !important; padding: 6px !important; flex-shrink: 0 !important;
+    transition: color 0.15s !important;
+  }
+  .mob-track-fav.loved { color: var(--accent3) !important; }
+  .mob-track-kebab {
+    background: none !important; border: none !important;
+    color: var(--text3) !important; font-size: 18px !important;
+    cursor: pointer !important; padding: 6px !important; flex-shrink: 0 !important;
   }
 
-  /* ── Controls row: search full width, sort+upload on one line below ── */
-  #music-controls-row {
-    flex-wrap: wrap !important;
-    gap: 8px !important;
+  /* ── Sticky mini-player at bottom (above bottom nav) ── */
+  .mini-player { bottom: 68px !important; right: 0 !important; left: 0 !important; width: 100% !important;
+    border-radius: 0 !important; border-left: none !important; border-right: none !important;
+    border-bottom: none !important; padding: 10px 16px 8px !important;
+    max-width: none !important;
   }
-  #music-search { flex: 1 1 100% !important; min-width: 0 !important; }
-  #music-sort { flex: 1 1 0 !important; min-width: 0 !important; width: auto !important; }
-  #music-controls-row .btn { flex-shrink: 0 !important; white-space: nowrap !important; }
 
-  /* ── Playlist tabs ── */
-  .playlist-tabs {
-    overflow-x: auto !important;
-    -webkit-overflow-scrolling: touch !important;
-    scrollbar-width: none !important;
-    margin-bottom: 10px !important;
+  /* Upload zone */
+  .music-upload-zone { padding: 20px 16px !important; border-radius: 14px !important; margin-bottom: 12px !important; }
+
+  /* Playlist tabs (mobile) */
+  .mob-pl-tabs {
+    display: flex !important; gap: 6px !important; overflow-x: auto !important;
+    scrollbar-width: none !important; -webkit-overflow-scrolling: touch !important;
+    margin-bottom: 12px !important; padding-bottom: 2px !important;
   }
-  .playlist-tabs::-webkit-scrollbar { display: none !important; }
+  .mob-pl-tabs::-webkit-scrollbar { display: none !important; }
+  .mob-pl-tab {
+    flex-shrink: 0 !important; background: var(--card) !important;
+    border: 1px solid var(--border) !important; border-radius: 99px !important;
+    color: var(--text2) !important; font-size: 12px !important; font-weight: 600 !important;
+    padding: 5px 14px !important; cursor: pointer !important; font-family: inherit !important;
+    transition: all 0.15s !important; white-space: nowrap !important;
+  }
+  .mob-pl-tab.active {
+    background: var(--accent2) !important; border-color: var(--accent2) !important; color: #fff !important;
+  }
 
-  /* ── Upload zone ── */
-  .music-upload-zone { padding: 20px 16px !important; border-radius: 14px !important; }
-
-  /* ── Track rows ── */
-  .track-row { padding: 10px 8px !important; gap: 10px !important; border-radius: 10px !important; }
-  .track-num { display: none !important; }
-  .track-dur { display: none !important; }
-  .track-art { width: 40px !important; height: 40px !important; font-size: 18px !important; flex-shrink: 0 !important; }
-  .track-title { font-size: 13px !important; }
-  .track-artist { font-size: 11px !important; }
-  .track-fav { font-size: 18px !important; padding: 6px !important; }
-  .track-row > .btn.btn-sm[title="Add to playlist"] { display: none !important; }
-  .track-del { display: none !important; }
-  .track-more { display: flex !important; align-items: center !important; justify-content: center !important; font-size: 18px !important; padding: 6px !important; }
+  /* Search row */
+  #mob-music-search-row {
+    display: flex !important; gap: 8px !important; margin-bottom: 12px !important;
+  }
+  #mob-music-search-row input { flex: 1 !important; }
+  #mob-music-search-row .btn { flex-shrink: 0 !important; white-space: nowrap !important; }
 
   /* AAY section — prevent content escaping topbar */
   #s-aay { overflow-x: hidden !important; }
@@ -986,6 +1159,7 @@ input[type=range]::-moz-range-progress{background:var(--accent3);border-radius:9
 
       <!-- MUSIC -->
       <section class="section" id="s-music">
+        <!-- Desktop layout (hidden on mobile) -->
         <div style="display:grid;grid-template-columns:220px 1fr;gap:16px;align-items:start" id="music-grid-layout">
           <div>
             <div class="np-card">
@@ -1049,6 +1223,101 @@ input[type=range]::-moz-range-progress{background:var(--accent3);border-radius:9
             </div>
             <div id="music-status" style="font-size:11px;color:var(--text3);margin:-4px 0 10px;display:none"></div>
             <div id="music-library"></div>
+          </div>
+        </div>
+
+        <!-- Mobile layout (shown on mobile only) -->
+        <div id="mob-music-view" style="display:none;flex-direction:column">
+          <!-- Tabs -->
+          <div class="mob-music-tabs">
+            <button class="mob-music-tab active" onclick="mobMusicTab('songs',this)">Songs</button>
+            <button class="mob-music-tab" onclick="mobMusicTab('playlists',this)">Playlists</button>
+            <button class="mob-music-tab" onclick="mobMusicTab('upload',this)">Upload</button>
+          </div>
+
+          <!-- Songs view -->
+          <div id="mob-tab-songs">
+            <!-- Now Playing card -->
+            <div class="mob-np-card">
+              <div class="mob-np-art" id="mob-np-art"><span id="mob-np-art-emoji">🎵</span></div>
+              <div class="mob-np-meta">
+                <div style="min-width:0">
+                  <div class="mob-np-title" id="mob-np-title">No track selected</div>
+                  <div class="mob-np-artist" id="mob-np-artist">—</div>
+                </div>
+                <button class="mob-np-fav" id="mob-np-fav-btn" onclick="mobToggleCurrentFav()"><i class="ti ti-heart"></i></button>
+              </div>
+              <!-- Seek -->
+              <div class="mob-seek-wrap">
+                <span class="mob-seek-time" id="mob-np-cur">0:00</span>
+                <input type="range" id="mob-np-seek" value="0" min="0" max="100" step="0.1">
+                <span class="mob-seek-time right" id="mob-np-dur">0:00</span>
+              </div>
+              <!-- Controls -->
+              <div class="mob-np-controls">
+                <button class="mob-ctrl-btn" id="mob-shuffle-btn" onclick="toggleShuffle()"><i class="ti ti-arrows-shuffle"></i></button>
+                <button class="mob-ctrl-btn" onclick="prevTrack()"><i class="ti ti-player-skip-back"></i></button>
+                <button class="mob-play-btn" id="mob-play-btn" onclick="togglePlay()"><i class="ti ti-player-play" id="mob-play-icon"></i></button>
+                <button class="mob-ctrl-btn" onclick="nextTrack()"><i class="ti ti-player-skip-forward"></i></button>
+                <button class="mob-ctrl-btn" id="mob-repeat-btn" onclick="cycleRepeat()"><i class="ti ti-repeat" id="mob-repeat-icon"></i></button>
+              </div>
+              <!-- Volume -->
+              <div class="mob-vol-row">
+                <i class="ti ti-volume"></i>
+                <input type="range" id="mob-np-vol" value="80" min="0" max="100" oninput="setVolume(this.value);updateRangeTrack(this)">
+                <i class="ti ti-volume-2"></i>
+              </div>
+              <!-- Sleep timer -->
+              <div class="mob-sleep-row">
+                <i class="ti ti-moon"></i>
+                <span>Sleep timer:</span>
+                <select onchange="setSleepTimer(this.value)" style="flex:1">
+                  <option value="0">Off</option>
+                  <option value="10">10 min</option>
+                  <option value="20">20 min</option>
+                  <option value="30">30 min</option>
+                  <option value="60">60 min</option>
+                </select>
+                <span id="mob-sleep-countdown" style="display:none;color:var(--accent3);font-weight:600;font-size:11px"></span>
+              </div>
+            </div>
+
+            <!-- Tracks list -->
+            <div class="mob-tracks-header">
+              <span class="mob-tracks-title">Tracks</span>
+              <select id="mob-music-sort" onchange="renderMobMusicLibrary()" style="width:130px;font-size:12px;padding:5px 8px">
+                <option value="added">Recent</option>
+                <option value="title">A–Z</option>
+                <option value="duration">Duration</option>
+              </select>
+            </div>
+
+            <!-- Search -->
+            <div id="mob-music-search-row">
+              <input type="text" id="mob-music-search" placeholder="Search tracks…" oninput="renderMobMusicLibrary()" style="font-size:13px">
+              <button class="btn btn-accent btn-sm" onclick="document.getElementById('music-file-input').click()"><i class="ti ti-upload"></i></button>
+            </div>
+
+            <div id="mob-music-library"></div>
+          </div>
+
+          <!-- Playlists view -->
+          <div id="mob-tab-playlists" style="display:none;padding-top:12px">
+            <div id="mob-playlists-list"></div>
+            <button class="new-playlist-btn" style="width:100%;margin-top:8px;text-align:center" onclick="createPlaylist()"><i class="ti ti-plus"></i> New playlist</button>
+          </div>
+
+          <!-- Upload view -->
+          <div id="mob-tab-upload" style="display:none;padding-top:12px">
+            <div class="music-upload-zone" style="margin-bottom:0"
+              ondragover="event.preventDefault();this.classList.add('drag')"
+              ondragleave="this.classList.remove('drag')"
+              ondrop="handleMusicDrop(event)"
+              onclick="document.getElementById('music-file-input').click()">
+              <i class="ti ti-music-plus"></i>
+              <span>Tap to upload audio files</span>
+            </div>
+            <div id="mob-music-status" style="font-size:11px;color:var(--text3);margin-top:8px;text-align:center;display:none"></div>
           </div>
         </div>
       </section>
@@ -1808,7 +2077,15 @@ function switchSection(id, navEl) {
   if(al) al.textContent = addBtnLabels[id]||'New';
   if(id==='analytics') renderAnalytics();
   if(id==='dashboard') { renderDashTasks(); renderWeekHeatmap('week-heatmap'); renderDashProjects(); }
-  if(id==='music') { state.miniPlayerVisible=true; updateMiniPlayerVisibility(); }
+  if(id==='music') {
+    state.miniPlayerVisible=true; updateMiniPlayerVisibility();
+    // Show correct layout based on viewport
+    const isMob=window.innerWidth<=768;
+    const desktop=document.getElementById('music-grid-layout');
+    const mobile=document.getElementById('mob-music-view');
+    if(desktop) desktop.style.display=isMob?'none':'grid';
+    if(mobile){ mobile.style.display=isMob?'flex':'none'; renderMobMusicLibrary(); }
+  }
   if(id==='watch') { startWatchClock(); renderAlarms(); renderReminders(); }
   if(id==='trash') renderTrash();
   if(id==='game') initGame();
@@ -3158,11 +3435,15 @@ function initMusicPlayer(){
   audio.volume=state.music.volume;
   audio.addEventListener('timeupdate',onTimeUpdate);
   audio.addEventListener('ended',onTrackEnded);
-  document.getElementById('np-vol').value=state.music.volume*100;
+  const volVal=state.music.volume*100;
+  ['np-vol','mob-np-vol'].forEach(id=>{const el=document.getElementById(id);if(el){el.value=volVal;updateRangeTrack(el);}});
   updateRepeatUI();updateShuffleUI();
   rebuildQueue();
   renderPlaylists();
   renderMusicLibrary();
+  renderMobMusicLibrary();
+  // Wire mob seek bar now (in case DOMContentLoaded already fired)
+  _wireSeekBar('mob-np-seek');
 }
 
 // Fingerprint identifies a file by name+size+lastModified so the SAME upload is never added twice,
@@ -3224,7 +3505,7 @@ async function processAudioFiles(files){
     state.music.tracks.push(track);
     added++;
   }
-  rebuildQueue();renderMusicLibrary();renderPlaylists();save();
+  rebuildQueue();renderMusicLibrary();renderMobMusicLibrary();renderPlaylists();save();
   if(failed) musicStatus(failed+' file'+(failed>1?'s':'')+' could not be saved — storage may be full',true);
   else if(added) { musicStatus(''); toast(added+' track'+(added>1?'s':'')+' added'+(skipped?` (${skipped} already in library)`:'')); }
   else if(skipped) { musicStatus(''); toast('Already in your library'); }
@@ -3327,83 +3608,132 @@ function onTrackEnded(){
 
 // ── Seek / volume ──
 let _seeking=false;
-document.getElementById('np-seek').addEventListener('mousedown',()=>_seeking=true);
-document.getElementById('np-seek').addEventListener('mouseup',()=>_seeking=false);
-document.getElementById('mp-seek-bar').addEventListener('mousedown',()=>_seeking=true);
-document.getElementById('mp-seek-bar').addEventListener('mouseup',()=>_seeking=false);
 
-// Mobile seek — must NOT be passive so we can preventDefault and stop the
-// page from scrolling while the person is dragging the seek thumb.
-['np-seek','mp-seek-bar'].forEach(id=>{
+// ── Helper: update range track fill (CSS custom property) ──
+function updateRangeTrack(el){
+  if(!el)return;
+  const pct=((parseFloat(el.value)-parseFloat(el.min||0))/(parseFloat(el.max||100)-parseFloat(el.min||0)))*100;
+  el.style.setProperty('--pct',pct.toFixed(1)+'%');
+}
+
+// ── Wire all seek bars (desktop + mobile mini + mobile full) ──
+function _wireSeekBar(id){
   const el=document.getElementById(id);
   if(!el)return;
-  let _touchStartX=0, _touchStartVal=0;
+  // Mouse
+  el.addEventListener('mousedown',()=>{_seeking=true;});
+  el.addEventListener('mouseup',()=>{
+    _seeking=false;
+    const pct=parseFloat(el.value)||0;
+    if(audio.duration){ audio.currentTime=(pct/100)*audio.duration; _syncAllSeekBars(pct,fmtTime(audio.currentTime)); }
+  });
+  el.addEventListener('input',()=>{
+    const pct=parseFloat(el.value)||0;
+    updateRangeTrack(el);
+    if(audio.duration){ const t=(pct/100)*audio.duration; _syncSeekTimes(fmtTime(t)); }
+  });
+  // Touch (non-passive touchmove to prevent scroll)
   el.addEventListener('touchstart',e=>{
     _seeking=true;
-    _touchStartX=e.touches[0].clientX;
-    _touchStartVal=parseFloat(el.value)||0;
     e.stopPropagation();
   },{passive:true});
   el.addEventListener('touchmove',e=>{
-    e.preventDefault(); // stops page scroll — requires non-passive
+    e.preventDefault();
     e.stopPropagation();
     const touch=e.touches[0];
     const rect=el.getBoundingClientRect();
     const pct=Math.min(100,Math.max(0,((touch.clientX-rect.left)/rect.width)*100));
     el.value=pct;
-    el.style.setProperty('--pct',pct.toFixed(1)+'%');
-    // Update time display live while dragging
-    if(audio.duration){
-      const t=(pct/100)*audio.duration;
-      ['np-cur','mp-cur-time'].forEach(tid=>{const tel=document.getElementById(tid);if(tel)tel.textContent=fmtTime(t);});
-    }
+    updateRangeTrack(el);
+    if(audio.duration){ _syncSeekTimes(fmtTime((pct/100)*audio.duration)); }
   },{passive:false});
   el.addEventListener('touchend',e=>{
     const pct=parseFloat(el.value)||0;
-    if(audio.duration) audio.currentTime=(pct/100)*audio.duration;
+    if(audio.duration){ audio.currentTime=(pct/100)*audio.duration; }
     _seeking=false;
   },{passive:true});
-});
-function seekTo(val){ if(audio.duration) audio.currentTime=(val/100)*audio.duration; }
+}
+
+function _syncAllSeekBars(pct,curStr){
+  ['np-seek','mp-seek-bar','mob-np-seek'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){ el.value=pct; updateRangeTrack(el); }
+  });
+  _syncSeekTimes(curStr);
+}
+function _syncSeekTimes(curStr){
+  ['np-cur','mp-cur-time','mob-np-cur'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=curStr;});
+}
+
+// Wire all three seek bars on init
+_wireSeekBar('np-seek');
+_wireSeekBar('mp-seek-bar');
+// mob-np-seek is in mobile HTML — wire after DOM ready
+document.addEventListener('DOMContentLoaded',()=>_wireSeekBar('mob-np-seek'));
+setTimeout(()=>_wireSeekBar('mob-np-seek'),500); // fallback if already past DOMContentLoaded
+
+function seekTo(val){ if(audio.duration){ audio.currentTime=(val/100)*audio.duration; } }
+
 function setVolume(val){
   state.music.volume=val/100; audio.volume=state.music.volume;
-  const el=document.getElementById('np-vol'); if(el)el.value=val;
+  ['np-vol','mob-np-vol'].forEach(id=>{const el=document.getElementById(id);if(el){el.value=val;updateRangeTrack(el);}});
   save();
 }
+
 function onTimeUpdate(){
   if(_seeking||!audio.duration)return;
   const pct=(audio.currentTime/audio.duration)*100;
   const cur=fmtTime(audio.currentTime),dur=fmtTime(audio.duration);
-  ['np-seek','mp-seek-bar'].forEach(id=>{const el=document.getElementById(id);if(el){el.value=pct;el.style.setProperty('--pct',pct.toFixed(1)+'%');}});
-  ['np-cur','mp-cur-time'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=cur;});
-  ['np-dur','mp-dur-time'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=dur;});
+  ['np-seek','mp-seek-bar','mob-np-seek'].forEach(id=>{const el=document.getElementById(id);if(el){el.value=pct;updateRangeTrack(el);}});
+  ['np-cur','mp-cur-time','mob-np-cur'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=cur;});
+  ['np-dur','mp-dur-time','mob-np-dur'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=dur;});
   updatePlayIcons();
 }
 function fmtTime(s){ if(!s||isNaN(s))return'0:00'; const m=Math.floor(s/60),sec=Math.floor(s%60); return m+':'+String(sec).padStart(2,'0'); }
 
 // ── Shuffle / repeat ──
 function toggleShuffle(){ state.music.shuffle=!state.music.shuffle; rebuildQueue(); updateShuffleUI(); save(); }
-function updateShuffleUI(){ const btn=document.getElementById('np-shuffle-btn'); if(btn)btn.classList.toggle('active-ctrl',state.music.shuffle); }
+function updateShuffleUI(){
+  ['np-shuffle-btn','mob-shuffle-btn'].forEach(id=>{const btn=document.getElementById(id);if(btn)btn.classList.toggle('active-ctrl',state.music.shuffle);});
+}
 function cycleRepeat(){ const modes=['off','all','one']; const i=modes.indexOf(state.music.repeat); state.music.repeat=modes[(i+1)%modes.length]; updateRepeatUI(); save(); }
 function updateRepeatUI(){
   const btn=document.getElementById('np-repeat-btn'),icon=document.getElementById('np-repeat-icon');
-  if(!btn||!icon)return;
-  btn.classList.toggle('active-ctrl',state.music.repeat!=='off');
-  icon.className=state.music.repeat==='one'?'ti ti-repeat-once':'ti ti-repeat';
+  if(btn&&icon){ btn.classList.toggle('active-ctrl',state.music.repeat!=='off'); icon.className=state.music.repeat==='one'?'ti ti-repeat-once':'ti ti-repeat'; }
+  const mbtn=document.getElementById('mob-repeat-btn'),micon=document.getElementById('mob-repeat-icon');
+  if(mbtn&&micon){ mbtn.classList.toggle('active-ctrl',state.music.repeat!=='off'); micon.className=state.music.repeat==='one'?'ti ti-repeat-once':'ti ti-repeat'; }
 }
 
 // ── Now playing UI ──
 function updateNowPlayingUI(track){
+  // Desktop
   ['mp-art','np-art'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent='🎵';});
   document.getElementById('mp-title').textContent=track?track.title:'—';
   document.getElementById('mp-artist').textContent=track?track.artist:'No track';
   document.getElementById('np-title').textContent=track?track.title:'No track selected';
   document.getElementById('np-artist').textContent=track?track.artist:'—';
+  // Mobile
+  const mArtEmoji=document.getElementById('mob-np-art-emoji'); if(mArtEmoji)mArtEmoji.textContent='🎵';
+  const mTitle=document.getElementById('mob-np-title'); if(mTitle)mTitle.textContent=track?track.title:'No track selected';
+  const mArtist=document.getElementById('mob-np-artist'); if(mArtist)mArtist.textContent=track?track.artist:'—';
+  // Fav button on mobile
+  const mFav=document.getElementById('mob-np-fav-btn');
+  if(mFav&&track){ mFav.className='mob-np-fav'+(track.favourite?' loved':''); mFav.innerHTML=`<i class="ti ${track.favourite?'ti-heart-filled':'ti-heart'}"></i>`; }
+  else if(mFav){ mFav.className='mob-np-fav'; mFav.innerHTML='<i class="ti ti-heart"></i>'; }
   updatePlayIcons();
+  // Re-render mob library to show EQ on playing track
+  renderMobMusicLibrary();
 }
 function updatePlayIcons(){
   const playing=!audio.paused&&!!audio.src;
   ['mp-play-icon','np-play-icon-big'].forEach(id=>{const el=document.getElementById(id);if(el)el.className=playing?'ti ti-player-pause':'ti ti-player-play';});
+  const mi=document.getElementById('mob-play-icon'); if(mi)mi.className=playing?'ti ti-player-pause':'ti ti-player-play';
+}
+function mobToggleCurrentFav(){
+  const cur=state.music.queue[state.music.currentIndex];
+  if(!cur)return;
+  toggleFav(cur.id);
+  updateNowPlayingUI(cur);
 }
 function showMiniPlayer(){
   if(state.miniPlayerVisible) document.getElementById('mini-player').classList.add('visible');
@@ -3484,10 +3814,77 @@ function handleTrackRowClick(id){
 }
 function toggleFav(id){
   const t=state.music.tracks.find(x=>x.id===id);
-  if(t){ t.favourite=!t.favourite; renderMusicLibrary(); renderPlaylists(); save(); }
+  if(t){ t.favourite=!t.favourite; renderMusicLibrary(); renderMobMusicLibrary(); renderPlaylists(); save(); }
 }
 
-// Soft delete — moves to Trash (blob stays in IndexedDB until trash is emptied, so it can be restored).
+// ── Mobile music library renderer ──
+function renderMobMusicLibrary(){
+  const el=document.getElementById('mob-music-library');if(!el)return;
+  const q=(document.getElementById('mob-music-search')||{}).value||'';
+  const sortMode=(document.getElementById('mob-music-sort')||{}).value||'added';
+  let tracks=getPlaylistTracks(state.music.activePlaylistId);
+  if(q) tracks=tracks.filter(t=>t.title.toLowerCase().includes(q.toLowerCase())||t.artist.toLowerCase().includes(q.toLowerCase()));
+  if(sortMode==='title') tracks=[...tracks].sort((a,b)=>a.title.localeCompare(b.title));
+  else if(sortMode==='duration') tracks=[...tracks].sort((a,b)=>(b.duration||0)-(a.duration||0));
+  else tracks=[...tracks].sort((a,b)=>(b.addedAt||0)-(a.addedAt||0));
+  const cur=state.music.queue[state.music.currentIndex];
+  const playing=!audio.paused&&!!audio.src;
+  if(!tracks.length){
+    el.innerHTML=`<div style="text-align:center;padding:32px;color:var(--text3);font-size:13px"><i class="ti ti-music-off" style="font-size:32px;display:block;margin-bottom:8px;opacity:0.4"></i>${state.music.tracks.length?'No tracks match.':'Upload audio files to start.'}</div>`;
+    return;
+  }
+  el.innerHTML=tracks.map(t=>{
+    const isPlaying=cur&&cur.id===t.id;
+    const paused=isPlaying&&!playing;
+    return`<div class="mob-track-row${isPlaying?' playing':''}" onclick="handleTrackRowClick('${t.id}')">
+      <div class="mob-track-thumb">
+        <span>${'🎵'}</span>
+        <div class="mob-track-eq${paused?' music-paused':''}">
+          <div class="mob-eq-bar"></div><div class="mob-eq-bar"></div><div class="mob-eq-bar"></div>
+        </div>
+      </div>
+      <div class="mob-track-info">
+        <div class="mob-track-title">${t.title}</div>
+        <div class="mob-track-artist">${t.artist}</div>
+      </div>
+      <button class="mob-track-fav${t.favourite?' loved':''}" onclick="event.stopPropagation();toggleFav('${t.id}')"><i class="ti ${t.favourite?'ti-heart-filled':'ti-heart'}"></i></button>
+      <button class="mob-track-kebab" onclick="event.stopPropagation();openTrackActionSheet('${t.id}')"><i class="ti ti-dots-vertical"></i></button>
+    </div>`;
+  }).join('');
+}
+
+function renderMobPlaylists(){
+  const el=document.getElementById('mob-playlists-list');if(!el)return;
+  const allPl=state.music.playlists||[];
+  el.innerHTML=allPl.map(pl=>{
+    const cnt=pl.id==='all'?state.music.tracks.length:pl.id==='favs'?state.music.tracks.filter(t=>t.favourite).length:(pl.trackIds||[]).length;
+    const active=pl.id===(state.music.activePlaylistId||'all');
+    return`<div style="display:flex;align-items:center;gap:10px;padding:10px 10px;border-radius:var(--radius-sm);cursor:pointer;background:${active?'rgba(76,175,110,0.1)':'transparent'};margin-bottom:4px" onclick="selectPlaylist('${pl.id}');mobMusicTab('songs',null)">
+      <i class="ti ${pl.id==='favs'?'ti-heart':pl.auto?'ti-music':'ti-playlist'}" style="font-size:16px;color:${active?'var(--accent3)':'var(--text3)'}"></i>
+      <span style="font-size:14px;flex:1;color:${active?'var(--text)':'var(--text2)'}">${pl.name}</span>
+      <span style="font-size:11px;color:var(--text3)">${cnt}</span>
+      ${!pl.auto?`<button onclick="event.stopPropagation();deletePlaylist('${pl.id}')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:0;opacity:0.5"><i class="ti ti-x"></i></button>`:''}
+    </div>`;
+  }).join('');
+}
+
+function mobMusicTab(tab, btnEl){
+  ['songs','playlists','upload'].forEach(t=>{
+    const el=document.getElementById('mob-tab-'+t);if(el)el.style.display=t===tab?'':'none';
+  });
+  document.querySelectorAll('.mob-music-tab').forEach(b=>b.classList.remove('active'));
+  if(btnEl) btnEl.classList.add('active');
+  else {
+    const tabs=['songs','playlists','upload'];
+    const idx=tabs.indexOf(tab);
+    const btns=document.querySelectorAll('.mob-music-tab');
+    if(btns[idx]) btns[idx].classList.add('active');
+  }
+  if(tab==='playlists') renderMobPlaylists();
+  if(tab==='songs') renderMobMusicLibrary();
+}
+
+ — moves to Trash (blob stays in IndexedDB until trash is emptied, so it can be restored).
 async function deleteTrack(id){
   if(!await confirmDialog('Remove this track? Goes to Trash.','Remove track'))return;
   const t=state.music.tracks.find(x=>x.id===id);
@@ -3497,7 +3894,7 @@ async function deleteTrack(id){
   if(t.blobUrl) URL.revokeObjectURL(t.blobUrl);
   state.music.tracks=state.music.tracks.filter(x=>x.id!==id);
   (state.music.playlists||[]).forEach(pl=>{ if(pl.trackIds) pl.trackIds=pl.trackIds.filter(tid=>tid!==id); });
-  rebuildQueue();renderMusicLibrary();renderPlaylists();save();
+  rebuildQueue();renderMusicLibrary();renderMobMusicLibrary();renderPlaylists();save();
   toast('Moved to trash');
 }
 
@@ -3516,7 +3913,7 @@ async function restoreTrackFromTrash(item){
     toast('Track file is gone (storage was cleared)',true); return;
   }
   state.music.tracks.push(track);
-  rebuildQueue();renderMusicLibrary();renderPlaylists();save();
+  rebuildQueue();renderMusicLibrary();renderMobMusicLibrary();renderPlaylists();save();
   toast('Track restored');
 }
 
@@ -3563,7 +3960,7 @@ function renderPlaylists(){
     return`<button class="pl-tab ${pl.id===(state.music.activePlaylistId||'all')?'active':''}" onclick="selectPlaylist('${pl.id}')">${pl.name}<span class="pl-count">${cnt}</span></button>`;
   }).join('')+`<button class="new-playlist-btn" onclick="createPlaylist()"><i class="ti ti-plus"></i></button>`;
 }
-function selectPlaylist(id){ state.music.activePlaylistId=id; rebuildQueue(); renderPlaylists(); renderMusicLibrary(); save(); }
+function selectPlaylist(id){ state.music.activePlaylistId=id; rebuildQueue(); renderPlaylists(); renderMusicLibrary(); renderMobMusicLibrary(); renderMobPlaylists(); save(); }
 async function createPlaylist(){
   const name=await promptDialog('New playlist','Playlist name…','My playlist'); if(!name)return;
   state.music.playlists.push({id:'pl_'+Date.now(),name,auto:false,trackIds:[]});
