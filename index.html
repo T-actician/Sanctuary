@@ -541,10 +541,17 @@ input[type=range]::-moz-range-progress{background:var(--accent3);border-radius:9
 
   /* ───────── MUSIC — rebuilt for mobile, not just shrunk ───────── */
   #music-grid-layout { display: flex !important; flex-direction: column !important; gap: 14px !important; }
-  .music-sidebar-panel, .np-card { width: 100% !important; box-sizing: border-box !important; }
+  .music-sidebar-panel, .np-card { width: 100% !important; box-sizing: border-box !important; overflow: hidden !important; }
   .np-art { width: 64px !important; height: 64px !important; font-size: 28px !important; }
-  .np-controls { gap: 4px !important; }
-  .np-play { width: 46px !important; height: 46px !important; }
+  .np-controls { gap: 4px !important; flex-wrap: nowrap !important; justify-content: center !important; }
+  .np-play { width: 44px !important; height: 44px !important; flex-shrink: 0 !important; }
+  .np-btn { font-size: 16px !important; padding: 5px !important; flex-shrink: 0 !important; }
+  .np-seek-wrap { width: 100% !important; box-sizing: border-box !important; display: flex !important; align-items: center !important; gap: 6px !important; }
+  .np-seek-wrap input[type=range] { flex: 1 !important; min-width: 0 !important; width: 0 !important; }
+  .np-title { font-size: 13px !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }
+  #np-vol { width: 100% !important; min-width: 0 !important; flex: 1 !important; }
+  .sleep-timer-row { flex-wrap: wrap !important; gap: 6px !important; }
+  .sleep-timer-row select { flex: 1 !important; min-width: 80px !important; }
 
   /* Search + sort + upload row: stop forcing 3 fixed-width controls onto
      one line. Search takes the full first row; sort + upload share the
@@ -690,6 +697,7 @@ input[type=range]::-moz-range-progress{background:var(--accent3);border-radius:9
       <button class="btn topbar-btn" onclick="openSearch()"><i class="ti ti-search"></i><span class="topbar-btn-label"> Search</span></button>
       <button class="btn topbar-btn" id="add-btn" onclick="handleAddBtn()"><i class="ti ti-plus"></i><span class="topbar-btn-label"> <span id="add-btn-label">New</span></span></button>
       <button class="btn btn-sm topbar-btn" onclick="openModal('theme-modal')" title="Theme"><i class="ti ti-palette"></i></button>
+      <button class="btn btn-sm topbar-btn" id="pwa-install-btn" onclick="pwaInstall()" title="Install app" style="display:none;color:var(--accent3);border-color:rgba(76,175,110,0.4)"><i class="ti ti-download"></i><span class="topbar-btn-label"> Install</span></button>
     </header>
 
     <div class="content-area">
@@ -3552,7 +3560,7 @@ function startAlarmChecker(){
   _alarmCheckInterval=setInterval(checkAlarms,250);
   checkAlarms();
   // If the tab was backgrounded/suspended past the alarm time, catch up the instant it's visible again.
-  document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ unlockRingAudio(); checkAlarms(); } });
+  document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ unlockRingAudio(); checkAlarms(); postAlarmsToSW && postAlarmsToSW(); } });
   window.addEventListener('focus',()=>{ unlockRingAudio(); checkAlarms(); });
 }
 function checkAlarms(){
@@ -3649,7 +3657,21 @@ function playRingTone(){
     if(!_ringAudioCtx)_ringAudioCtx=new(window.AudioContext||window.webkitAudioContext)();
     if(_ringAudioCtx.state==='suspended')_ringAudioCtx.resume();
     const ctx=_ringAudioCtx;
-    [0,0.3,0.6].forEach(delay=>{const osc=ctx.createOscillator(),gain=ctx.createGain();osc.connect(gain);gain.connect(ctx.destination);osc.frequency.value=880;osc.type='sine';gain.gain.setValueAtTime(0,ctx.currentTime+delay);gain.gain.linearRampToValueAtTime(0.6,ctx.currentTime+delay+0.05);gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+delay+0.4);osc.start(ctx.currentTime+delay);osc.stop(ctx.currentTime+delay+0.45);});
+    // Compressor prevents clipping at high gain while keeping perceived volume maxed
+    const comp=ctx.createDynamicsCompressor();
+    comp.threshold.value=-6;comp.knee.value=3;comp.ratio.value=4;
+    comp.attack.value=0.001;comp.release.value=0.1;
+    comp.connect(ctx.destination);
+    // Square wave + gain 1.0 = much louder than old sine at 0.6
+    [0,0.32,0.64].forEach(delay=>{
+      const osc=ctx.createOscillator(),gain=ctx.createGain();
+      osc.connect(gain);gain.connect(comp);
+      osc.frequency.value=1040;osc.type='square';
+      gain.gain.setValueAtTime(0,ctx.currentTime+delay);
+      gain.gain.linearRampToValueAtTime(1.0,ctx.currentTime+delay+0.04);
+      gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+delay+0.42);
+      osc.start(ctx.currentTime+delay);osc.stop(ctx.currentTime+delay+0.45);
+    });
   }catch(e){}
 }
 function dismissRing(){
@@ -4387,10 +4409,86 @@ function applyImageZoom() {
 </script>
 
 <script>
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', function() {
-    navigator.serviceWorker.register('/sw.js').catch(function(e){ console.log('SW:', e); });
+// ── SERVICE WORKER + BACKGROUND ALARM NOTIFICATIONS ──
+// How it works:
+//   1. On first user interaction we request Notification permission.
+//   2. Whenever alarms/reminders change we post the full list to the SW.
+//   3. The SW stores them and uses setTimeout internally to fire a
+//      showNotification() even when the app tab is closed/backgrounded.
+//   4. Tapping the notification re-opens the app (or brings it to front)
+//      and triggers the in-app ring overlay via ?alarm=1 query param.
+
+let _swReg = null;
+
+async function requestNotificationPermission() {
+  if (!('Notification' in window)) return;
+  if (Notification.permission === 'granted') return;
+  if (Notification.permission === 'denied') return;
+  await Notification.requestPermission();
+}
+// Request on first real gesture so browser allows the prompt
+['click','touchstart','keydown'].forEach(evt => window.addEventListener(evt, requestNotificationPermission, {once: true, passive: true}));
+
+function postAlarmsToSW() {
+  if (!_swReg || !_swReg.active) return;
+  const now = Date.now();
+  const items = [];
+  (state.alarms||[]).forEach(a => {
+    if (!a.on) return;
+    const [h,m] = (a.time||'').split(':').map(Number);
+    const d = new Date(); d.setHours(h, m, 0, 0);
+    if (d.getTime() <= now) d.setDate(d.getDate() + 1); // next occurrence
+    items.push({ id: a.id, label: a.label||'Alarm', fireAt: d.getTime(), type: 'alarm' });
   });
+  (state.reminders||[]).forEach(r => {
+    if (!r.on) return;
+    const [h,m] = (r.time||'').split(':').map(Number);
+    const d = new Date(); d.setHours(h, m, 0, 0);
+    if (d.getTime() <= now) { if (r.repeat) d.setDate(d.getDate() + 1); else return; }
+    items.push({ id: r.id, label: r.label||'Reminder', fireAt: d.getTime(), type: 'reminder' });
+  });
+  _swReg.active.postMessage({ type: 'SCHEDULE_ALARMS', alarms: items });
+}
+
+// Re-export save so every save also refreshes the SW schedule
+const _swOrigSave = window.save;
+window.save = function() { _swOrigSave.apply(this, arguments); postAlarmsToSW(); };
+
+// Listen for SW message telling us an alarm fired while tab was closed/hidden
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.addEventListener('message', e => {
+    if (e.data && e.data.type === 'ALARM_FIRED') {
+      const { id, label, alarmType } = e.data;
+      // Find the matching item and ring it
+      const item = alarmType === 'alarm'
+        ? (state.alarms||[]).find(a => a.id === id)
+        : (state.reminders||[]).find(r => r.id === id);
+      if (item) startRinging(item, alarmType);
+    }
+  });
+
+  window.addEventListener('load', async function() {
+    try {
+      _swReg = await navigator.serviceWorker.register('/sw.js');
+      // Wait for it to become active (handles first install)
+      if (!_swReg.active) {
+        await new Promise(res => {
+          const sw = _swReg.installing || _swReg.waiting;
+          if (!sw) { res(); return; }
+          sw.addEventListener('statechange', () => { if (sw.state === 'activated') res(); });
+        });
+        _swReg = await navigator.serviceWorker.getRegistration();
+      }
+      postAlarmsToSW();
+    } catch(e) { console.log('SW registration failed:', e); }
+  });
+
+  // If app opened via notification tap, auto-open the Watch section
+  if (window.location.search.includes('alarm=1')) {
+    window.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => switchSection('watch', document.querySelector('[data-section=watch]')), 500);
+    });
+  }
 }
 </script>
 
@@ -4646,7 +4744,34 @@ if ('serviceWorker' in navigator) {
 })();
 
 // ═══════════════════════════════════════════════════════
-// BACK BUTTON — section history + overlay dismissal
+// PWA INSTALL — desktop + Android Chrome/Edge prompt
+// ═══════════════════════════════════════════════════════
+(function(){
+  let _deferredPrompt=null;
+
+  window.addEventListener('beforeinstallprompt',e=>{
+    e.preventDefault();
+    _deferredPrompt=e;
+    const btn=document.getElementById('pwa-install-btn');
+    if(btn) btn.style.display='';
+  });
+
+  window.pwaInstall=async function(){
+    if(!_deferredPrompt){ toast('Open Sanctuary in Chrome or Edge to install it as an app'); return; }
+    _deferredPrompt.prompt();
+    const{outcome}=await _deferredPrompt.userChoice;
+    _deferredPrompt=null;
+    const btn=document.getElementById('pwa-install-btn');
+    if(btn) btn.style.display='none';
+    if(outcome==='accepted') toast('Sanctuary installed! Find it in your Start menu or desktop 🌿');
+  };
+
+  window.addEventListener('appinstalled',()=>{
+    const btn=document.getElementById('pwa-install-btn');
+    if(btn) btn.style.display='none';
+    _deferredPrompt=null;
+  });
+})();
 // ═══════════════════════════════════════════════════════
 (function(){
   // Two separate stacks:
