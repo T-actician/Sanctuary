@@ -556,7 +556,7 @@ input[type=range]::-moz-range-progress{background:var(--accent3);border-radius:9
      below — but it means a missed case degrades to "scrolls" rather than
      "breaks the layout". */
   body, .content-area, .section, .card { max-width: 100vw; }
-  .content-area { padding: 12px 12px 84px !important; overflow-y: auto !important; overflow-x: hidden !important; scroll-behavior: smooth !important; -webkit-overflow-scrolling: touch !important; }
+  .content-area { padding: 12px 12px 100px !important; overflow-y: auto !important; overflow-x: hidden !important; scroll-behavior: smooth !important; -webkit-overflow-scrolling: touch !important; }
   .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr !important; }
   .gallery-grid { grid-template-columns: repeat(2, 1fr) !important; }
   .ach-grid { grid-template-columns: repeat(2, 1fr) !important; }
@@ -1224,15 +1224,15 @@ input[type=range]::-moz-range-progress{background:var(--accent3);border-radius:9
             <div class="card-header"><span class="card-title"><i class="ti ti-brand-mastercard"></i> M-Pesa (Kenya)</span></div>
             <div style="text-align:center;padding:10px 0 16px">
               <div style="font-size:13px;color:var(--text2);margin-bottom:14px">Send via M-Pesa Till or Paybill</div>
-              <div style="display:inline-flex;align-items:center;gap:12px;background:rgba(76,175,110,0.1);border:1px solid rgba(76,175,110,0.3);border-radius:12px;padding:16px 24px;margin-bottom:10px">
+              <a href="tel:0712345678" style="display:inline-flex;align-items:center;gap:12px;background:rgba(76,175,110,0.1);border:1px solid rgba(76,175,110,0.3);border-radius:12px;padding:16px 24px;margin-bottom:10px;text-decoration:none;cursor:pointer;transition:all 0.2s" onmouseover="this.style.background='rgba(76,175,110,0.18)'" onmouseout="this.style.background='rgba(76,175,110,0.1)'">
                 <div style="font-size:32px">📱</div>
                 <div style="text-align:left">
-                  <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.8px">Send to number</div>
+                  <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.8px">Tap to send via M-Pesa</div>
                   <div style="font-size:24px;font-weight:800;color:var(--accent3);letter-spacing:2px">0712 345 678</div>
                   <div style="font-size:11px;color:var(--text3);margin-top:2px">Name: Sanctuary Dev</div>
                 </div>
-              </div>
-              <div style="font-size:11px;color:var(--text3)">Any amount is appreciated 🙏</div>
+              </a>
+              <div style="font-size:11px;color:var(--text3)">Tap the number above → opens M-Pesa on your phone 🙏</div>
             </div>
           </div>
 
@@ -1284,7 +1284,18 @@ input[type=range]::-moz-range-progress{background:var(--accent3);border-radius:9
           <div class="card" style="margin-bottom:14px">
             <div class="card-header"><span class="card-title"><i class="ti ti-layers"></i> Features</span></div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-              ${['📖 Diary & journaling','🎯 Daily goals','📝 Notebook','📊 Analytics','🖼 Gallery & vision board','🎵 Music player','⏰ Alarms & reminders','🌿 Mindful breaks','🏆 Achievements','🗺 Life journey','🧠 Mind game','👤 Personal profile'].map(f=>`<div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2);padding:6px 0;border-bottom:1px solid var(--border)">${f}</div>`).join('')}
+              <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2);padding:6px 0;border-bottom:1px solid var(--border)">📖 Diary & journaling</div>
+              <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2);padding:6px 0;border-bottom:1px solid var(--border)">🎯 Daily goals</div>
+              <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2);padding:6px 0;border-bottom:1px solid var(--border)">📝 Notebook</div>
+              <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2);padding:6px 0;border-bottom:1px solid var(--border)">📊 Analytics</div>
+              <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2);padding:6px 0;border-bottom:1px solid var(--border)">🖼 Gallery & vision board</div>
+              <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2);padding:6px 0;border-bottom:1px solid var(--border)">🎵 Music player</div>
+              <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2);padding:6px 0;border-bottom:1px solid var(--border)">⏰ Alarms & reminders</div>
+              <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2);padding:6px 0;border-bottom:1px solid var(--border)">🌿 Mindful breaks</div>
+              <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2);padding:6px 0;border-bottom:1px solid var(--border)">🏆 Achievements</div>
+              <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2);padding:6px 0;border-bottom:1px solid var(--border)">🗺 Life journey</div>
+              <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2);padding:6px 0;border-bottom:1px solid var(--border)">🧠 Mind game</div>
+              <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2);padding:6px 0;border-bottom:1px solid var(--border)">👤 Personal profile</div>
             </div>
           </div>
 
@@ -4458,8 +4469,14 @@ function obFinish() {
 }
 
 function checkOnboarding() {
-  if(!localStorage.getItem('sanctuary_onboarded')) {
+  // Only show for brand new users — someone with existing data is a returning user
+  const hasData = state.diaryEntries.length || state.goals.length || state.notes.length || state.profile.name !== 'You';
+  const alreadySeen = localStorage.getItem('sanctuary_onboarded');
+  if(!alreadySeen && !hasData) {
     setTimeout(()=>openModal('onboarding-modal'), 800);
+  } else if(hasData && !alreadySeen) {
+    // Returning user who predates onboarding — mark as done silently
+    localStorage.setItem('sanctuary_onboarded','1');
   }
 }
 
@@ -4506,7 +4523,12 @@ init();
         <div style="font-size:22px;font-weight:800;color:var(--text);margin-bottom:8px">Welcome to Sanctuary</div>
         <div style="font-size:13px;color:var(--text3);line-height:1.8;margin-bottom:24px">Your calm, private space to journal, plan,<br>reflect, and grow — every day.</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:28px;text-align:left">
-          ${[['📖','Diary','Write daily entries and track your mood'],['🎯','Goals','Set daily ambitions and build streaks'],['📝','Notebook','Capture ideas, plans, and reflections'],['🎵','Music','Play your own music while you work'],['🖼','Gallery','Build a vision board and memory wall'],['⏰','Alarms','Set alarms and reminders that actually work']].map(([e,t,d])=>`<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px"><div style="font-size:20px;margin-bottom:4px">${e}</div><div style="font-size:12px;font-weight:700;color:var(--text)">${t}</div><div style="font-size:11px;color:var(--text3);margin-top:2px;line-height:1.4">${d}</div></div>`).join('')}
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px"><div style="font-size:20px;margin-bottom:4px">📖</div><div style="font-size:12px;font-weight:700;color:var(--text)">Diary</div><div style="font-size:11px;color:var(--text3);margin-top:2px;line-height:1.4">Write daily entries and track your mood</div></div>
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px"><div style="font-size:20px;margin-bottom:4px">🎯</div><div style="font-size:12px;font-weight:700;color:var(--text)">Goals</div><div style="font-size:11px;color:var(--text3);margin-top:2px;line-height:1.4">Set daily ambitions and build streaks</div></div>
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px"><div style="font-size:20px;margin-bottom:4px">📝</div><div style="font-size:12px;font-weight:700;color:var(--text)">Notebook</div><div style="font-size:11px;color:var(--text3);margin-top:2px;line-height:1.4">Capture ideas, plans, and reflections</div></div>
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px"><div style="font-size:20px;margin-bottom:4px">🎵</div><div style="font-size:12px;font-weight:700;color:var(--text)">Music</div><div style="font-size:11px;color:var(--text3);margin-top:2px;line-height:1.4">Play your own music while you work</div></div>
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px"><div style="font-size:20px;margin-bottom:4px">🖼</div><div style="font-size:12px;font-weight:700;color:var(--text)">Gallery</div><div style="font-size:11px;color:var(--text3);margin-top:2px;line-height:1.4">Build a vision board and memory wall</div></div>
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px"><div style="font-size:20px;margin-bottom:4px">⏰</div><div style="font-size:12px;font-weight:700;color:var(--text)">Alarms</div><div style="font-size:11px;color:var(--text3);margin-top:2px;line-height:1.4">Set alarms and reminders that actually work</div></div>
         </div>
         <button class="btn btn-accent" style="width:100%;padding:13px;font-size:14px;font-weight:700" onclick="obNext(2)">Get started →</button>
       </div>
