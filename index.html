@@ -35,6 +35,7 @@ html,body{height:100%;font-family:'Inter',system-ui,sans-serif;background:#0b141
 ::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:99px}
+@media(display-mode:standalone){#pwa-install-btn{display:none!important}}
 
 .app{display:flex;height:100vh;width:100vw;overflow:hidden}
 
@@ -713,6 +714,9 @@ input[type=range]::-moz-range-progress{background:var(--accent3);border-radius:9
       <div class="nav-section-label">Identity</div>
       <div class="nav-item" data-section="aay" onclick="switchSection('aay',this)"><i class="ti ti-sparkles"></i><span>All about you</span></div>
       <div class="nav-section-label">More</div>
+      <div class="nav-item" data-section="support" onclick="switchSection('support',this)"><i class="ti ti-heart-handshake"></i><span>Support Dev</span></div>
+      <div class="nav-item" data-section="about" onclick="switchSection('about',this)"><i class="ti ti-info-circle"></i><span>About</span></div>
+      <div class="nav-item" data-section="privacy" onclick="switchSection('privacy',this)"><i class="ti ti-shield-check"></i><span>Privacy & Terms</span></div>
       <div class="nav-item" data-section="trash" onclick="switchSection('trash',this)"><i class="ti ti-trash"></i><span>Trash</span></div>
     </nav>
     <div class="profile-area">
@@ -1203,6 +1207,168 @@ input[type=range]::-moz-range-progress{background:var(--accent3);border-radius:9
           <button class="btn" onclick="emptyTrash()" style="color:#f09090;border-color:rgba(240,144,144,0.3)"><i class="ti ti-trash-x"></i> Empty trash</button>
         </div>
         <div class="card"><div id="trash-list"></div></div>
+      </section>
+
+
+      <!-- SUPPORT DEV -->
+      <section class="section" id="s-support">
+        <div style="max-width:560px;margin:0 auto">
+          <div style="text-align:center;padding:24px 0 20px">
+            <div style="font-size:40px;margin-bottom:10px">🌿</div>
+            <div style="font-size:20px;font-weight:700;color:var(--text)">Support Sanctuary</div>
+            <div style="font-size:13px;color:var(--text3);margin-top:6px;line-height:1.6">Sanctuary is built and maintained by one developer in Kenya.<br>If it's added value to your life, consider supporting its growth.</div>
+          </div>
+
+          <!-- M-Pesa -->
+          <div class="card" style="margin-bottom:14px">
+            <div class="card-header"><span class="card-title"><i class="ti ti-brand-mastercard"></i> M-Pesa (Kenya)</span></div>
+            <div style="text-align:center;padding:10px 0 16px">
+              <div style="font-size:13px;color:var(--text2);margin-bottom:14px">Send via M-Pesa Till or Paybill</div>
+              <div style="display:inline-flex;align-items:center;gap:12px;background:rgba(76,175,110,0.1);border:1px solid rgba(76,175,110,0.3);border-radius:12px;padding:16px 24px;margin-bottom:10px">
+                <div style="font-size:32px">📱</div>
+                <div style="text-align:left">
+                  <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.8px">Send to number</div>
+                  <div style="font-size:24px;font-weight:800;color:var(--accent3);letter-spacing:2px">0712 345 678</div>
+                  <div style="font-size:11px;color:var(--text3);margin-top:2px">Name: Sanctuary Dev</div>
+                </div>
+              </div>
+              <div style="font-size:11px;color:var(--text3)">Any amount is appreciated 🙏</div>
+            </div>
+          </div>
+
+          <!-- PayPal -->
+          <div class="card" style="margin-bottom:14px">
+            <div class="card-header"><span class="card-title"><i class="ti ti-brand-paypal"></i> PayPal (International)</span></div>
+            <div style="text-align:center;padding:10px 0 16px">
+              <div style="font-size:13px;color:var(--text2);margin-bottom:14px">Support from anywhere in the world</div>
+              <a href="https://paypal.me/yourpaypallink" target="_blank" style="display:inline-flex;align-items:center;gap:10px;background:#003087;color:#fff;text-decoration:none;padding:12px 28px;border-radius:10px;font-size:14px;font-weight:700;transition:all 0.2s" onmouseover="this.style.background='#002070'" onmouseout="this.style.background='#003087'">
+                <i class="ti ti-brand-paypal" style="font-size:18px"></i> Donate via PayPal
+              </a>
+            </div>
+          </div>
+
+          <!-- Intasend -->
+          <div class="card" style="margin-bottom:14px">
+            <div class="card-header"><span class="card-title"><i class="ti ti-credit-card"></i> Card / Intasend</span></div>
+            <div style="text-align:center;padding:10px 0 16px">
+              <div style="font-size:13px;color:var(--text2);margin-bottom:14px">Pay with Visa, Mastercard or M-Pesa online</div>
+              <a href="https://intasend.com/pay/your-link" target="_blank" style="display:inline-flex;align-items:center;gap:10px;background:var(--accent2);color:#fff;text-decoration:none;padding:12px 28px;border-radius:10px;font-size:14px;font-weight:700;transition:all 0.2s" onmouseover="this.style.background='var(--accent)'" onmouseout="this.style.background='var(--accent2)'">
+                <i class="ti ti-credit-card" style="font-size:18px"></i> Pay with Card / M-Pesa
+              </a>
+            </div>
+          </div>
+
+          <div style="text-align:center;font-size:12px;color:var(--text3);padding:8px 0 20px;line-height:1.7">
+            Every contribution goes directly toward keeping Sanctuary free,<br>fast, and continuously improved. Thank you 💚
+          </div>
+        </div>
+      </section>
+
+      <!-- ABOUT -->
+      <section class="section" id="s-about">
+        <div style="max-width:560px;margin:0 auto">
+          <div style="text-align:center;padding:24px 0 20px">
+            <div style="width:72px;height:72px;border-radius:18px;background:linear-gradient(135deg,var(--accent2),var(--accent));display:flex;align-items:center;justify-content:center;font-size:34px;margin:0 auto 14px">🌿</div>
+            <div style="font-size:22px;font-weight:800;color:var(--text)">Sanctuary</div>
+            <div style="font-size:12px;color:var(--accent3);margin-top:4px;font-weight:600">Version 1.0.0</div>
+            <div style="font-size:13px;color:var(--text3);margin-top:8px;line-height:1.7">Your personal sanctuary — everywhere you go.<br>Built with love in Kenya 🇰🇪</div>
+          </div>
+
+          <div class="card" style="margin-bottom:14px">
+            <div class="card-header"><span class="card-title"><i class="ti ti-info-circle"></i> What is Sanctuary?</span></div>
+            <div style="font-size:13px;color:var(--text2);line-height:1.8">
+              Sanctuary is a personal wellness and productivity app built for people who want one calm, private place to journal, plan, reflect, and grow. No ads. No tracking. Your data is yours.
+            </div>
+          </div>
+
+          <div class="card" style="margin-bottom:14px">
+            <div class="card-header"><span class="card-title"><i class="ti ti-layers"></i> Features</span></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+              ${['📖 Diary & journaling','🎯 Daily goals','📝 Notebook','📊 Analytics','🖼 Gallery & vision board','🎵 Music player','⏰ Alarms & reminders','🌿 Mindful breaks','🏆 Achievements','🗺 Life journey','🧠 Mind game','👤 Personal profile'].map(f=>`<div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2);padding:6px 0;border-bottom:1px solid var(--border)">${f}</div>`).join('')}
+            </div>
+          </div>
+
+          <div class="card" style="margin-bottom:14px">
+            <div class="card-header"><span class="card-title"><i class="ti ti-shield"></i> Your data</span></div>
+            <div style="font-size:13px;color:var(--text2);line-height:1.8">
+              All your data is stored securely in your own account. We never sell, share, or advertise with your data. You can delete your account and all data at any time.
+            </div>
+          </div>
+
+          <div class="card" style="margin-bottom:14px">
+            <div class="card-header"><span class="card-title"><i class="ti ti-settings"></i> Account</span></div>
+            <button onclick="deleteAccount()" style="width:100%;padding:12px;background:rgba(240,80,80,0.07);border:1px solid rgba(240,80,80,0.2);border-radius:8px;color:rgba(240,144,144,0.85);font-size:13px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.15s" onmouseover="this.style.background='rgba(240,80,80,0.12)'" onmouseout="this.style.background='rgba(240,80,80,0.07)'">
+              <i class="ti ti-user-x"></i> Delete my account & all data
+            </button>
+            <div style="font-size:11px;color:var(--text3);text-align:center;margin-top:8px">This is permanent and cannot be undone.</div>
+          </div>
+
+          <div style="text-align:center;font-size:11px;color:var(--text3);padding:8px 0 20px;line-height:1.8">
+            Made in Kenya 🇰🇪 · <span style="cursor:pointer;color:var(--accent)" onclick="switchSection('privacy',document.querySelector('[data-section=privacy]'))">Privacy Policy</span> · <span style="cursor:pointer;color:var(--accent)" onclick="switchSection('support',document.querySelector('[data-section=support]'))">Support Dev</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- PRIVACY & TERMS -->
+      <section class="section" id="s-privacy">
+        <div style="max-width:640px;margin:0 auto;padding-bottom:40px">
+          <div style="font-size:20px;font-weight:800;color:var(--text);margin-bottom:4px">Privacy Policy & Terms</div>
+          <div style="font-size:11px;color:var(--text3);margin-bottom:20px">Last updated: June 2026</div>
+
+          <div class="card" style="margin-bottom:14px">
+            <div class="card-header"><span class="card-title"><i class="ti ti-database"></i> What we collect</span></div>
+            <div style="font-size:13px;color:var(--text2);line-height:1.9">
+              <div style="margin-bottom:8px">• <strong style="color:var(--text)">Account info:</strong> Your email address, used only for login and account recovery.</div>
+              <div style="margin-bottom:8px">• <strong style="color:var(--text)">App data:</strong> Everything you create in Sanctuary (diary entries, notes, goals, photos, music) is stored in your private account.</div>
+              <div>• <strong style="color:var(--text)">Device data:</strong> We store app preferences (theme, layout) locally on your device.</div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-bottom:14px">
+            <div class="card-header"><span class="card-title"><i class="ti ti-eye-off"></i> What we never do</span></div>
+            <div style="font-size:13px;color:var(--text2);line-height:1.9">
+              <div style="margin-bottom:8px">• We <strong style="color:#f09090">never</strong> sell your data to anyone.</div>
+              <div style="margin-bottom:8px">• We <strong style="color:#f09090">never</strong> show you ads.</div>
+              <div style="margin-bottom:8px">• We <strong style="color:#f09090">never</strong> read your diary entries, notes, or personal content.</div>
+              <div>• We <strong style="color:#f09090">never</strong> share your data with third parties except the services that power the app (listed below).</div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-bottom:14px">
+            <div class="card-header"><span class="card-title"><i class="ti ti-plug"></i> Third-party services</span></div>
+            <div style="font-size:13px;color:var(--text2);line-height:1.9">
+              <div style="margin-bottom:8px">• <strong style="color:var(--text)">Supabase</strong> — stores your account and app data securely. <a href="https://supabase.com/privacy" target="_blank" style="color:var(--accent)">Their privacy policy ↗</a></div>
+              <div style="margin-bottom:8px">• <strong style="color:var(--text)">Cloudflare R2</strong> — stores your uploaded files (photos, music). <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" style="color:var(--accent)">Their privacy policy ↗</a></div>
+              <div>• <strong style="color:var(--text)">Vercel</strong> — hosts the app. <a href="https://vercel.com/legal/privacy-policy" target="_blank" style="color:var(--accent)">Their privacy policy ↗</a></div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-bottom:14px">
+            <div class="card-header"><span class="card-title"><i class="ti ti-user-check"></i> Your rights</span></div>
+            <div style="font-size:13px;color:var(--text2);line-height:1.9">
+              <div style="margin-bottom:8px">• <strong style="color:var(--text)">Access:</strong> All your data is visible to you in the app at any time.</div>
+              <div style="margin-bottom:8px">• <strong style="color:var(--text)">Delete:</strong> You can delete your account and all associated data at any time from About → Delete account.</div>
+              <div>• <strong style="color:var(--text)">Export:</strong> Contact us and we will provide an export of your data.</div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-bottom:14px">
+            <div class="card-header"><span class="card-title"><i class="ti ti-file-text"></i> Terms of use</span></div>
+            <div style="font-size:13px;color:var(--text2);line-height:1.9">
+              <div style="margin-bottom:8px">• Sanctuary is provided as-is. We do our best to keep it running but cannot guarantee 100% uptime.</div>
+              <div style="margin-bottom:8px">• You are responsible for the content you create in your account.</div>
+              <div style="margin-bottom:8px">• Do not use Sanctuary for anything illegal or harmful.</div>
+              <div>• We reserve the right to terminate accounts that violate these terms.</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><span class="card-title"><i class="ti ti-mail"></i> Contact</span></div>
+            <div style="font-size:13px;color:var(--text2);line-height:1.9">
+              Questions about your data or these terms? Email us at <a href="mailto:hello@sanctuary.app" style="color:var(--accent)">hello@sanctuary.app</a>
+            </div>
+          </div>
+        </div>
       </section>
 
     </div><!-- /content-area -->
@@ -1831,8 +1997,8 @@ function setGreeting() {
 // ─────────────────────────────────────────────
 // NAVIGATION
 // ─────────────────────────────────────────────
-const sectionTitles = { dashboard:'Dashboard', diary:'Diary', notes:'Notebook', goals:'Daily ambitions', projects:'Projects', breaks:'Breaks', aay:'All about you', journey:'Life journey', gallery:'Gallery', analytics:'Analytics', music:'Music', watch:'Watch & Alarms', game:'Mind game', trash:'Trash' };
-const addBtnLabels = { dashboard:'New', diary:'New entry', notes:'New note', goals:'Add goal', projects:'New project', breaks:'Add activity', aay:'Add item', journey:'Add highlight', gallery:'Add photo', analytics:'—', music:'Upload', watch:'Set alarm', game:'New game', trash:'Empty trash' };
+const sectionTitles = { dashboard:'Dashboard', diary:'Diary', notes:'Notebook', goals:'Daily ambitions', projects:'Projects', breaks:'Breaks', aay:'All about you', journey:'Life journey', gallery:'Gallery', analytics:'Analytics', music:'Music', watch:'Watch & Alarms', game:'Mind game', trash:'Trash', support:'Support Dev 💚', about:'About Sanctuary', privacy:'Privacy & Terms' };
+const addBtnLabels = { dashboard:'New', diary:'New entry', notes:'New note', goals:'Add goal', projects:'New project', breaks:'Add activity', aay:'Add item', journey:'Add highlight', gallery:'Add photo', analytics:'—', music:'Upload', watch:'Set alarm', game:'New game', trash:'Empty trash', support:'—', about:'—', privacy:'—' };
 
 function switchSection(id, navEl) {
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
@@ -2173,6 +2339,7 @@ function renderGoals() {
   if(!list) return;
   const done = state.goals.filter(g=>g.done).length;
   const sg = document.getElementById('stat-goals'); if(sg) sg.textContent=done+'/'+state.goals.length;
+  if(!state.goals.length){list.innerHTML=`<div style="text-align:center;padding:32px 20px;color:var(--text3)"><div style="font-size:40px;margin-bottom:10px">🎯</div><div style="font-size:14px;font-weight:600;color:var(--text2);margin-bottom:6px">No goals yet</div><div style="font-size:12px;line-height:1.6;margin-bottom:16px">Set your first ambition for today.<br>Small steps build big streaks.</div><button class="btn btn-accent" onclick="openAddGoal()"><i class="ti ti-plus"></i> Add your first goal</button></div>`;const sg=document.getElementById('stat-goals');if(sg)sg.textContent='0/0';renderDashTasks();return;}
   list.innerHTML = state.goals.map(g=>`
     <div class="task-row">
       <div class="chk ${g.done?'done':''}" onclick="toggleGoal(${g.id})">${g.done?'✓':''}</div>
@@ -2180,12 +2347,18 @@ function renderGoals() {
         <div class="task-text ${g.done?'done':''}">${g.text}</div>
         <div class="task-meta">${g.time||'Today'} · <span class="task-tag ${TAG_CLS[g.tag]||'tag-blue'}">${g.tag}</span></div>
       </div>
-      <button class="btn btn-sm" onclick="removeGoal(${g.id})" style="opacity:0.4;flex-shrink:0"><i class="ti ti-x"></i></button>
+      <button class="btn btn-sm" onclick="editGoal(${g.id})" style="opacity:0.5;flex-shrink:0"><i class="ti ti-edit"></i></button>
+      <button class="btn btn-sm" onclick="removeGoal(${g.id})" style="opacity:0.4;flex-shrink:0;color:#f09090"><i class="ti ti-x"></i></button>
     </div>`).join('');
   renderDashTasks();
 }
 function toggleGoal(id) { const g=state.goals.find(x=>x.id===id); if(g){g.done=!g.done;renderGoals();recalculateStreak();save();} }
 function removeGoal(id) { const g=state.goals.find(x=>x.id===id); if(g)moveToTrash('goal',g); state.goals=state.goals.filter(x=>x.id!==id); renderGoals(); save(); }
+async function editGoal(id){
+  const g=state.goals.find(x=>x.id===id); if(!g)return;
+  const val=await promptDialog('Edit goal',g.text,g.text); if(val===null)return;
+  if(val.trim()) { g.text=val.trim(); renderGoals(); save(); toast('Goal updated'); }
+}
 function openAddGoal() { document.getElementById('add-goal-form').style.display='flex'; document.getElementById('new-goal-input').focus(); }
 function closeAddGoal() { document.getElementById('add-goal-form').style.display='none'; document.getElementById('new-goal-input').value=''; }
 function saveNewGoal() {
@@ -2229,6 +2402,7 @@ function renderNotes(filter='',tagFilter='') {
   let notes=state.notes;
   if(filter) notes=notes.filter(n=>n.title.toLowerCase().includes(filter)||n.content.toLowerCase().includes(filter));
   if(tagFilter) notes=notes.filter(n=>n.tag===tagFilter);
+  if(!notes.length&&!filter&&!tagFilter){list.innerHTML=`<div style="text-align:center;padding:40px 20px;color:var(--text3)"><div style="font-size:40px;margin-bottom:10px">📝</div><div style="font-size:14px;font-weight:600;color:var(--text2);margin-bottom:6px">Your notebook is empty</div><div style="font-size:12px;line-height:1.6;margin-bottom:16px">Capture ideas, plans, reflections — anything on your mind.</div><button class="btn btn-accent" onclick="openNoteModal()"><i class="ti ti-plus"></i> Write your first note</button></div>`;return;}
   list.innerHTML = notes.map(n=>`
     <div class="note-card" onclick="openEditNote(${n.id})">
       <div class="note-title">${n.title}${n.attachments&&n.attachments.length?` <i class="ti ti-paperclip" style="font-size:12px;color:var(--accent)"></i>`:''}</div>
@@ -2607,12 +2781,37 @@ function setNotesLayout(layout,el) {
 function renderDiary() {
   const list=document.getElementById('diary-list'); if(!list) return;
   const se=document.getElementById('stat-entries'); if(se) se.textContent=state.diaryEntries.length;
-  list.innerHTML=state.diaryEntries.map(e=>`
+  if(!state.diaryEntries.length){const se2=document.getElementById('stat-entries');if(se2)se2.textContent='0';list.innerHTML=`<div style="text-align:center;padding:40px 20px;color:var(--text3)"><div style="font-size:40px;margin-bottom:10px">📖</div><div style="font-size:14px;font-weight:600;color:var(--text2);margin-bottom:6px">No diary entries yet</div><div style="font-size:12px;line-height:1.6;margin-bottom:16px">Start writing above — even a few lines a day<br>builds a powerful record of your life.</div></div>`;return;}
+  list.innerHTML=state.diaryEntries.map((e,i)=>`
     <div class="note-card">
-      <div class="note-title">${e.date} <span style="margin-left:6px">${e.mood}</span></div>
-      <div style="font-size:11px;color:var(--accent);margin-bottom:4px;font-weight:600">${e.moodLabel}</div>
+      <div style="display:flex;align-items:flex-start;justify-content:space-between">
+        <div>
+          <div class="note-title">${e.date} <span style="margin-left:6px">${e.mood}</span></div>
+          <div style="font-size:11px;color:var(--accent);margin-bottom:4px;font-weight:600">${e.moodLabel}</div>
+        </div>
+        <div style="display:flex;gap:4px;flex-shrink:0">
+          <button class="btn btn-sm" onclick="editDiaryEntry(${i})"><i class="ti ti-edit"></i></button>
+          <button class="btn btn-sm" onclick="deleteDiaryEntry(${i})" style="color:#f09090;opacity:0.6"><i class="ti ti-trash"></i></button>
+        </div>
+      </div>
       <div class="note-preview">${e.content}</div>
     </div>`).join('');
+}
+function editDiaryEntry(idx){
+  const e=state.diaryEntries[idx];if(!e)return;
+  const editor=document.getElementById('diary-editor');
+  editor.innerText=e.content;
+  editor.focus();
+  state._diaryEditIdx=idx;
+  toast('Editing entry — save when done');
+  switchSection('diary',document.querySelector('[data-section=diary]'));
+}
+function deleteDiaryEntry(idx){
+  confirmDialog('Delete this diary entry?').then(ok=>{
+    if(!ok)return;
+    state.diaryEntries.splice(idx,1);
+    renderDiary();save();toast('Entry deleted');
+  });
 }
 function fmtDoc(cmd,val){document.execCommand(cmd,false,val||null);document.getElementById('diary-editor').focus();}
 function clearEditor(){document.getElementById('diary-editor').innerHTML='';}
@@ -2628,8 +2827,15 @@ function saveDiary() {
   const txt=editor.innerText.trim(); if(!txt){toast('Write something first',true);return;}
   const now=new Date();
   const dateStr=now.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-  state.diaryEntries.unshift({date:dateStr,mood:state.currentMood.emoji,moodLabel:state.currentMood.label+' '+state.currentMood.emoji,content:txt.substring(0,200)+(txt.length>200?'…':''),savedAt:now.toISOString()});
-  clearEditor(); renderDiary(); recalculateStreak(); save(); toast('Entry saved! 📖');
+  if(state._diaryEditIdx!==undefined){
+    const e=state.diaryEntries[state._diaryEditIdx];
+    if(e){e.content=txt.substring(0,200)+(txt.length>200?'…':'');e.mood=state.currentMood.emoji;e.moodLabel=state.currentMood.label+' '+state.currentMood.emoji;}
+    state._diaryEditIdx=undefined;
+    clearEditor();renderDiary();save();toast('Entry updated! 📖');
+  } else {
+    state.diaryEntries.unshift({date:dateStr,mood:state.currentMood.emoji,moodLabel:state.currentMood.label+' '+state.currentMood.emoji,content:txt.substring(0,200)+(txt.length>200?'…':''),savedAt:now.toISOString()});
+    clearEditor();renderDiary();recalculateStreak();save();toast('Entry saved! 📖');
+  }
 }
 function saveDashJournal() {
   const txt=document.getElementById('dash-journal').value.trim(); if(!txt){toast('Write something first',true);return;}
@@ -2644,6 +2850,7 @@ function saveDashJournal() {
 // ─────────────────────────────────────────────
 function renderProjects() {
   const list=document.getElementById('projects-list'); if(!list) return;
+  if(!state.projects.length){list.innerHTML=`<div style="text-align:center;padding:40px 20px;color:var(--text3)"><div style="font-size:40px;margin-bottom:10px">📋</div><div style="font-size:14px;font-weight:600;color:var(--text2);margin-bottom:6px">No projects yet</div><div style="font-size:12px;line-height:1.6;margin-bottom:16px">Track your work, side projects, or any multi-step goal<br>with milestones and progress.</div><button class="btn btn-accent" onclick="openModal('project-modal')"><i class="ti ti-plus"></i> Create your first project</button></div>`;return;}
   list.innerHTML=`<div style="display:flex;justify-content:flex-end;margin-bottom:12px"><button class="btn btn-accent" onclick="openModal('project-modal')"><i class="ti ti-plus"></i> New project</button></div>`+
     state.projects.map(p=>{
       const steps=p.steps||[];
@@ -2660,7 +2867,8 @@ function renderProjects() {
           ${steps.map((s,si)=>`<div class="task-row">
             <div class="chk ${s.done?'done':''}" onclick="toggleStep(${p.id},${si})">${s.done?'✓':''}</div>
             <div class="task-body"><div class="task-text ${s.done?'done':''}">${s.text}</div></div>
-            <button class="btn btn-sm" onclick="removeStep(${p.id},${si})" style="opacity:0.3"><i class="ti ti-x"></i></button>
+            <button class="btn btn-sm" onclick="editStep(${p.id},${si})" style="opacity:0.4"><i class="ti ti-edit"></i></button>
+            <button class="btn btn-sm" onclick="removeStep(${p.id},${si})" style="opacity:0.3;color:#f09090"><i class="ti ti-x"></i></button>
           </div>`).join('')}
           <div class="add-task-form">
             <input type="text" placeholder="Add a step…" id="step-input-${p.id}" onkeydown="if(event.key==='Enter')addStep(${p.id})" style="flex:1;font-size:12px">
@@ -2690,6 +2898,11 @@ function renderProjects() {
 function toggleStep(pid,si){const p=state.projects.find(x=>x.id===pid);if(!p||!p.steps)return;p.steps[si].done=!p.steps[si].done;renderProjects();renderDashProjects();save();}
 function addStep(pid){const p=state.projects.find(x=>x.id===pid);if(!p)return;const inp=document.getElementById('step-input-'+pid);const txt=inp?inp.value.trim():'';if(!txt)return;if(!p.steps)p.steps=[];p.steps.push({text:txt,done:false});renderProjects();renderDashProjects();save();toast('Step added');}
 function removeStep(pid,si){const p=state.projects.find(x=>x.id===pid);if(!p||!p.steps)return;p.steps.splice(si,1);renderProjects();renderDashProjects();save();}
+async function editStep(pid,si){
+  const p=state.projects.find(x=>x.id===pid);if(!p||!p.steps||!p.steps[si])return;
+  const val=await promptDialog('Edit step',p.steps[si].text,p.steps[si].text);if(val===null)return;
+  if(val.trim()){p.steps[si].text=val.trim();renderProjects();renderDashProjects();save();toast('Step updated');}
+}
 function saveProject(){const name=document.getElementById('proj-name-input').value.trim();if(!name){toast('Add a name',true);return;}const desc=document.getElementById('proj-desc-input').value.trim();const deadline=document.getElementById('proj-deadline-input').value||'TBD';const color=document.getElementById('proj-color-input').value;state.projects.push({id:Date.now(),name,desc,deadline,color,steps:[]});closeModal('project-modal');renderProjects();renderDashProjects();save();toast('Project created!');}
 async function deleteProject(id){if(!await confirmDialog('Delete project? Goes to Trash.'))return;const p=state.projects.find(x=>x.id===id);if(p)moveToTrash('project',p);state.projects=state.projects.filter(x=>x.id!==id);renderProjects();renderDashProjects();save();toast('Moved to trash');}
 function renderDashProjects(){const el=document.getElementById('dash-projects');if(!el)return;el.innerHTML=state.projects.map(p=>{const pct=p.steps&&p.steps.length?Math.round(p.steps.filter(s=>s.done).length/p.steps.length*100):0;return`<div class="task-row" style="padding:10px 0"><div class="task-body" style="flex:1"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px"><span style="font-size:13px;font-weight:600;color:var(--text)">${p.name}</span><span style="font-size:12px;font-weight:700;color:var(--accent3)">${pct}%</span></div><div class="prog-wrap"><div class="prog-fill ${p.color||'fill-green'}" style="width:${pct}%"></div></div></div></div>`;}).join('')||'<div style="font-size:12px;color:var(--text3);padding:8px 0">No projects yet.</div>';}
@@ -3033,16 +3246,67 @@ async function confirmDeletePlace(id){if(!await confirmDialog('Delete this place
 // ─────────────────────────────────────────────
 // ACHIEVEMENTS / GROWTH / MILESTONES
 // ─────────────────────────────────────────────
-function renderAchievements(){const el=document.getElementById('achievements-grid');if(!el)return;el.innerHTML=state.achievements.map(a=>`<div class="ach-badge"><button onclick="deleteAch(${a.id})" style="position:absolute;top:4px;right:4px;background:none;border:none;color:var(--text3);cursor:pointer;font-size:11px;opacity:0.5"><i class="ti ti-x"></i></button><div class="ach-icon">${a.icon}</div><div class="ach-name">${a.name}</div><div class="ach-date">${a.date}</div></div>`).join('')+`<div class="ach-badge" style="cursor:pointer;opacity:0.4" onclick="openModal('achievement-modal')"><div class="ach-icon"><i class="ti ti-plus"></i></div><div class="ach-name">Add new</div></div>`;}
-function saveAchievement(){const name=document.getElementById('ach-name-input').value.trim();if(!name){toast('Add a title',true);return;}const icon=document.getElementById('ach-icon-input').value.trim()||'🏆';state.achievements.push({id:Date.now(),name,icon,date:new Date().toLocaleDateString('en-GB',{month:'short',year:'numeric'})});closeModal('achievement-modal');renderAchievements();save();toast('Achievement unlocked!');}
+function renderAchievements(){const el=document.getElementById('achievements-grid');if(!el)return;el.innerHTML=state.achievements.map(a=>`<div class="ach-badge"><button onclick="editAch(${a.id})" style="position:absolute;top:4px;left:4px;background:none;border:none;color:var(--text3);cursor:pointer;font-size:11px;opacity:0.5"><i class="ti ti-edit"></i></button><button onclick="deleteAch(${a.id})" style="position:absolute;top:4px;right:4px;background:none;border:none;color:var(--text3);cursor:pointer;font-size:11px;opacity:0.5"><i class="ti ti-x"></i></button><div class="ach-icon">${a.icon}</div><div class="ach-name">${a.name}</div><div class="ach-date">${a.date}</div></div>`).join('')+`<div class="ach-badge" style="cursor:pointer;opacity:0.4" onclick="openModal('achievement-modal')"><div class="ach-icon"><i class="ti ti-plus"></i></div><div class="ach-name">Add new</div></div>`;}
+function saveAchievement(){
+  const name=document.getElementById('ach-name-input').value.trim();if(!name){toast('Add a title',true);return;}
+  const icon=document.getElementById('ach-icon-input').value.trim()||'🏆';
+  if(state._achEditId){
+    const a=state.achievements.find(x=>x.id===state._achEditId);
+    if(a){a.name=name;a.icon=icon;}
+    state._achEditId=null;
+    document.getElementById('achievement-modal').querySelector('.modal-title').textContent='Add achievement';
+    toast('Achievement updated!');
+  } else {
+    state.achievements.push({id:Date.now(),name,icon,date:new Date().toLocaleDateString('en-GB',{month:'short',year:'numeric'})});
+    toast('Achievement unlocked!');
+  }
+  closeModal('achievement-modal');renderAchievements();save();
+}
 function deleteAch(id){const a=state.achievements.find(x=>x.id===id);if(a)moveToTrash('achievement',a);state.achievements=state.achievements.filter(x=>x.id!==id);renderAchievements();save();}
-function renderGrowth(){const el=document.getElementById('growth-list');if(!el)return;el.innerHTML=state.growth.map(g=>`<div class="task-row"><div class="chk done" style="cursor:default">✓</div><div class="task-body"><div class="task-text">${g.text}</div><div class="task-meta">${g.date}</div></div><button class="btn btn-sm" onclick="removeGrowth(${g.id})" style="opacity:0.4;flex-shrink:0"><i class="ti ti-x"></i></button></div>`).join('')||'<div style="font-size:12px;color:var(--text3);padding:8px 0">No growth records yet.</div>';}
+async function editAch(id){
+  const a=state.achievements.find(x=>x.id===id);if(!a)return;
+  document.getElementById('ach-name-input').value=a.name;
+  document.getElementById('ach-icon-input').value=a.icon;
+  document.getElementById('achievement-modal').querySelector('.modal-title').textContent='Edit achievement';
+  state._achEditId=id;
+  openModal('achievement-modal');
+}
+function renderGrowth(){const el=document.getElementById('growth-list');if(!el)return;el.innerHTML=state.growth.map(g=>`<div class="task-row"><div class="chk done" style="cursor:default">✓</div><div class="task-body"><div class="task-text">${g.text}</div><div class="task-meta">${g.date}</div></div><button class="btn btn-sm" onclick="editGrowth(${g.id})" style="opacity:0.5;flex-shrink:0"><i class="ti ti-edit"></i></button><button class="btn btn-sm" onclick="removeGrowth(${g.id})" style="opacity:0.4;flex-shrink:0;color:#f09090"><i class="ti ti-x"></i></button></div>`).join('')||'<div style="font-size:12px;color:var(--text3);padding:8px 0">No growth records yet.</div>';}
 function addGrowth(){const inp=document.getElementById('growth-input');const v=inp.value.trim();if(!v)return;state.growth.unshift({id:Date.now(),text:v,date:'Just now'});inp.value='';renderGrowth();save();toast('Growth recorded!');}
 function removeGrowth(id){const g=state.growth.find(x=>x.id===id);if(g)moveToTrash('growth',g);state.growth=state.growth.filter(x=>x.id!==id);renderGrowth();save();}
-function renderTimeline(){const el=document.getElementById('journey-timeline');if(!el)return;const sorted=[...state.milestones].sort((a,b)=>new Date(b.date)-new Date(a.date));el.innerHTML=sorted.map(m=>{const d=new Date(m.date);const ds=isNaN(d)?m.date:d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});return`<div class="tl-item"><div class="tl-dot">●</div><div class="tl-date">${ds} <button onclick="deleteMilestone(${m.id})" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:11px;opacity:0.5;margin-left:6px"><i class="ti ti-x"></i></button></div><div class="tl-title">${m.title}</div><div class="tl-desc">${m.desc||''}</div></div>`;}).join('')||'<div style="font-size:12px;color:var(--text3)">No highlights yet.</div>';}
+async function editGrowth(id){
+  const g=state.growth.find(x=>x.id===id);if(!g)return;
+  const val=await promptDialog('Edit growth record',g.text,g.text);if(val===null)return;
+  if(val.trim()){g.text=val.trim();renderGrowth();save();toast('Updated');}
+}
+function renderTimeline(){const el=document.getElementById('journey-timeline');if(!el)return;const sorted=[...state.milestones].sort((a,b)=>new Date(b.date)-new Date(a.date));el.innerHTML=sorted.map(m=>{const d=new Date(m.date);const ds=isNaN(d)?m.date:d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});return`<div class="tl-item"><div class="tl-dot">●</div><div class="tl-date">${ds} <button onclick="editMilestone(${m.id})" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:11px;opacity:0.5;margin-left:4px"><i class="ti ti-edit"></i></button><button onclick="deleteMilestone(${m.id})" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:11px;opacity:0.5;margin-left:2px"><i class="ti ti-x"></i></button></div><div class="tl-title">${m.title}</div><div class="tl-desc">${m.desc||''}</div></div>`;}).join('')||'<div style="font-size:12px;color:var(--text3)">No highlights yet.</div>';}
 function openMilestoneModal(){document.getElementById('mile-date-input').value=new Date().toISOString().slice(0,10);document.getElementById('mile-title-input').value='';document.getElementById('mile-desc-input').value='';openModal('milestone-modal');}
-function saveMilestone(){const title=document.getElementById('mile-title-input').value.trim();if(!title){toast('Add a title',true);return;}const date=document.getElementById('mile-date-input').value||new Date().toISOString().slice(0,10);const desc=document.getElementById('mile-desc-input').value.trim();state.milestones.push({id:Date.now(),date,title,desc});closeModal('milestone-modal');renderTimeline();save();toast('Added to timeline!');}
+function saveMilestone(){
+  const title=document.getElementById('mile-title-input').value.trim();if(!title){toast('Add a title',true);return;}
+  const date=document.getElementById('mile-date-input').value||new Date().toISOString().slice(0,10);
+  const desc=document.getElementById('mile-desc-input').value.trim();
+  if(state._mileEditId){
+    const m=state.milestones.find(x=>x.id===state._mileEditId);
+    if(m){m.title=title;m.date=date;m.desc=desc;}
+    state._mileEditId=null;
+    document.querySelector('#milestone-modal .modal-title').textContent='Add life highlight';
+    toast('Highlight updated!');
+  } else {
+    state.milestones.push({id:Date.now(),date,title,desc});
+    toast('Added to timeline!');
+  }
+  closeModal('milestone-modal');renderTimeline();save();
+}
 function deleteMilestone(id){const m=state.milestones.find(x=>x.id===id);if(m)moveToTrash('milestone',m);state.milestones=state.milestones.filter(x=>x.id!==id);renderTimeline();save();}
+function editMilestone(id){
+  const m=state.milestones.find(x=>x.id===id);if(!m)return;
+  state._mileEditId=id;
+  document.getElementById('mile-date-input').value=m.date||new Date().toISOString().slice(0,10);
+  document.getElementById('mile-title-input').value=m.title;
+  document.getElementById('mile-desc-input').value=m.desc||'';
+  document.querySelector('#milestone-modal .modal-title').textContent='Edit highlight';
+  openModal('milestone-modal');
+}
 
 // ─────────────────────────────────────────────
 // ANALYTICS
@@ -3481,6 +3745,7 @@ function renderMusicLibrary(){
       <div class="track-info"><div class="track-title">${t.title}</div><div class="track-artist">${t.artist}</div></div>
       <div class="track-dur">${fmtTime(t.duration)}</div>
       <button class="track-fav ${t.favourite?'loved':''}" onclick="event.stopPropagation();toggleFav('${t.id}')"><i class="ti ${t.favourite?'ti-heart-filled':'ti-heart'}"></i></button>
+      <button class="btn btn-sm" onclick="event.stopPropagation();editTrack('${t.id}')" title="Edit" style="font-size:11px;padding:3px 6px;opacity:0.5"><i class="ti ti-edit"></i></button>
       <button class="btn btn-sm" onclick="event.stopPropagation();addToPlaylist('${t.id}')" title="Add to playlist" style="font-size:11px;padding:3px 6px;opacity:0.5"><i class="ti ti-playlist-add"></i></button>
       <button class="track-del" onclick="event.stopPropagation();deleteTrack('${t.id}')"><i class="ti ti-trash"></i></button>
       <button class="track-more" onclick="event.stopPropagation();openTrackActionSheet('${t.id}')" title="More"><i class="ti ti-dots-vertical"></i></button>
@@ -3507,6 +3772,7 @@ function openTrackActionSheet(trackId){
   sheet.style.display='';
   sheet.innerHTML=`
     <button class="btn" style="text-align:left;width:100%" id="tas-fav"><i class="ti ${track.favourite?'ti-heart-filled':'ti-heart'}"></i> ${track.favourite?'Remove from favourites':'Add to favourites'}</button>
+    <button class="btn" style="text-align:left;width:100%" id="tas-edit"><i class="ti ti-edit"></i> Edit title / artist</button>
     <button class="btn" style="text-align:left;width:100%" id="tas-playlist"><i class="ti ti-playlist-add"></i> Add to playlist</button>
     <button class="btn" style="text-align:left;width:100%;color:#f09090" id="tas-delete"><i class="ti ti-trash"></i> Delete track</button>`;
   const okBtn=document.getElementById('prompt-modal-ok');
@@ -3514,6 +3780,7 @@ function openTrackActionSheet(trackId){
   okBtn.style.display='none';
   const cleanup=()=>{ sheet.style.display='none'; input.style.display=''; okBtn.style.display=''; cancelBtn.onclick=null; closeModal('prompt-modal'); };
   document.getElementById('tas-fav').onclick=()=>{ toggleFav(trackId); cleanup(); };
+  document.getElementById('tas-edit').onclick=()=>{ cleanup(); editTrack(trackId); };
   document.getElementById('tas-playlist').onclick=()=>{ cleanup(); addToPlaylist(trackId); };
   document.getElementById('tas-delete').onclick=()=>{ cleanup(); deleteTrack(trackId); };
   cancelBtn.onclick=cleanup;
@@ -3529,6 +3796,17 @@ function toggleFav(id){
   if(t){ t.favourite=!t.favourite; renderMusicLibrary(); renderPlaylists(); save(); }
 }
 
+async function editTrack(id){
+  const t=state.music.tracks.find(x=>x.id===id);if(!t)return;
+  const title=await promptDialog('Edit track title','Title',t.title);if(title===null)return;
+  const artist=await promptDialog('Edit artist name','Artist',t.artist);if(artist===null)return;
+  if(title.trim())t.title=title.trim();
+  if(artist.trim())t.artist=artist.trim();
+  renderMusicLibrary();
+  const cur=state.music.queue[state.music.currentIndex];
+  if(cur&&cur.id===id)updateNowPlayingUI(t);
+  save();toast('Track updated');
+}
 // Soft delete — moves to Trash (blob stays in IndexedDB until trash is emptied, so it can be restored).
 async function deleteTrack(id){
   if(!await confirmDialog('Remove this track? Goes to Trash.','Remove track'))return;
@@ -4057,13 +4335,30 @@ function saveAlarm(){
   if(!time){toast('Pick a time',true);return;}
   const label=document.getElementById('alarm-label-input').value.trim();
   const ringtoneTrackId=document.getElementById('alarm-ringtone-input').value||null;
-  state.alarms.push({id:Date.now(),time,label,on:true,ringtoneTrackId});
+  if(state._alarmEditId){
+    const a=state.alarms.find(x=>x.id===state._alarmEditId);
+    if(a){a.time=time;a.label=label;a.ringtoneTrackId=ringtoneTrackId;}
+    state._alarmEditId=null;
+    toast('Alarm updated ⏰');
+  } else {
+    state.alarms.push({id:Date.now(),time,label,on:true,ringtoneTrackId});
+    toast('Alarm set ⏰');
+  }
   document.getElementById('alarm-form').style.display='none';
-  renderAlarms();save();toast('Alarm set ⏰');
+  renderAlarms();save();
 }
-function renderAlarms(){const el=document.getElementById('alarm-list');if(!el)return;if(!state.alarms.length){el.innerHTML='<div style="font-size:12px;color:var(--text3);padding:8px 0">No alarms set.</div>';return;}el.innerHTML=state.alarms.map(a=>`<div class="alarm-item"><div style="flex:1"><div class="alarm-time-lbl">${a.time}</div>${a.label?`<div style="font-size:12px;color:var(--text3)">${a.label}</div>`:''}</div><button class="alarm-toggle ${a.on?'on':''}" onclick="toggleAlarm(${a.id})"></button><button class="btn btn-sm" onclick="deleteAlarm(${a.id})" style="opacity:0.4;margin-left:6px"><i class="ti ti-trash"></i></button></div>`).join('');}
+function renderAlarms(){const el=document.getElementById('alarm-list');if(!el)return;if(!state.alarms.length){el.innerHTML='<div style="font-size:12px;color:var(--text3);padding:8px 0">No alarms set.</div>';return;}el.innerHTML=state.alarms.map(a=>`<div class="alarm-item"><div style="flex:1"><div class="alarm-time-lbl">${a.time}</div>${a.label?`<div style="font-size:12px;color:var(--text3)">${a.label}</div>`:''}</div><button class="alarm-toggle ${a.on?'on':''}" onclick="toggleAlarm(${a.id})"></button><button class="btn btn-sm" onclick="editAlarm(${a.id})" style="opacity:0.5;margin-left:4px"><i class="ti ti-edit"></i></button><button class="btn btn-sm" onclick="deleteAlarm(${a.id})" style="opacity:0.4;margin-left:2px;color:#f09090"><i class="ti ti-trash"></i></button></div>`).join('');}
 function toggleAlarm(id){const a=state.alarms.find(x=>x.id===id);if(a){a.on=!a.on;renderAlarms();save();}}
 function deleteAlarm(id){const a=state.alarms.find(x=>x.id===id);if(a)moveToTrash('alarm',a);state.alarms=state.alarms.filter(x=>x.id!==id);renderAlarms();save();}
+function editAlarm(id){
+  const a=state.alarms.find(x=>x.id===id);if(!a)return;
+  state._alarmEditId=id;
+  const f=document.getElementById('alarm-form');f.style.display='';
+  document.getElementById('alarm-time-input').value=a.time;
+  document.getElementById('alarm-label-input').value=a.label||'';
+  _populateRingtoneSelect('alarm-ringtone-input',a.ringtoneTrackId||'');
+  document.getElementById('alarm-time-input').focus();
+}
 // Reminders UI
 function addReminder(){
   const f=document.getElementById('reminder-form');
@@ -4082,17 +4377,35 @@ function saveReminder(){
   const label=document.getElementById('reminder-label-input').value.trim();
   const repeat=document.getElementById('reminder-repeat-input').checked;
   const ringtoneTrackId=document.getElementById('reminder-ringtone-input').value||null;
-  state.reminders.push({id:Date.now(),time,label,on:true,repeat,ringtoneTrackId});
+  if(state._reminderEditId){
+    const r=state.reminders.find(x=>x.id===state._reminderEditId);
+    if(r){r.time=time;r.label=label;r.repeat=repeat;r.ringtoneTrackId=ringtoneTrackId;}
+    state._reminderEditId=null;
+    toast('Reminder updated 🔔');
+  } else {
+    state.reminders.push({id:Date.now(),time,label,on:true,repeat,ringtoneTrackId});
+    toast('Reminder set 🔔');
+  }
   document.getElementById('reminder-form').style.display='none';
-  renderReminders();save();toast('Reminder set 🔔');
+  renderReminders();save();
 }
 function renderReminders(){
   const el=document.getElementById('reminder-list');if(!el)return;
-  const active=state.reminders.map(r=>`<div class="alarm-item"><div style="flex:1"><div class="alarm-time-lbl">${r.time}</div>${r.label?`<div style="font-size:12px;color:var(--text3)">${r.label}</div>`:''}<div style="margin-top:3px">${r.repeat?'<span style="background:rgba(76,175,110,0.2);color:var(--accent3);font-size:10px;padding:1px 7px;border-radius:99px">Repeats daily</span>':'<span style="background:var(--border);color:var(--text3);font-size:10px;padding:1px 7px;border-radius:99px">One-time</span>'}</div></div><button class="alarm-toggle ${r.on?'on':''}" onclick="toggleReminder(${r.id})"></button><button class="btn btn-sm" onclick="deleteReminder(${r.id})" style="opacity:0.4;margin-left:6px"><i class="ti ti-trash"></i></button></div>`).join('');
+  const active=state.reminders.map(r=>`<div class="alarm-item"><div style="flex:1"><div class="alarm-time-lbl">${r.time}</div>${r.label?`<div style="font-size:12px;color:var(--text3)">${r.label}</div>`:''}<div style="margin-top:3px">${r.repeat?'<span style="background:rgba(76,175,110,0.2);color:var(--accent3);font-size:10px;padding:1px 7px;border-radius:99px">Repeats daily</span>':'<span style="background:var(--border);color:var(--text3);font-size:10px;padding:1px 7px;border-radius:99px">One-time</span>'}</div></div><button class="alarm-toggle ${r.on?'on':''}" onclick="toggleReminder(${r.id})"></button><button class="btn btn-sm" onclick="editReminder(${r.id})" style="opacity:0.5;margin-left:4px"><i class="ti ti-edit"></i></button><button class="btn btn-sm" onclick="deleteReminder(${r.id})" style="opacity:0.4;margin-left:2px;color:#f09090"><i class="ti ti-trash"></i></button></div>`).join('');
   const past=(state.pastReminders||[]).map(r=>{const d=new Date(r.firedAt);const ds=d.toLocaleDateString('en-GB',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});return`<div class="alarm-item" style="opacity:0.6"><div style="flex:1"><div class="alarm-time-lbl">${r.time}</div><div style="font-size:11px;color:var(--text3)">${r.label||'Reminder'} · ${ds}</div></div><button class="btn btn-sm" onclick="deletePastReminder(${r.id})" style="opacity:0.4;margin-left:6px;color:#f09090"><i class="ti ti-trash"></i></button></div>`;}).join('');
   el.innerHTML=active+(active?'':'<div style="font-size:12px;color:var(--text3);padding:8px 0">No reminders set.</div>')+(past?`<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--text3);margin-bottom:8px">Past reminders</div>${past}</div>`:'');
 }
 function toggleReminder(id){const r=state.reminders.find(x=>x.id===id);if(r){r.on=!r.on;renderReminders();save();}}
+function editReminder(id){
+  const r=state.reminders.find(x=>x.id===id);if(!r)return;
+  state._reminderEditId=id;
+  const f=document.getElementById('reminder-form');f.style.display='';
+  document.getElementById('reminder-time-input').value=r.time;
+  document.getElementById('reminder-label-input').value=r.label||'';
+  document.getElementById('reminder-repeat-input').checked=r.repeat||false;
+  _populateRingtoneSelect('reminder-ringtone-input',r.ringtoneTrackId||'');
+  document.getElementById('reminder-time-input').focus();
+}
 async function deleteReminder(id){if(!await confirmDialog('Delete this reminder?'))return;const r=state.reminders.find(x=>x.id===id);if(r)moveToTrash('reminder',r);state.reminders=state.reminders.filter(x=>x.id!==id);renderReminders();save();}
 function deletePastReminder(id){const r=state.pastReminders.find(x=>x.id===id);if(r)moveToTrash('past_reminder',r);state.pastReminders=state.pastReminders.filter(x=>x.id!==id);renderReminders();save();}
 
@@ -4108,11 +4421,126 @@ function flashPad(idx,dur){const p=document.getElementById('gp-'+idx);if(!p)retu
 function gamePadClick(idx){if(!_game.playing||!_game.accepting)return;flashPad(idx,200);_game.playerSeq.push(idx);const pos=_game.playerSeq.length-1;if(_game.playerSeq[pos]!==_game.seq[pos]){gameWrong();return;}if(_game.playerSeq.length===_game.seq.length){_game.score+=_game.seq.length*10;_game.level++;_game.speed=Math.max(250,_game.speed-20);document.getElementById('game-score').textContent=_game.score;document.getElementById('game-level').textContent=_game.level;document.getElementById('game-status').textContent='✓ Nice! Next level…';setTimeout(gameNextRound,900);}}
 function gameWrong(){_game.accepting=false;document.querySelectorAll('.game-pad').forEach(p=>p.classList.add('wrong'));document.getElementById('game-status').textContent=`✗ Game over! Score: ${_game.score}`;setTimeout(()=>document.querySelectorAll('.game-pad').forEach(p=>p.classList.remove('wrong')),600);if(_game.score>(_game.best||0)){_game.best=_game.score;state.gameBest=_game.best;document.getElementById('game-best').textContent=_game.best;save();setTimeout(()=>toast('🏆 New best: '+_game.best+'!'),700);}_game.playing=false;setTimeout(()=>{document.getElementById('game-start-btn').style.display='';document.getElementById('game-start-btn').textContent='▶ Play again';},1000);}
 
+
+// ─────────────────────────────────────────────
+// ONBOARDING
+// ─────────────────────────────────────────────
+let _obMood = { cls:'m-calm', emoji:'🍃', label:'Peaceful' };
+
+function obSetMood(btn, cls, emoji, label) {
+  document.querySelectorAll('#ob-slide-2 .mood-btn').forEach(b=>b.className='mood-btn');
+  btn.classList.add('sel', cls);
+  _obMood = {cls, emoji, label};
+}
+
+function obNext(slide) {
+  document.querySelectorAll('.ob-slide').forEach(s=>s.style.display='none');
+  document.getElementById('ob-slide-'+slide).style.display='';
+  document.querySelectorAll('.ob-dot').forEach((d,i)=>{
+    d.style.width = (i+1)===slide ? '24px' : '6px';
+    d.style.background = (i+1)===slide ? 'var(--accent)' : 'var(--border2)';
+  });
+}
+
+function obFinish() {
+  const name = document.getElementById('ob-name').value.trim();
+  const tagline = document.getElementById('ob-tagline').value.trim();
+  if(name) { state.profile.name = name; state.profile.initials = name[0].toUpperCase(); }
+  if(tagline) state.profile.tagline = tagline;
+  state.currentMood = _obMood;
+  document.querySelectorAll('.mood-btn').forEach(b=>b.className='mood-btn');
+  document.querySelectorAll('.mood-btn')[['m-calm','m-focus','m-joy','m-low','m-inspired'].indexOf(_obMood.cls)]?.classList.add('sel',_obMood.cls);
+  updateProfileUI();
+  closeModal('onboarding-modal');
+  localStorage.setItem('sanctuary_onboarded','1');
+  save();
+  toast('Welcome to Sanctuary, ' + (name||'friend') + '! 🌿');
+}
+
+function checkOnboarding() {
+  if(!localStorage.getItem('sanctuary_onboarded')) {
+    setTimeout(()=>openModal('onboarding-modal'), 800);
+  }
+}
+
+// ─────────────────────────────────────────────
+// ACCOUNT DELETION
+// ─────────────────────────────────────────────
+async function deleteAccount() {
+  if(!await confirmDialog('This will permanently delete your account and ALL your data. This cannot be undone.', 'Delete account?')) return;
+  if(!await confirmDialog('Are you absolutely sure? Everything will be gone forever.', 'Last chance')) return;
+  try {
+    // Delete all storage files (best effort)
+    if(_currentUser) {
+      await _supabase.from('sanctuary_data').delete().eq('id', _currentUser.id).catch(()=>{});
+      await _supabase.from('profiles').delete().eq('id', _currentUser.id).catch(()=>{});
+      await _supabase.auth.admin?.deleteUser?.(_currentUser.id).catch(()=>{});
+    }
+    // Clear local
+    clearLocalState();
+    localStorage.removeItem('sanctuary_onboarded');
+    await _supabase.auth.signOut();
+    _currentUser = null;
+    document.getElementById('auth-screen').style.display = 'flex';
+    toast('Account deleted. Sorry to see you go 💚');
+  } catch(e) {
+    toast('Could not fully delete account. Please contact us at hello@sanctuary.app', true);
+  }
+}
+
 // ─────────────────────────────────────────────
 // BOOT
 // ─────────────────────────────────────────────
 init();
 </script>
+
+
+<!-- ONBOARDING MODAL -->
+<div class="modal-overlay" id="onboarding-modal" style="z-index:10001">
+  <div class="modal" style="width:480px;padding:0;overflow:hidden">
+    <div id="onboarding-slides">
+
+      <!-- Slide 1 -->
+      <div class="ob-slide" id="ob-slide-1" style="padding:32px;text-align:center">
+        <div style="font-size:52px;margin-bottom:16px">🌿</div>
+        <div style="font-size:22px;font-weight:800;color:var(--text);margin-bottom:8px">Welcome to Sanctuary</div>
+        <div style="font-size:13px;color:var(--text3);line-height:1.8;margin-bottom:24px">Your calm, private space to journal, plan,<br>reflect, and grow — every day.</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:28px;text-align:left">
+          ${[['📖','Diary','Write daily entries and track your mood'],['🎯','Goals','Set daily ambitions and build streaks'],['📝','Notebook','Capture ideas, plans, and reflections'],['🎵','Music','Play your own music while you work'],['🖼','Gallery','Build a vision board and memory wall'],['⏰','Alarms','Set alarms and reminders that actually work']].map(([e,t,d])=>`<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px"><div style="font-size:20px;margin-bottom:4px">${e}</div><div style="font-size:12px;font-weight:700;color:var(--text)">${t}</div><div style="font-size:11px;color:var(--text3);margin-top:2px;line-height:1.4">${d}</div></div>`).join('')}
+        </div>
+        <button class="btn btn-accent" style="width:100%;padding:13px;font-size:14px;font-weight:700" onclick="obNext(2)">Get started →</button>
+      </div>
+
+      <!-- Slide 2 -->
+      <div class="ob-slide" id="ob-slide-2" style="padding:32px;display:none">
+        <div style="font-size:40px;text-align:center;margin-bottom:14px">👤</div>
+        <div style="font-size:18px;font-weight:700;color:var(--text);text-align:center;margin-bottom:6px">Set up your profile</div>
+        <div style="font-size:12px;color:var(--text3);text-align:center;margin-bottom:20px">This is just for you — it personalises your experience</div>
+        <div class="form-row"><label class="form-label">Your name</label><input type="text" id="ob-name" placeholder="e.g. Alex" style="font-size:15px"></div>
+        <div class="form-row"><label class="form-label">A short tagline</label><input type="text" id="ob-tagline" placeholder="e.g. Curious mind. Creative soul." style="font-size:13px"></div>
+        <div class="form-row" style="margin-bottom:24px"><label class="form-label">How are you feeling today?</label>
+          <div style="display:flex;gap:8px;margin-top:6px">
+            <button class="mood-btn sel m-calm" onclick="obSetMood(this,'m-calm','🍃','Peaceful')" style="flex:1;font-size:22px">🍃</button>
+            <button class="mood-btn" onclick="obSetMood(this,'m-focus','🧘','Focused')" style="flex:1;font-size:22px">🧘</button>
+            <button class="mood-btn" onclick="obSetMood(this,'m-joy','⚡','Energised')" style="flex:1;font-size:22px">⚡</button>
+            <button class="mood-btn" onclick="obSetMood(this,'m-low','🌧','Low')" style="flex:1;font-size:22px">🌧</button>
+            <button class="mood-btn" onclick="obSetMood(this,'m-inspired','✨','Inspired')" style="flex:1;font-size:22px">✨</button>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px">
+          <button class="btn" style="flex:1;padding:12px" onclick="obNext(1)">← Back</button>
+          <button class="btn btn-accent" style="flex:2;padding:12px;font-size:14px;font-weight:700" onclick="obFinish()">Enter Sanctuary →</button>
+        </div>
+      </div>
+
+    </div>
+    <!-- Progress dots -->
+    <div style="display:flex;justify-content:center;gap:6px;padding:0 0 20px">
+      <div class="ob-dot" id="ob-dot-1" style="width:24px;height:6px;border-radius:3px;background:var(--accent);transition:all 0.3s"></div>
+      <div class="ob-dot" id="ob-dot-2" style="width:6px;height:6px;border-radius:3px;background:var(--border2);transition:all 0.3s"></div>
+    </div>
+  </div>
+</div>
 
 <!-- SUPABASE -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -4518,6 +4946,7 @@ function clearLocalState() {
       state.profile.initials = _currentUser.user_metadata.name[0].toUpperCase();
       updateProfileUI();
     }
+    checkOnboarding();
   }
 
   // Listen for sign-in / sign-out events
@@ -4536,6 +4965,7 @@ function clearLocalState() {
         updateProfileUI();
       }
       await loadFromSupabase();
+      checkOnboarding();
     }
     if (event === 'SIGNED_OUT') {
       clearLocalState();
@@ -4579,6 +5009,9 @@ function clearLocalState() {
     <div class="nav-section-label">Identity</div>
     <div class="nav-item" data-mob-section="aay" onclick="mobNavGo('aay',this)"><i class="ti ti-sparkles"></i><span>All about you</span></div>
     <div class="nav-section-label">More</div>
+    <div class="nav-item" data-mob-section="support" onclick="mobNavGo('support',this)"><i class="ti ti-heart-handshake"></i><span>Support Dev</span></div>
+    <div class="nav-item" data-mob-section="about" onclick="mobNavGo('about',this)"><i class="ti ti-info-circle"></i><span>About</span></div>
+    <div class="nav-item" data-mob-section="privacy" onclick="mobNavGo('privacy',this)"><i class="ti ti-shield-check"></i><span>Privacy & Terms</span></div>
     <div class="nav-item" data-mob-section="trash" onclick="mobNavGo('trash',this)"><i class="ti ti-trash"></i><span>Trash</span></div>
   </nav>
   <div class="profile-area">
@@ -5409,6 +5842,11 @@ if ('serviceWorker' in navigator) {
 
   // Show iOS prompt on load if iOS and not installed and not dismissed
   window.addEventListener('load',()=>{
+    // Hide install button if already running as installed app
+    if(isInStandaloneMode()){
+      const btn=document.getElementById('pwa-install-btn');
+      if(btn) btn.style.display='none';
+    }
     if(isIOS()&&!isInStandaloneMode()&&!localStorage.getItem('pwa_banner_dismissed')){
       setTimeout(showIOSPrompt, 4000);
     }
