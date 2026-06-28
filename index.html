@@ -2729,9 +2729,11 @@ async function showAttachmentInViewer(att) {
     const imgEl = document.getElementById('att-viewer-img');
     imgEl.src = '';
     try {
-      const blob = await fetch(src).then(r => r.blob());
+      let imgBlob;
+      if (att.blobKey) imgBlob = await idbGet(att.blobKey);
+      if (!imgBlob) imgBlob = await fetch(src).then(r => r.blob());
       if (_attCurrentBlobUrl) URL.revokeObjectURL(_attCurrentBlobUrl);
-      _attCurrentBlobUrl = URL.createObjectURL(blob);
+      _attCurrentBlobUrl = URL.createObjectURL(imgBlob);
       imgEl.style.transform = 'scale(1) translate(0px,0px)';
       imgEl.onload = () => { _attSetProgress(100); };
       imgEl.onerror = () => { _attHideAllPanels(); fb('🖼️', 'Image could not be displayed. Try re-uploading.'); };
@@ -2756,9 +2758,22 @@ async function showAttachmentInViewer(att) {
         window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
       }
       _attSetProgress(50, 'Parsing PDF…');
-      const ab = await fetch(src).then(r => r.arrayBuffer());
+      // Try IDB blob first (avoids CORS entirely), fall back to URL for pdfjs
+      let pdfSource;
+      if (att.blobKey) {
+        const blob = await idbGet(att.blobKey);
+        if (blob) {
+          if (_attCurrentBlobUrl) URL.revokeObjectURL(_attCurrentBlobUrl);
+          _attCurrentBlobUrl = URL.createObjectURL(blob);
+          pdfSource = {url: _attCurrentBlobUrl};
+        }
+      }
+      if (!pdfSource) {
+        // Pass URL directly to pdfjs — its loader handles CORS better than fetch()
+        pdfSource = {url: src, withCredentials: false};
+      }
       _attSetProgress(70, 'Rendering…');
-      _attPdfDoc = await window.pdfjsLib.getDocument({data: ab}).promise;
+      _attPdfDoc = await window.pdfjsLib.getDocument(pdfSource).promise;
       await _attRenderPdfPage(1);
       _attSetProgress(100);
     } catch(e) { _attHideAllPanels(); fb('📄', 'PDF could not be rendered: ' + e.message); }
@@ -2774,8 +2789,17 @@ async function showAttachmentInViewer(att) {
       }
       _attSetProgress(60, 'Parsing…');
       let wb;
-      if (isCsv) { const text = await fetch(src).then(r=>r.text()); wb = window.XLSX.read(text, {type:'string'}); }
-      else { const ab = await fetch(src).then(r=>r.arrayBuffer()); wb = window.XLSX.read(ab, {type:'array'}); }
+      if (isCsv) {
+        let csvText;
+        if (att.blobKey) { const b = await idbGet(att.blobKey); if(b) csvText = await b.text(); }
+        if (!csvText) csvText = await fetch(src).then(r=>r.text());
+        wb = window.XLSX.read(csvText, {type:'string'});
+      } else {
+        let xlsAb;
+        if (att.blobKey) { const b = await idbGet(att.blobKey); if(b) xlsAb = await b.arrayBuffer(); }
+        if (!xlsAb) xlsAb = await fetch(src).then(r=>r.arrayBuffer());
+        wb = window.XLSX.read(xlsAb, {type:'array'});
+      }
       _attSetProgress(80, 'Rendering table…');
       let innerHtml = '<style>.att-xls-wrap table{border-collapse:collapse;font-size:12px;color:#1a1a1a;background:#fff;width:max-content}.att-xls-wrap td,.att-xls-wrap th{border:1px solid #ddd;padding:6px 12px;white-space:nowrap}.att-xls-wrap th{background:#f0f0f0;font-weight:700;position:sticky;top:0;z-index:1}</style>';
       wb.SheetNames.forEach(name => {
@@ -2797,8 +2821,10 @@ async function showAttachmentInViewer(att) {
         await new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.11.0/mammoth.browser.min.js';s.onload=res;s.onerror=rej;document.head.appendChild(s);});
       }
       _attSetProgress(60, 'Converting…');
-      const ab = await fetch(src).then(r=>r.arrayBuffer());
-      const result = await window.mammoth.convertToHtml({arrayBuffer: ab});
+      let docxAb;
+      if (att.blobKey) { const b = await idbGet(att.blobKey); if(b) docxAb = await b.arrayBuffer(); }
+      if (!docxAb) docxAb = await fetch(src).then(r=>r.arrayBuffer());
+      const result = await window.mammoth.convertToHtml({arrayBuffer: docxAb});
       _attSetProgress(90, 'Rendering…');
       docxEl.innerHTML = `<style>
         .att-docx-body{font-family:Georgia,serif;font-size:14px;line-height:1.7;color:#1a1a1a}
@@ -2826,8 +2852,10 @@ async function showAttachmentInViewer(att) {
     const textEl = document.getElementById('att-viewer-text');
     _attSetProgress(40, 'Loading…');
     try {
-      const text = await fetch(src).then(r=>r.text());
-      textEl.textContent = text || '(Empty file)';
+      let txtContent;
+      if (att.blobKey) { const b = await idbGet(att.blobKey); if(b) txtContent = await b.text(); }
+      if (!txtContent) txtContent = await fetch(src).then(r=>r.text());
+      textEl.textContent = txtContent || '(Empty file)';
       _attSetProgress(100);
     } catch(e) { _attHideAllPanels(); fb('📃', 'File could not be loaded: ' + e.message); }
 
