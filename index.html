@@ -1627,33 +1627,79 @@ input[type=range]::-moz-range-progress{background:var(--accent3);border-radius:9
   </div>
 </div>
 
-<!-- ATTACHMENT VIEWER -->
-<div class="modal-overlay" id="attachment-viewer" onclick="if(event.target===this)closeAttachmentViewer()">
-  <div style="background:var(--card);border-radius:var(--radius-lg);width:90%;max-width:900px;height:85vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:var(--shadow)">
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid var(--border);flex-shrink:0">
-      <div style="font-size:13px;font-weight:600;color:var(--text)" id="att-viewer-name">File</div>
-      <div style="display:flex;gap:8px;align-items:center">
-        <div id="att-viewer-pdf-nav" style="display:none;align-items:center;gap:6px">
-          <button onclick="attPdfPrev()" style="background:none;border:1px solid var(--border2);border-radius:var(--radius-sm);padding:4px 8px;color:var(--text2);cursor:pointer;font-size:11px">‹ Prev</button>
-          <span id="att-viewer-pdf-page" style="font-size:11px;color:var(--text3)">1 / 1</span>
-          <button onclick="attPdfNext()" style="background:none;border:1px solid var(--border2);border-radius:var(--radius-sm);padding:4px 8px;color:var(--text2);cursor:pointer;font-size:11px">Next ›</button>
-        </div>
-        <button id="att-viewer-download-btn" onclick="attViewerDownload()" style="background:none;border:1px solid var(--border2);border-radius:var(--radius-sm);padding:5px 10px;color:var(--text2);font-size:11px;cursor:pointer;display:flex;align-items:center;gap:5px;font-family:inherit"><i class="ti ti-download"></i> Download</button>
-        <button onclick="closeAttachmentViewer()" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:20px"><i class="ti ti-x"></i></button>
+<!-- ATTACHMENT VIEWER — rewritten -->
+<div id="attachment-viewer" style="display:none;position:fixed;inset:0;z-index:9900;background:rgba(0,0,0,0.85);backdrop-filter:blur(6px);flex-direction:column;align-items:center;justify-content:center" onclick="if(event.target===this)closeAttachmentViewer()">
+  <!-- Viewer card -->
+  <div style="position:relative;width:min(96vw,960px);height:min(92vh,860px);display:flex;flex-direction:column;background:var(--bg2);border:1px solid var(--border2);border-radius:18px;overflow:hidden;box-shadow:0 32px 80px rgba(0,0,0,0.7)">
+
+    <!-- Header bar -->
+    <div style="display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--bg)">
+      <div id="att-viewer-type-icon" style="font-size:20px;flex-shrink:0">📄</div>
+      <div style="flex:1;min-width:0">
+        <div id="att-viewer-name" style="font-size:13px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">File</div>
+        <div id="att-viewer-meta" style="font-size:10px;color:var(--text3);margin-top:1px"></div>
       </div>
+      <!-- PDF nav -->
+      <div id="att-viewer-pdf-nav" style="display:none;align-items:center;gap:4px">
+        <button onclick="attPdfPrev()" style="background:var(--card);border:1px solid var(--border2);border-radius:6px;padding:5px 10px;color:var(--text2);cursor:pointer;font-size:12px;font-family:inherit">‹</button>
+        <span id="att-viewer-pdf-page" style="font-size:11px;color:var(--text3);min-width:48px;text-align:center">1 / 1</span>
+        <button onclick="attPdfNext()" style="background:var(--card);border:1px solid var(--border2);border-radius:6px;padding:5px 10px;color:var(--text2);cursor:pointer;font-size:12px;font-family:inherit">›</button>
+      </div>
+      <!-- Image zoom -->
+      <div id="att-viewer-img-zoom" style="display:none;align-items:center;gap:4px">
+        <button onclick="attImgZoom(-0.2)" style="background:var(--card);border:1px solid var(--border2);border-radius:6px;padding:5px 10px;color:var(--text2);cursor:pointer;font-size:14px;font-family:inherit">−</button>
+        <span id="att-viewer-img-zoom-lbl" style="font-size:11px;color:var(--text3);min-width:38px;text-align:center">100%</span>
+        <button onclick="attImgZoom(0.2)" style="background:var(--card);border:1px solid var(--border2);border-radius:6px;padding:5px 10px;color:var(--text2);cursor:pointer;font-size:14px;font-family:inherit">+</button>
+      </div>
+      <button onclick="attViewerDownload()" style="background:var(--card);border:1px solid var(--border2);border-radius:8px;padding:6px 12px;color:var(--text2);font-size:12px;cursor:pointer;display:flex;align-items:center;gap:6px;font-family:inherit;flex-shrink:0"><i class="ti ti-download"></i><span class="topbar-btn-label">Download</span></button>
+      <button onclick="closeAttachmentViewer()" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:22px;flex-shrink:0;padding:4px;line-height:1"><i class="ti ti-x"></i></button>
     </div>
-    <div style="flex:1;min-height:0;overflow:auto;display:flex;align-items:center;justify-content:center;background:var(--bg)" id="att-viewer-body">
-      <img id="att-viewer-img" style="display:none;max-width:100%;max-height:100%;object-fit:contain"/>
-      <div id="att-viewer-pdf-wrap" style="display:none;width:100%;height:100%;overflow:auto;align-items:flex-start;justify-content:center;padding:16px;box-sizing:border-box">
-        <canvas id="att-viewer-canvas" style="box-shadow:0 4px 24px rgba(0,0,0,0.5);max-width:100%"></canvas>
+
+    <!-- Loading bar -->
+    <div id="att-viewer-loading" style="display:none;flex-shrink:0">
+      <div style="height:3px;background:var(--border)">
+        <div id="att-viewer-progress" style="height:100%;background:linear-gradient(90deg,var(--accent2),var(--accent3));width:0%;transition:width 0.3s ease;border-radius:99px"></div>
       </div>
-      <div id="att-viewer-excel" style="display:none;width:100%;height:100%;overflow:auto;padding:16px;box-sizing:border-box;font-size:12px"></div>
-      <div id="att-viewer-docx" style="display:none;width:100%;height:100%;overflow:auto;padding:32px;box-sizing:border-box"></div>
-      <div id="att-viewer-text" style="display:none;padding:20px;color:var(--text);font-size:13px;white-space:pre-wrap;overflow:auto;width:100%;height:100%"></div>
-      <div id="att-viewer-fallback" style="display:none;flex-direction:column;align-items:center;gap:14px;padding:40px;text-align:center;max-width:380px">
-        <div style="font-size:40px;opacity:0.5" id="att-viewer-fallback-icon">📄</div>
-        <div style="font-size:13px;color:var(--text2);line-height:1.6" id="att-viewer-fallback-text"></div>
+      <div style="text-align:center;padding:8px;font-size:11px;color:var(--text3)" id="att-viewer-loading-text">Loading…</div>
+    </div>
+
+    <!-- Body -->
+    <div id="att-viewer-body" style="flex:1;min-height:0;position:relative;overflow:hidden">
+
+      <!-- Image -->
+      <div id="att-panel-img" style="display:none;width:100%;height:100%;overflow:hidden;position:relative;cursor:grab;background:repeating-conic-gradient(var(--border) 0% 25%,transparent 0% 50%) 0 0/20px 20px">
+        <div id="att-img-viewport" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;overflow:hidden">
+          <img id="att-viewer-img" style="max-width:none;max-height:none;object-fit:contain;transform-origin:center;transition:transform 0.15s ease;user-select:none;-webkit-user-drag:none;border-radius:4px;box-shadow:0 4px 24px rgba(0,0,0,0.4)"/>
+        </div>
       </div>
+
+      <!-- PDF -->
+      <div id="att-panel-pdf" style="display:none;width:100%;height:100%;overflow:auto;background:#525659;display:flex;flex-direction:column;align-items:center;padding:20px;gap:16px;box-sizing:border-box">
+        <canvas id="att-viewer-canvas" style="background:#fff;box-shadow:0 4px 20px rgba(0,0,0,0.5);border-radius:2px;max-width:100%"></canvas>
+      </div>
+
+      <!-- Excel / CSV -->
+      <div id="att-panel-excel" style="display:none;width:100%;height:100%;overflow:auto;padding:0">
+        <div id="att-viewer-excel" style="padding:16px;font-size:12px;min-width:max-content"></div>
+      </div>
+
+      <!-- Word / DOCX -->
+      <div id="att-panel-docx" style="display:none;width:100%;height:100%;overflow:auto;background:#f5f5f5;display:flex;justify-content:center;padding:24px;box-sizing:border-box">
+        <div id="att-viewer-docx" style="background:#fff;width:100%;max-width:740px;min-height:100%;padding:48px 56px;box-shadow:0 2px 20px rgba(0,0,0,0.15);border-radius:4px;box-sizing:border-box"></div>
+      </div>
+
+      <!-- Plain text -->
+      <div id="att-panel-text" style="display:none;width:100%;height:100%;overflow:auto;padding:20px;box-sizing:border-box">
+        <pre id="att-viewer-text" style="margin:0;font-family:monospace;font-size:13px;color:var(--text);line-height:1.7;white-space:pre-wrap;word-break:break-word"></pre>
+      </div>
+
+      <!-- Fallback -->
+      <div id="att-panel-fallback" style="display:none;width:100%;height:100%;align-items:center;justify-content:center;flex-direction:column;gap:14px;padding:40px;text-align:center">
+        <div id="att-viewer-fallback-icon" style="font-size:52px;opacity:0.5">📄</div>
+        <div id="att-viewer-fallback-text" style="font-size:14px;color:var(--text2);line-height:1.7;max-width:360px"></div>
+        <button onclick="attViewerDownload()" style="margin-top:8px;background:var(--accent2);border:none;color:#fff;padding:10px 22px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:8px"><i class="ti ti-download"></i> Download file</button>
+      </div>
+
     </div>
   </div>
 </div>
@@ -2496,13 +2542,64 @@ let _attViewerCurrentAtt = null;
 let _attPdfDoc = null;
 let _attPdfPage = 1;
 let _attCurrentBlobUrl = null;
-// Expose for external patching (PDF quality fix)
+let _attImgScale = 1;
+let _attImgPanX = 0;
+let _attImgPanY = 0;
+let _attImgDragging = false;
+let _attImgLastX = 0;
+let _attImgLastY = 0;
+
 Object.defineProperty(window,'_attPdfDoc',{get:()=>_attPdfDoc,set:v=>{_attPdfDoc=v;}});
+
 function closeAttachmentViewer() {
   if (_attCurrentBlobUrl) { URL.revokeObjectURL(_attCurrentBlobUrl); _attCurrentBlobUrl = null; }
-  _attViewerCurrentAtt = null;
-  _attPdfDoc = null;
-  closeModal('attachment-viewer');
+  _attViewerCurrentAtt = null; _attPdfDoc = null; _attPdfPage = 1;
+  _attImgScale = 1; _attImgPanX = 0; _attImgPanY = 0;
+  const el = document.getElementById('attachment-viewer');
+  if (el) el.style.display = 'none';
+}
+
+function _attShowViewer() {
+  const el = document.getElementById('attachment-viewer');
+  if (el) { el.style.display = 'flex'; }
+}
+
+function _attSetProgress(pct, text) {
+  const bar = document.getElementById('att-viewer-loading');
+  const prog = document.getElementById('att-viewer-progress');
+  const txt = document.getElementById('att-viewer-loading-text');
+  if (!bar) return;
+  if (pct >= 100) { bar.style.display = 'none'; return; }
+  bar.style.display = '';
+  if (prog) prog.style.width = pct + '%';
+  if (txt && text) txt.textContent = text;
+}
+
+function _attHideAllPanels() {
+  ['att-panel-img','att-panel-pdf','att-panel-excel','att-panel-docx','att-panel-text','att-panel-fallback'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+  const nav = document.getElementById('att-viewer-pdf-nav');
+  const zoom = document.getElementById('att-viewer-img-zoom');
+  if (nav) nav.style.display = 'none';
+  if (zoom) zoom.style.display = 'none';
+  _attSetProgress(100);
+}
+
+function _attShowPanel(id) {
+  const el = document.getElementById(id);
+  if (el) el.style.display = (id === 'att-panel-fallback' || id === 'att-panel-pdf') ? 'flex' : (id === 'att-panel-docx' ? 'flex' : '');
+  if (id === 'att-panel-pdf') el.style.display = 'flex';
+  if (id === 'att-panel-docx') el.style.display = 'flex';
+}
+
+const FILE_TYPE_ICONS = { pdf:'📄', image:'🖼️', xlsx:'📊', xls:'📊', csv:'📋', docx:'📝', doc:'📝', txt:'📃', md:'📃', json:'📦', mp3:'🎵', mp4:'🎬', zip:'📦' };
+function _attGetIcon(name, mime) {
+  const ext = (name||'').split('.').pop().toLowerCase();
+  if (mime && mime.startsWith('image/')) return '🖼️';
+  if (mime === 'application/pdf' || ext === 'pdf') return '📄';
+  return FILE_TYPE_ICONS[ext] || '📄';
 }
 
 function attViewerDownload() {
@@ -2510,253 +2607,235 @@ function attViewerDownload() {
   const att = _attViewerCurrentAtt;
   const src = att.url || att.storageUrl || att.data || '';
   if (!src) return;
-  const a = document.createElement('a');
-  a.href = src.includes('/file/') ? src + (src.includes('?') ? '&' : '?') + 'download=1' : src;
-  a.download = att.name;
-  a.click();
+  // Create a link and force download — only triggered by explicit user click
+  fetch(src).then(r => r.blob()).then(blob => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = att.name; a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+  }).catch(() => {
+    const a = document.createElement('a');
+    a.href = src; a.download = att.name; a.click();
+  });
 }
 
-function _attHideAll() {
-  document.getElementById('att-viewer-img').style.display = 'none';
-  const wrap = document.getElementById('att-viewer-pdf-wrap');
-  wrap.style.display = 'none';
-  document.getElementById('att-viewer-excel').style.display = 'none';
-  document.getElementById('att-viewer-docx').style.display = 'none';
-  document.getElementById('att-viewer-text').style.display = 'none';
-  document.getElementById('att-viewer-fallback').style.display = 'none';
-  document.getElementById('att-viewer-pdf-nav').style.display = 'none';
-  document.getElementById('att-viewer-body').style.alignItems = 'center';
+// Image pan/zoom
+function _attApplyImgTransform() {
+  const img = document.getElementById('att-viewer-img');
+  if (!img) return;
+  img.style.transform = `scale(${_attImgScale}) translate(${_attImgPanX/_attImgScale}px,${_attImgPanY/_attImgScale}px)`;
+  const lbl = document.getElementById('att-viewer-img-zoom-lbl');
+  if (lbl) lbl.textContent = Math.round(_attImgScale * 100) + '%';
+}
+function attImgZoom(delta) {
+  if (delta === 0) { _attImgScale = 1; _attImgPanX = 0; _attImgPanY = 0; }
+  else _attImgScale = Math.max(0.5, Math.min(8, _attImgScale + delta));
+  _attApplyImgTransform();
+}
+function _attInitImgDrag() {
+  const wrap = document.getElementById('att-panel-img');
+  if (!wrap || wrap._dragInited) return;
+  wrap._dragInited = true;
+  wrap.addEventListener('mousedown', e => { _attImgDragging=true; _attImgLastX=e.clientX; _attImgLastY=e.clientY; wrap.style.cursor='grabbing'; });
+  window.addEventListener('mouseup', () => { _attImgDragging=false; const w=document.getElementById('att-panel-img'); if(w)w.style.cursor='grab'; });
+  window.addEventListener('mousemove', e => { if(!_attImgDragging)return; _attImgPanX+=e.clientX-_attImgLastX; _attImgPanY+=e.clientY-_attImgLastY; _attImgLastX=e.clientX; _attImgLastY=e.clientY; _attApplyImgTransform(); });
+  wrap.addEventListener('wheel', e => { e.preventDefault(); attImgZoom(e.deltaY < 0 ? 0.15 : -0.15); }, {passive:false});
+  // Touch pinch
+  let _lastPinchDist = 0;
+  wrap.addEventListener('touchstart', e => { if(e.touches.length===1){_attImgDragging=true;_attImgLastX=e.touches[0].clientX;_attImgLastY=e.touches[0].clientY;}else _lastPinchDist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY); }, {passive:true});
+  wrap.addEventListener('touchmove', e => { if(e.touches.length===1&&_attImgDragging){_attImgPanX+=e.touches[0].clientX-_attImgLastX;_attImgPanY+=e.touches[0].clientY-_attImgLastY;_attImgLastX=e.touches[0].clientX;_attImgLastY=e.touches[0].clientY;_attApplyImgTransform();}else if(e.touches.length===2){const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);if(_lastPinchDist)attImgZoom((d-_lastPinchDist)/200);_lastPinchDist=d;} }, {passive:true});
+  wrap.addEventListener('touchend', () => { _attImgDragging=false; });
+  // Double tap to reset
+  let _tapTimer=null,_tapCount=0;
+  wrap.addEventListener('click', () => { _tapCount++; clearTimeout(_tapTimer); _tapTimer=setTimeout(()=>{if(_tapCount>=2){attImgZoom(0);}_tapCount=0;},280); });
 }
 
 async function _attRenderPdfPage(pageNum) {
   if (!_attPdfDoc) return;
   const page = await _attPdfDoc.getPage(pageNum);
   const canvas = document.getElementById('att-viewer-canvas');
-  const wrap = document.getElementById('att-viewer-pdf-wrap');
-  const wrapWidth = wrap.clientWidth || document.getElementById('att-viewer-body').clientWidth || 640;
-  const scale = Math.min(2, Math.max(0.4, (wrapWidth - 32) / page.getViewport({scale:1}).width));
-  const vp = page.getViewport({scale});
-  canvas.width = vp.width;
-  canvas.height = vp.height;
-  await page.render({canvasContext: canvas.getContext('2d'), viewport: vp}).promise;
-  document.getElementById('att-viewer-pdf-page').textContent = `${pageNum} / ${_attPdfDoc.numPages}`;
+  const panel = document.getElementById('att-panel-pdf');
+  const panelWidth = (panel ? panel.clientWidth : 800) - 40;
+  const dpr = window.devicePixelRatio || 1;
+  const baseVp = page.getViewport({scale:1});
+  const fitScale = Math.min(3, (panelWidth / baseVp.width));
+  const vp = page.getViewport({scale: fitScale * dpr});
+  canvas.width = vp.width; canvas.height = vp.height;
+  canvas.style.width = (vp.width / dpr) + 'px';
+  canvas.style.height = (vp.height / dpr) + 'px';
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  await page.render({canvasContext: ctx, viewport: vp, background:'#ffffff'}).promise;
+  const nav = document.getElementById('att-viewer-pdf-page');
+  if (nav) nav.textContent = `${pageNum} / ${_attPdfDoc.numPages}`;
 }
 
-async function attPdfPrev() {
-  if (_attPdfPage > 1) { _attPdfPage--; await _attRenderPdfPage(_attPdfPage); }
-}
-async function attPdfNext() {
-  if (_attPdfDoc && _attPdfPage < _attPdfDoc.numPages) { _attPdfPage++; await _attRenderPdfPage(_attPdfPage); }
-}
+async function attPdfPrev() { if(_attPdfPage>1){_attPdfPage--;await _attRenderPdfPage(_attPdfPage);} }
+async function attPdfNext() { if(_attPdfDoc&&_attPdfPage<_attPdfDoc.numPages){_attPdfPage++;await _attRenderPdfPage(_attPdfPage);} }
 
 async function showAttachmentInViewer(att) {
   if (!att) return;
   _attViewerCurrentAtt = att;
-  _attPdfDoc = null;
-  _attPdfPage = 1;
+  _attPdfDoc = null; _attPdfPage = 1;
+  _attImgScale = 1; _attImgPanX = 0; _attImgPanY = 0;
 
-  // Resolve URL — cloud storageUrl is authoritative for cross-device; fall back to IDB blob only if needed
-  if (att.storageUrl) {
-    att.url = att.storageUrl;
-  } else if ((!att.url || att.url.startsWith('blob:')) && att.blobKey) {
+  // Resolve URL
+  if (att.storageUrl) att.url = att.storageUrl;
+  else if ((!att.url || att.url.startsWith('blob:')) && att.blobKey) {
     const blob = await idbGet(att.blobKey);
     if (blob) att.url = URL.createObjectURL(blob);
   }
-  if (!att.url && att.storageUrl) att.url = att.storageUrl;
-
   const src = att.url || att.data || '';
-  document.getElementById('att-viewer-name').textContent = att.name;
-  _attHideAll();
 
-  // Open the modal NOW, before any rendering — this guarantees the viewer
-  // has real layout dimensions (clientWidth etc.) by the time PDF/docx/
-  // anything else measures them. Opening it only at the end was the cause
-  // of page 1 of a PDF rendering tiny/blank (it measured a hidden, 0-width
-  // container) while every later page rendered correctly.
-  openModal('attachment-viewer');
-  // One frame to let the browser actually paint the now-visible layout
-  // before anything reads clientWidth/clientHeight from it.
+  // Set header
+  const icon = _attGetIcon(att.name, att.type);
+  const iconEl = document.getElementById('att-viewer-type-icon');
+  if (iconEl) iconEl.textContent = icon;
+  const nameEl = document.getElementById('att-viewer-name');
+  if (nameEl) nameEl.textContent = att.name || 'File';
+  const metaEl = document.getElementById('att-viewer-meta');
+  if (metaEl) metaEl.textContent = att.type || '';
+
+  _attHideAllPanels();
+  _attShowViewer();
   await new Promise(res => requestAnimationFrame(() => requestAnimationFrame(res)));
 
   const lowerName = (att.name || '').toLowerCase();
   const mime = att.type || '';
   const isPdf = mime === 'application/pdf' || lowerName.endsWith('.pdf');
-  const isImg = mime.startsWith('image/');
-  const isXls = lowerName.endsWith('.xlsx') || lowerName.endsWith('.xls');
-  const isCsv = lowerName.endsWith('.csv') || lowerName.endsWith('.tsv') || mime === 'text/csv';
-  const isDocx = lowerName.endsWith('.docx') || mime === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+  const isImg = mime.startsWith('image/') || /\.(png|jpg|jpeg|gif|webp|svg|bmp)$/.test(lowerName);
+  const isXls = /\.(xlsx|xls)$/.test(lowerName);
+  const isCsv = /\.(csv|tsv)$/.test(lowerName) || mime === 'text/csv';
+  const isDocx = lowerName.endsWith('.docx') || mime.includes('wordprocessingml');
   const isLegacyDoc = lowerName.endsWith('.doc') && !isDocx;
-  const isPlainText = mime.startsWith('text/') || /\.(txt|md|markdown|json|log|csv$|js|ts|css|html?|xml|yaml|yml|ini|conf|sh|py|java|c|cpp|rb|go|rs)$/.test(lowerName) && !isCsv;
+  const isText = !isPdf && !isImg && !isXls && !isCsv && !isDocx && !isLegacyDoc &&
+    (mime.startsWith('text/') || /\.(txt|md|json|log|js|ts|css|html|xml|yaml|yml|sh|py|rb|go|rs|c|cpp|java|ini|conf)$/.test(lowerName));
 
   const fb = (icon, text) => {
-    document.getElementById('att-viewer-fallback-icon').textContent = icon;
-    document.getElementById('att-viewer-fallback-text').textContent = text;
-    document.getElementById('att-viewer-fallback').style.display = 'flex';
+    _attShowPanel('att-panel-fallback');
+    const fi = document.getElementById('att-viewer-fallback-icon'); if(fi) fi.textContent = icon;
+    const ft = document.getElementById('att-viewer-fallback-text'); if(ft) ft.textContent = text;
   };
 
-  if (!src) {
-    fb('⚠️', 'This file could not be loaded — it may have been cleared by the browser. Try re-uploading it.');
-  } else if (isImg) {
+  if (!src) { fb('⚠️', 'This file could not be loaded. Try re-uploading it.'); return; }
+
+  if (isImg) {
+    _attShowPanel('att-panel-img');
+    _attInitImgDrag();
+    const zoomCtrl = document.getElementById('att-viewer-img-zoom');
+    if (zoomCtrl) zoomCtrl.style.display = 'flex';
+    _attSetProgress(30, 'Loading image…');
     const imgEl = document.getElementById('att-viewer-img');
-    imgEl.style.display = '';
     imgEl.src = '';
     try {
-      // Fetch as a Blob and render an in-memory blob: URL — never the raw
-      // network URL directly. A blob: URL has no server response and no
-      // Content-Disposition header attached to it, so there is nothing for
-      // any browser, extension, or download manager to ever interpret as
-      // "download this" instead of "show this".
       const blob = await fetch(src).then(r => r.blob());
-      const blobUrl = URL.createObjectURL(blob);
       if (_attCurrentBlobUrl) URL.revokeObjectURL(_attCurrentBlobUrl);
-      _attCurrentBlobUrl = blobUrl;
-      imgEl.src = blobUrl;
-    } catch(e) {
-      imgEl.style.display = 'none';
-      fb('🖼️', 'This image could not be loaded (' + e.message + '). Try re-uploading it.');
-    }
+      _attCurrentBlobUrl = URL.createObjectURL(blob);
+      imgEl.style.transform = 'scale(1) translate(0px,0px)';
+      imgEl.onload = () => { _attSetProgress(100); };
+      imgEl.onerror = () => { _attHideAllPanels(); fb('🖼️', 'Image could not be displayed. Try re-uploading.'); };
+      imgEl.src = _attCurrentBlobUrl;
+      _attSetProgress(80, 'Rendering…');
+    } catch(e) { _attHideAllPanels(); fb('🖼️', 'Image failed to load: ' + e.message); }
+
   } else if (isPdf) {
-    // Fetch as ArrayBuffer so IDM never sees the URL
-    const wrap = document.getElementById('att-viewer-pdf-wrap');
-    wrap.style.display = 'flex';
-    document.getElementById('att-viewer-body').style.alignItems = 'flex-start';
-    document.getElementById('att-viewer-pdf-page').textContent = 'Loading…';
-    document.getElementById('att-viewer-pdf-nav').style.display = 'flex';
+    _attShowPanel('att-panel-pdf');
+    const nav = document.getElementById('att-viewer-pdf-nav');
+    if (nav) nav.style.display = 'flex';
+    const page_lbl = document.getElementById('att-viewer-pdf-page');
+    if (page_lbl) page_lbl.textContent = 'Loading…';
+    _attSetProgress(20, 'Fetching PDF…');
     try {
       if (!window.pdfjsLib) {
         await new Promise((res, rej) => {
           const s = document.createElement('script');
           s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
-          s.onload = res; s.onerror = rej;
-          document.head.appendChild(s);
+          s.onload = res; s.onerror = rej; document.head.appendChild(s);
         });
         window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
       }
+      _attSetProgress(50, 'Parsing PDF…');
       const ab = await fetch(src).then(r => r.arrayBuffer());
+      _attSetProgress(70, 'Rendering…');
       _attPdfDoc = await window.pdfjsLib.getDocument({data: ab}).promise;
       await _attRenderPdfPage(1);
-    } catch(e) {
-      document.getElementById('att-viewer-pdf-nav').style.display = 'none';
-      wrap.style.display = 'none';
-      fb('📄', 'This PDF could not be rendered (' + e.message + '). Try re-uploading it.');
-    }
-  } else if (isXls) {
+      _attSetProgress(100);
+    } catch(e) { _attHideAllPanels(); fb('📄', 'PDF could not be rendered: ' + e.message); }
+
+  } else if (isXls || isCsv) {
+    _attShowPanel('att-panel-excel');
     const excelEl = document.getElementById('att-viewer-excel');
-    excelEl.style.display = '';
-    excelEl.innerHTML = '<div style="color:var(--text3);padding:20px">Loading spreadsheet…</div>';
+    excelEl.innerHTML = '<div style="padding:20px;color:var(--text3)">Loading spreadsheet…</div>';
+    _attSetProgress(30, 'Loading spreadsheet…');
     try {
       if (!window.XLSX) {
-        await new Promise((res, rej) => {
-          const s = document.createElement('script');
-          s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
-          s.onload = res; s.onerror = rej;
-          document.head.appendChild(s);
-        });
+        await new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';s.onload=res;s.onerror=rej;document.head.appendChild(s);});
       }
-      const ab = await fetch(src).then(r => r.arrayBuffer());
-      const wb = window.XLSX.read(ab, {type:'array'});
-      let html = '';
+      _attSetProgress(60, 'Parsing…');
+      let wb;
+      if (isCsv) { const text = await fetch(src).then(r=>r.text()); wb = window.XLSX.read(text, {type:'string'}); }
+      else { const ab = await fetch(src).then(r=>r.arrayBuffer()); wb = window.XLSX.read(ab, {type:'array'}); }
+      _attSetProgress(80, 'Rendering table…');
+      let innerHtml = '<style>.att-xls-wrap table{border-collapse:collapse;font-size:12px;color:#1a1a1a;background:#fff;width:max-content}.att-xls-wrap td,.att-xls-wrap th{border:1px solid #ddd;padding:6px 12px;white-space:nowrap}.att-xls-wrap th{background:#f0f0f0;font-weight:700;position:sticky;top:0;z-index:1}</style>';
       wb.SheetNames.forEach(name => {
         const ws = wb.Sheets[name];
-        const tbl = window.XLSX.utils.sheet_to_html(ws, {id:'att-xls-tbl'});
-        html += `<div style="margin-bottom:24px"><div style="font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px;padding:6px 10px;background:rgba(76,175,110,0.08);border-radius:6px;border:1px solid var(--border)">${name}</div>${tbl}</div>`;
+        const tbl = window.XLSX.utils.sheet_to_html(ws);
+        innerHtml += `<div style="margin-bottom:20px"><div style="padding:8px 14px;background:rgba(76,175,110,0.1);border-bottom:1px solid var(--border);font-size:11px;font-weight:700;color:var(--accent3);letter-spacing:0.8px;text-transform:uppercase;position:sticky;top:0;z-index:2">${name}</div><div class="att-xls-wrap" style="overflow:auto">${tbl}</div></div>`;
       });
-      excelEl.innerHTML = `<style>#att-xls-tbl,#att-viewer-excel table{border-collapse:collapse;font-size:12px;color:var(--text);width:max-content}#att-viewer-excel td,#att-viewer-excel th{border:1px solid var(--border);padding:5px 10px;white-space:nowrap}#att-viewer-excel th{background:var(--bg3);color:var(--text2);font-weight:600}</style>${html}`;
-    } catch(e) {
-      excelEl.style.display = 'none';
-      fb('📊', 'This spreadsheet could not be rendered (' + e.message + '). Try re-uploading it.');
-    }
-  } else if (isCsv) {
-    const excelEl = document.getElementById('att-viewer-excel');
-    excelEl.style.display = '';
-    excelEl.innerHTML = '<div style="color:var(--text3);padding:20px">Loading CSV…</div>';
-    try {
-      if (!window.XLSX) {
-        await new Promise((res, rej) => {
-          const s = document.createElement('script');
-          s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
-          s.onload = res; s.onerror = rej;
-          document.head.appendChild(s);
-        });
-      }
-      const text = await fetch(src).then(r => r.text());
-      const wb = window.XLSX.read(text, {type:'string'});
-      const ws = wb.Sheets[wb.SheetNames[0]];
-      const tbl = window.XLSX.utils.sheet_to_html(ws, {id:'att-xls-tbl'});
-      excelEl.innerHTML = `<style>#att-xls-tbl{border-collapse:collapse;font-size:12px;color:var(--text);width:max-content}#att-xls-tbl td,#att-xls-tbl th{border:1px solid var(--border);padding:5px 10px;white-space:nowrap}#att-xls-tbl th{background:var(--bg3);color:var(--text2);font-weight:600}</style>${tbl}`;
-    } catch(e) {
-      excelEl.style.display = 'none';
-      fb('📋', 'This CSV could not be rendered (' + e.message + '). Try re-uploading it.');
-    }
+      excelEl.innerHTML = innerHtml;
+      _attSetProgress(100);
+    } catch(e) { _attHideAllPanels(); fb('📊', 'Spreadsheet could not be rendered: ' + e.message); }
+
   } else if (isDocx) {
+    _attShowPanel('att-panel-docx');
     const docxEl = document.getElementById('att-viewer-docx');
-    docxEl.style.display = '';
-    docxEl.innerHTML = '<div style="color:var(--text3)">Loading document…</div>';
-    document.getElementById('att-viewer-body').style.alignItems = 'flex-start';
+    docxEl.innerHTML = '<div style="padding:20px;color:#999">Loading document…</div>';
+    _attSetProgress(30, 'Loading document…');
     try {
       if (!window.mammoth) {
-        await new Promise((res, rej) => {
-          const s = document.createElement('script');
-          s.src = 'https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.11.0/mammoth.browser.min.js';
-          s.onload = res; s.onerror = rej;
-          document.head.appendChild(s);
-        });
+        await new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.11.0/mammoth.browser.min.js';s.onload=res;s.onerror=rej;document.head.appendChild(s);});
       }
-      const ab = await fetch(src).then(r => r.arrayBuffer());
-      const result = await window.mammoth.convertToHtml({ arrayBuffer: ab });
+      _attSetProgress(60, 'Converting…');
+      const ab = await fetch(src).then(r=>r.arrayBuffer());
+      const result = await window.mammoth.convertToHtml({arrayBuffer: ab});
+      _attSetProgress(90, 'Rendering…');
       docxEl.innerHTML = `<style>
-        #att-viewer-docx{max-width:680px;margin:0 auto;background:#fff;color:#1a1a1a;padding:48px 56px;border-radius:6px;box-shadow:0 2px 16px rgba(0,0,0,0.3);font-family:'Georgia',serif;line-height:1.6;font-size:14px}
-        #att-viewer-docx h1{font-size:24px;margin:0 0 16px;font-weight:700}
-        #att-viewer-docx h2{font-size:19px;margin:24px 0 12px;font-weight:700}
-        #att-viewer-docx h3{font-size:16px;margin:20px 0 10px;font-weight:700}
-        #att-viewer-docx p{margin:0 0 12px}
-        #att-viewer-docx table{border-collapse:collapse;margin:12px 0}
-        #att-viewer-docx td,#att-viewer-docx th{border:1px solid #ccc;padding:6px 10px}
-        #att-viewer-docx img{max-width:100%}
-        #att-viewer-docx ul,#att-viewer-docx ol{margin:0 0 12px;padding-left:24px}
-      </style>` + result.value;
-      if (!result.value.trim()) {
-        docxEl.innerHTML += '<div style="color:#999;font-style:italic;margin-top:12px">(This document appears to be empty, or contains only unsupported elements.)</div>';
-      }
-    } catch(e) {
-      docxEl.style.display = 'none';
-      fb('📝', 'This Word document could not be rendered (' + e.message + '). Try re-uploading it, or download it to open in Word.');
-    }
+        .att-docx-body{font-family:Georgia,serif;font-size:14px;line-height:1.7;color:#1a1a1a}
+        .att-docx-body h1{font-size:26px;margin:0 0 18px;font-weight:700;border-bottom:2px solid #e0e0e0;padding-bottom:10px}
+        .att-docx-body h2{font-size:20px;margin:24px 0 12px;font-weight:700}
+        .att-docx-body h3{font-size:16px;margin:18px 0 10px;font-weight:700}
+        .att-docx-body p{margin:0 0 12px}
+        .att-docx-body table{border-collapse:collapse;margin:14px 0;width:100%}
+        .att-docx-body td,.att-docx-body th{border:1px solid #ccc;padding:8px 12px}
+        .att-docx-body th{background:#f5f5f5;font-weight:600}
+        .att-docx-body img{max-width:100%;border-radius:4px}
+        .att-docx-body ul,.att-docx-body ol{margin:0 0 12px;padding-left:28px}
+        .att-docx-body li{margin-bottom:4px}
+        .att-docx-body strong{font-weight:700}
+        .att-docx-body em{font-style:italic}
+      </style><div class="att-docx-body">${result.value || '<p style="color:#999;font-style:italic">This document appears to be empty.</p>'}</div>`;
+      _attSetProgress(100);
+    } catch(e) { _attHideAllPanels(); fb('📝', 'Document could not be rendered: ' + e.message + '\nTry downloading it to open in Word.'); }
+
   } else if (isLegacyDoc) {
-    // Legacy .doc (pre-2007 binary format) has no reliable client-side renderer.
-    // Being honest about this beats faking a broken preview.
-    fb('📝', 'Older .doc files can\'t be previewed in-browser yet — only modern .docx files can. Use Download to open this one in Word, or re-save it as .docx for in-app preview.');
-  } else if (isPlainText) {
+    fb('📝', 'Older .doc files cannot be previewed here. Download it to open in Microsoft Word.');
+
+  } else if (isText) {
+    _attShowPanel('att-panel-text');
     const textEl = document.getElementById('att-viewer-text');
+    _attSetProgress(40, 'Loading…');
     try {
-      const text = await fetch(src).then(r => r.text());
-      textEl.textContent = text || '(This file is empty.)';
-      textEl.style.display = '';
-    } catch(e) {
-      fb('📃', 'This file could not be loaded (' + e.message + ').');
-    }
+      const text = await fetch(src).then(r=>r.text());
+      textEl.textContent = text || '(Empty file)';
+      _attSetProgress(100);
+    } catch(e) { _attHideAllPanels(); fb('📃', 'File could not be loaded: ' + e.message); }
+
   } else {
-    fb('📦', `"${att.name}" is a file type Sanctuary can't preview yet. Use Download to open it in another app.`);
+    fb('📦', `"${att.name}" cannot be previewed. Click Download to open it in the right app.`);
   }
 }
-function viewModalAttachment(idx){showAttachmentInViewer(state.noteModalAttachments[idx]);}
-function removeNoteAttachment(idx){
-  const att=state.noteModalAttachments[idx];
-  if(att&&att.blobKey)idbDel(att.blobKey);
-  state.noteModalAttachments.splice(idx,1);renderNoteAttachments();
-}
-function saveNote() {
-  const title=document.getElementById('note-title-input').value.trim(); if(!title){toast('Add a title',true);return;}
-  const content=document.getElementById('note-content-input').value.trim();
-  const tag=document.getElementById('note-tag-input').value;
-  let isNewNote = false;
-  if(state.noteModalEditId){
-    const n=state.notes.find(x=>x.id===state.noteModalEditId);
-    if(n){n.title=title;n.content=content;n.tag=tag;n.attachments=state.noteModalAttachments;n.date='Just now';}
-  }
-  else { state.notes.unshift({id:Date.now(),title,content,tag,attachments:state.noteModalAttachments,date:'Just now'}); isNewNote = true; }
-  closeModal('note-modal'); renderNotes(); if(isNewNote) recalculateStreak(); save(); toast(state.noteModalEditId?'Note updated!':'Note saved!');
-}
+
 function viewAttachment(noteId,attIdx){
   const note=state.notes.find(n=>n.id===noteId);
   if(!note||!note.attachments||!note.attachments[attIdx])return;
@@ -5411,77 +5490,7 @@ if ('serviceWorker' in navigator) {
   },{passive:true});
 })();
 
-// ═══════════════════════════════════════════════════════
-// FILE VIEWER — clean styles for PDF / Word / Excel
-// ═══════════════════════════════════════════════════════
-(function(){
-  const style=document.createElement('style');
-  style.textContent=`
-    /* Header: always horizontal, filename wraps, never cuts off */
-    #attachment-viewer > div > div:first-child{
-      flex-wrap:wrap!important;gap:8px!important;padding:10px 14px!important;
-    }
-    #att-viewer-name{
-      white-space:normal!important;word-break:break-all!important;
-      font-size:13px!important;line-height:1.4!important;
-      flex:1 1 100%!important;order:0!important;
-    }
-    #att-viewer-pdf-nav,#att-viewer-download-btn,
-    #attachment-viewer button[onclick*="closeAttachmentViewer"]{flex-shrink:0!important;}
-    /* PDF — pure white background, no bleed from dark theme */
-    #att-viewer-pdf-wrap{
-      background:#ffffff!important;min-height:300px;
-      display:flex!important;align-items:flex-start!important;
-      justify-content:center!important;padding:16px!important;
-    }
-    #att-viewer-canvas{
-      background:#ffffff!important;display:block!important;
-      margin:0 auto!important;box-shadow:0 2px 16px rgba(0,0,0,0.25)!important;
-      border-radius:4px!important;max-width:100%!important;
-    }
-    /* Word doc — white page feel */
-    #att-viewer-docx{
-      background:#fff!important;overflow:auto!important;
-    }
-    /* Excel / CSV */
-    #att-viewer-excel{overflow:auto!important;max-width:100%!important;}
-    /* Plain text */
-    #att-viewer-text{
-      white-space:pre-wrap!important;word-break:break-word!important;
-      font-size:13px!important;line-height:1.6!important;overflow:auto!important;
-    }
-    @media(max-width:600px){
-      #att-viewer-name{font-size:12px!important}
-      #att-viewer-download-btn span{display:none}
-    }
-  `;
-  document.head.appendChild(style);
 
-  // Override PDF page renderer — crisp DPI-aware rendering, white fill first
-  window._attRenderPdfPage = async function(pageNum){
-    if(!window._attPdfDoc) return;
-    const page=await window._attPdfDoc.getPage(pageNum);
-    const canvas=document.getElementById('att-viewer-canvas');
-    const wrap=document.getElementById('att-viewer-pdf-wrap');
-    // Use actual rendered width for scale; wait a frame if wrap is 0
-    const wrapW=wrap.clientWidth||document.getElementById('att-viewer-body').clientWidth||700;
-    const dpr=window.devicePixelRatio||1;
-    const baseVp=page.getViewport({scale:1});
-    const baseScale=Math.min(3,Math.max(1,(wrapW-32)/baseVp.width));
-    const vp=page.getViewport({scale:baseScale*dpr});
-    canvas.width=vp.width;
-    canvas.height=vp.height;
-    canvas.style.width=(vp.width/dpr)+'px';
-    canvas.style.height=(vp.height/dpr)+'px';
-    const ctx=canvas.getContext('2d');
-    // White fill prevents dark-theme bleed through transparent PDF areas
-    ctx.fillStyle='#ffffff';
-    ctx.fillRect(0,0,canvas.width,canvas.height);
-    await page.render({canvasContext:ctx,viewport:vp,background:'#ffffff'}).promise;
-    const nav=document.getElementById('att-viewer-pdf-page');
-    if(nav) nav.textContent=`${pageNum} / ${window._attPdfDoc.numPages}`;
-  };
-})();
 
 // ═══════════════════════════════════════════════════════════
 // OFFLINE SYNC — IndexedDB for complete offline access + sync
