@@ -4600,32 +4600,45 @@ function checkOnboarding() {
 async function deleteAccount() {
   if(!await confirmDialog('This will permanently delete your account and ALL your data. This cannot be undone.', 'Delete account?')) return;
   if(!await confirmDialog('Are you absolutely sure? Everything will be gone forever.', 'Last chance')) return;
-  try {
-    if(_currentUser) {
-      // Delete app data from database
-      await _supabase.from('sanctuary_data').delete().eq('id', _currentUser.id).catch(()=>{});
-      await _supabase.from('profiles').delete().eq('id', _currentUser.id).catch(()=>{});
-    }
-    // Clear all local state and storage
+
+  // Show deleting state
+  toast('Deleting your account…');
+
+  if(!_currentUser) {
     clearLocalState();
     localStorage.removeItem('sanctuary_onboarded');
     localStorage.removeItem('pwa_banner_dismissed');
-    // Sign out — Supabase deletes the auth user on next admin sweep
-    // For immediate auth deletion we send a self-delete request via RPC if available
-    await _supabase.rpc('delete_user').catch(()=>{});
-    await _supabase.auth.signOut();
-    _currentUser = null;
     document.getElementById('auth-screen').style.display = 'flex';
-    toast('Account deleted. Sorry to see you go 💚');
-  } catch(e) {
-    // Even if something fails, clear local data and sign out the user
+    return;
+  }
+
+  // Call the RPC — this deletes sanctuary_data, profiles AND auth.users in one go
+  const { data, error } = await _supabase.rpc('delete_user');
+
+  if (error) {
+    console.error('Delete account error:', error);
+    // RPC failed — still clear local and sign out so user isn't stuck
     clearLocalState();
     localStorage.removeItem('sanctuary_onboarded');
+    localStorage.removeItem('pwa_banner_dismissed');
     await _supabase.auth.signOut().catch(()=>{});
     _currentUser = null;
     document.getElementById('auth-screen').style.display = 'flex';
-    toast('Account signed out. If any data remains, email youtearn82@gmail.com', true);
+    toast('Account signed out. Contact youtearn82@gmail.com to confirm full deletion.', true);
+    return;
   }
+
+  // RPC succeeded — auth user is deleted on Supabase
+  // Clear everything locally
+  clearLocalState();
+  localStorage.removeItem('sanctuary_onboarded');
+  localStorage.removeItem('pwa_banner_dismissed');
+
+  // Sign out the session (token is now invalid since user is deleted)
+  await _supabase.auth.signOut().catch(()=>{});
+  _currentUser = null;
+  document.getElementById('auth-screen').style.display = 'flex';
+  toast('Account fully deleted. Sorry to see you go 💚');
 }
 
 // ─────────────────────────────────────────────
