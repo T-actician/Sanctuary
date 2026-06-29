@@ -1,5 +1,5 @@
 // Sanctuary Service Worker — offline-first caching + background alarms
-const CACHE_NAME = 'sanctuary-v3';
+const CACHE_NAME = 'sanctuary-v4';
 
 const PRECACHE = [
   '/',
@@ -22,7 +22,6 @@ self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
-        // Cache what we can — don't fail install if CDN is unreachable
         return cache.addAll(PRECACHE).catch(() => {});
       })
       .then(() => self.skipWaiting())
@@ -52,27 +51,24 @@ self.addEventListener('fetch', event => {
     url.hostname.includes('hzbcerubdaldvapsajce')
   ) return;
 
-  // App shell navigation → cache-first, network fallback
+  // App shell navigation → network-first, cache fallback
+  // Network-first ensures the latest index.html is always used when online.
+  // Cache fallback keeps the app working offline.
   if (event.request.mode === 'navigate') {
     event.respondWith(
-      caches.match('/index.html')
-        .then(cached => {
-          // Serve cached immediately, update in background
-          const networkFetch = fetch(event.request)
-            .then(res => {
-              if (res && res.status === 200) {
-                caches.open(CACHE_NAME).then(c => c.put('/index.html', res.clone()));
-              }
-              return res;
-            })
-            .catch(() => null);
-          return cached || networkFetch;
+      fetch(event.request)
+        .then(res => {
+          if (res && res.status === 200) {
+            caches.open(CACHE_NAME).then(c => c.put('/index.html', res.clone()));
+          }
+          return res;
         })
+        .catch(() => caches.match('/index.html'))
     );
     return;
   }
 
-  // CDN assets (icons, fonts, pdfjs, xlsx, mammoth) → cache-first, network fallback, cache result
+  // CDN assets → cache-first, network fallback, cache result
   if (CDN_HOSTS.some(h => url.hostname.includes(h))) {
     event.respondWith(
       caches.match(event.request).then(cached => {

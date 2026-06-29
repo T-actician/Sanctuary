@@ -3121,7 +3121,7 @@ async function removeProjAttachment(pid, ai){
 // BREAKS + TIMER
 // ─────────────────────────────────────────────
 const BREAK_BGS=['#1a3a22','#1a2540','#261a3a','#3a2a10','#3a1a1a','#0d2818'];
-function renderBreaks(){const el=document.getElementById('breaks-grid');if(!el)return;el.innerHTML=state.breaks.map((b,i)=>`<div class="break-card" onclick="${b.link?`window.open('${b.link}','_blank')`:'setTimer(10);toast(\'10 min break started 🌿\')'}"><div class="break-icon-wrap" style="background:${BREAK_BGS[i%BREAK_BGS.length]}">${b.icon}</div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;color:var(--text)">${b.name}</div><div style="font-size:11px;color:var(--text3)">${b.desc}</div></div><div style="display:flex;gap:2px;flex-shrink:0"><button class="btn btn-sm" onclick="event.stopPropagation();openBreakModal(${b.id})" style="opacity:0.55"><i class="ti ti-edit"></i></button><button class="btn btn-sm" onclick="event.stopPropagation();removeBreak(${b.id})" style="opacity:0.55;color:#f09090"><i class="ti ti-x"></i></button></div></div>`).join('')+`<div class="break-card" onclick="openBreakModal()" style="border-style:dashed;background:transparent"><div class="break-icon-wrap" style="background:var(--bg2);color:var(--text3)"><i class="ti ti-plus" style="font-size:18px"></i></div><div><div style="font-size:13px;font-weight:600;color:var(--text3)">Add activity</div></div></div>`;}
+function renderBreaks(){const el=document.getElementById('breaks-grid');if(!el)return;el.innerHTML=state.breaks.map((b,i)=>`<div class="break-card" onclick="${b.link?`openExternalLink(null,'${b.link}')`:'setTimer(10);toast(\'10 min break started 🌿\')'}"><div class="break-icon-wrap" style="background:${BREAK_BGS[i%BREAK_BGS.length]}">${b.icon}</div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;color:var(--text)">${b.name}</div><div style="font-size:11px;color:var(--text3)">${b.desc}</div></div><div style="display:flex;gap:2px;flex-shrink:0"><button class="btn btn-sm" onclick="event.stopPropagation();openBreakModal(${b.id})" style="opacity:0.55"><i class="ti ti-edit"></i></button><button class="btn btn-sm" onclick="event.stopPropagation();removeBreak(${b.id})" style="opacity:0.55;color:#f09090"><i class="ti ti-x"></i></button></div></div>`).join('')+`<div class="break-card" onclick="openBreakModal()" style="border-style:dashed;background:transparent"><div class="break-icon-wrap" style="background:var(--bg2);color:var(--text3)"><i class="ti ti-plus" style="font-size:18px"></i></div><div><div style="font-size:13px;font-weight:600;color:var(--text3)">Add activity</div></div></div>`;}
 function openBreakModal(editId=null){state.breakModalEditId=editId;if(editId){const b=state.breaks.find(x=>x.id===editId);document.getElementById('break-modal-title').textContent='Edit break';document.getElementById('break-name-input').value=b.name;document.getElementById('break-desc-input').value=b.desc;document.getElementById('break-link-input').value=b.link||'';document.getElementById('break-icon-input').value=b.icon;}else{document.getElementById('break-modal-title').textContent='Add break activity';document.getElementById('break-name-input').value='';document.getElementById('break-desc-input').value='';document.getElementById('break-link-input').value='';document.getElementById('break-icon-input').value='';}openModal('break-modal');}
 function saveBreak(){const name=document.getElementById('break-name-input').value.trim();if(!name){toast('Add a name',true);return;}const desc=document.getElementById('break-desc-input').value.trim();let link=document.getElementById('break-link-input').value.trim();if(link&&!link.match(/^https?:\/\//i))link='https://'+link;const icon=document.getElementById('break-icon-input').value.trim()||'🌿';if(state.breakModalEditId){const b=state.breaks.find(x=>x.id===state.breakModalEditId);if(b){b.name=name;b.desc=desc;b.link=link;b.icon=icon;}}else state.breaks.push({id:Date.now(),name,desc,link,icon});closeModal('break-modal');renderBreaks();save();toast(state.breakModalEditId?'Activity updated!':'Activity added!');}
 async function removeBreak(id){if(!await confirmDialog('Delete this activity?'))return;const b=state.breaks.find(x=>x.id===id);if(b)moveToTrash('break',b);state.breaks=state.breaks.filter(x=>x.id!==id);renderBreaks();save();}
@@ -3161,7 +3161,7 @@ function renderAAY(filter){
   container.innerHTML=cfg.map(c=>{
     const arr=state.aay[c.key]||[];
     let itemsHtml='';
-    if(c.key==='links'){itemsHtml=`<div style="display:flex;flex-direction:column;gap:6px">`+arr.map((l,i)=>`<div style="display:flex;align-items:center;gap:8px"><a href="${l.url}" style="font-size:13px;color:var(--accent);text-decoration:none" target="_blank">${l.label} ↗</a><div style="margin-left:auto;display:flex;gap:4px"><button class="btn btn-sm" style="opacity:0.4;padding:2px 6px" onclick="editAAYItem('links',${i})"><i class="ti ti-edit"></i></button><button class="btn btn-sm" style="opacity:0.4;padding:2px 6px;color:#f09090" onclick="confirmDeleteAAY('links',${i})"><i class="ti ti-x"></i></button></div></div>`).join('')+`</div>`;}
+    if(c.key==='links'){itemsHtml=`<div style="display:flex;flex-direction:column;gap:6px">`+arr.map((l,i)=>`<div style="display:flex;align-items:center;gap:8px"><a href="${l.url}" style="font-size:13px;color:var(--accent);text-decoration:none" target="_blank" onclick="openExternalLink(event,'${l.url}')">${l.label} ↗</a><div style="margin-left:auto;display:flex;gap:4px"><button class="btn btn-sm" style="opacity:0.4;padding:2px 6px" onclick="editAAYItem('links',${i})"><i class="ti ti-edit"></i></button><button class="btn btn-sm" style="opacity:0.4;padding:2px 6px;color:#f09090" onclick="confirmDeleteAAY('links',${i})"><i class="ti ti-x"></i></button></div></div>`).join('')+`</div>`;}
     else if(c.key==='quotes'){itemsHtml=arr.map((q,i)=>`<div class="quote-block"><div class="quote-text">${q}</div><div style="position:absolute;top:8px;right:8px;display:flex;gap:3px"><button class="btn btn-sm" style="padding:2px 6px;opacity:0.4" onclick="editAAYItem('quotes',${i})"><i class="ti ti-edit"></i></button><button class="btn btn-sm" style="padding:2px 6px;opacity:0.4;color:#f09090" onclick="confirmDeleteAAY('quotes',${i})"><i class="ti ti-x"></i></button></div></div>`).join('');}
     else{itemsHtml=`<div style="display:flex;flex-wrap:wrap;gap:6px">`+arr.map((item,i)=>`<div style="display:flex;align-items:center;gap:4px;background:rgba(255,255,255,0.04);padding:6px 10px;border-radius:99px;border:1px solid var(--border)"><span style="font-size:12px">${item}</span><button class="btn btn-sm" onclick="editAAYItem('${c.key}',${i})" style="padding:1px 4px;opacity:0.4;font-size:11px"><i class="ti ti-edit"></i></button><button class="btn btn-sm" onclick="confirmDeleteAAY('${c.key}',${i})" style="padding:1px 4px;opacity:0.4;color:#f09090;font-size:11px"><i class="ti ti-trash"></i></button></div>`).join('')+`</div>`;}
     return `<div class="aay-section"><div class="aay-section-title"><i class="ti ${c.icon}"></i> ${c.label}<button class="btn btn-sm" style="margin-left:auto;padding:2px 7px" onclick="openAAYModal('${c.key}')"><i class="ti ti-plus"></i></button></div>${itemsHtml}</div>`;
@@ -3450,6 +3450,13 @@ async function editAch(id){
 }
 function renderGrowth(){const el=document.getElementById('growth-list');if(!el)return;el.innerHTML=state.growth.map(g=>`<div class="task-row"><div class="chk done" style="cursor:default">✓</div><div class="task-body"><div class="task-text">${g.text}</div><div class="task-meta">${g.date}</div></div><button class="btn btn-sm" onclick="editGrowth(${g.id})" style="opacity:0.5;flex-shrink:0"><i class="ti ti-edit"></i></button><button class="btn btn-sm" onclick="removeGrowth(${g.id})" style="opacity:0.4;flex-shrink:0;color:#f09090"><i class="ti ti-x"></i></button></div>`).join('')||'<div style="font-size:12px;color:var(--text3);padding:8px 0">No growth records yet.</div>';}
 function addGrowth(){const inp=document.getElementById('growth-input');const v=inp.value.trim();if(!v)return;state.growth.unshift({id:Date.now(),text:v,date:'Just now'});inp.value='';renderGrowth();save();toast('Growth recorded!');}
+function openExternalLink(e, url) {
+  if (!url || url === '#') { e && e.preventDefault(); toast('No link saved for this item', true); return; }
+  // Let the browser handle it — if it fails, show friendly message
+  const win = window.open(url, '_blank');
+  if (!win) toast('Could not open link — check your popup blocker', true);
+}
+
 function removeGrowth(id){const g=state.growth.find(x=>x.id===id);if(g)moveToTrash('growth',g);state.growth=state.growth.filter(x=>x.id!==id);renderGrowth();save();}
 async function editGrowth(id){
   const g=state.growth.find(x=>x.id===id);if(!g)return;
@@ -4835,6 +4842,30 @@ function openMpesa() {
 }
 
 // ─────────────────────────────────────────────
+// OFFLINE GUEST BANNER
+// ─────────────────────────────────────────────
+function _showOfflineGuestBanner() {
+  // Already have local data from a previous session
+  const hasLocalData = state.diaryEntries.length || state.goals.length || state.notes.length;
+  if (hasLocalData) {
+    // Show the app with cached data + offline banner
+    const banner = document.createElement('div');
+    banner.id = 'offline-guest-banner';
+    banner.style.cssText = 'position:fixed;top:0;left:0;right:0;background:rgba(240,184,74,0.12);border-bottom:1px solid rgba(240,184,74,0.3);padding:10px 16px;display:flex;align-items:center;gap:10px;z-index:9999;font-size:12px;color:#f0b84a';
+    banner.innerHTML = '<i class="ti ti-wifi-off" style="font-size:16px;flex-shrink:0"></i><span style="flex:1">You're offline — showing your last saved data. Changes won't sync until you're back online.</span><button onclick="document.getElementById('offline-guest-banner').remove()" style="background:none;border:none;color:#f0b84a;cursor:pointer;font-size:18px;padding:0">×</button>';
+    document.body.appendChild(banner);
+  } else {
+    // No local data + offline — show auth screen with offline message
+    document.getElementById('auth-screen').style.display = 'flex';
+    const msg = document.createElement('div');
+    msg.style.cssText = 'position:absolute;bottom:20px;left:20px;right:20px;background:rgba(240,184,74,0.12);border:1px solid rgba(240,184,74,0.3);border-radius:10px;padding:12px 16px;font-size:12px;color:#f0b84a;text-align:center;display:flex;align-items:center;gap:8px;justify-content:center';
+    msg.innerHTML = '<i class="ti ti-wifi-off"></i> You're offline. Connect to the internet to sign in.';
+    document.getElementById('auth-screen').style.position = 'relative';
+    document.getElementById('auth-screen').appendChild(msg);
+  }
+}
+
+// ─────────────────────────────────────────────
 // BOOT
 // ─────────────────────────────────────────────
 init();
@@ -5257,8 +5288,22 @@ function injectSyncBar() {
   bar.innerHTML = `
     <div id="sync-dot" style="width:7px;height:7px;border-radius:50%;background:var(--accent);flex-shrink:0"></div>
     <span id="sync-label">Saved</span>
+    <span id="offline-badge" style="display:none;background:rgba(240,184,74,0.15);color:#f0b84a;border-radius:99px;padding:1px 7px;font-size:10px;font-weight:600">Offline</span>
     <button onclick="authSignOut()" style="background:none;border:1px solid var(--border);border-radius:var(--radius-sm);padding:3px 8px;font-size:11px;color:var(--text3);cursor:pointer;margin-left:4px;font-family:inherit">Sign out</button>`;
   topbar.appendChild(bar);
+
+  // Show/hide offline badge
+  function updateOfflineBadge() {
+    const badge = document.getElementById('offline-badge');
+    if (badge) badge.style.display = navigator.onLine ? 'none' : '';
+  }
+  window.addEventListener('online', updateOfflineBadge);
+  window.addEventListener('offline', () => {
+    updateOfflineBadge();
+    setSyncStatus('err');
+    toast('You're offline — data saved locally 📦');
+  });
+  updateOfflineBadge();
 }
 
 function togglePw(id, btn) {
@@ -5302,21 +5347,53 @@ function clearLocalState() {
 }
 
 (async () => {
-  const { data: { session } } = await _supabase.auth.getSession();
+  // getSession() reads from localStorage — works offline
+  let session = null;
+  try {
+    const { data } = await _supabase.auth.getSession();
+    session = data.session;
+  } catch(e) {
+    // Offline or Supabase unreachable — try localStorage fallback
+    console.warn('getSession failed (offline?):', e);
+  }
+
   document.getElementById('main-app').style.visibility = 'visible';
+
   if (session) {
     _currentUser = session.user;
     document.getElementById('auth-screen').style.display = 'none';
     injectSyncBar();
-    await loadFromSupabase();
-    // Set profile name from auth metadata if not set
+
+    if (navigator.onLine) {
+      // Online — load fresh data from Supabase
+      await loadFromSupabase();
+    } else {
+      // Offline — use locally cached data (already loaded in init())
+      setSyncStatus('err');
+      toast('You're offline — showing your saved data 📦');
+    }
+
     if ((!state.profile.name || state.profile.name === 'You') && _currentUser.user_metadata?.name) {
       state.profile.name = _currentUser.user_metadata.name;
       state.profile.initials = _currentUser.user_metadata.name[0].toUpperCase();
       updateProfileUI();
     }
     checkOnboarding();
+  } else {
+    // No session — always show auth screen
+    document.getElementById('auth-screen').style.display = 'flex';
   }
+
+  // When back online — sync automatically
+  window.addEventListener('online', async () => {
+    const banner = document.getElementById('offline-guest-banner');
+    if (banner) banner.remove();
+    if (_currentUser) {
+      setSyncStatus('syncing');
+      await loadFromSupabase().catch(() => setSyncStatus('err'));
+      toast('Back online — data synced ✅');
+    }
+  });
 
   // Listen for sign-in / sign-out events
   _supabase.auth.onAuthStateChange(async (event, session) => {
