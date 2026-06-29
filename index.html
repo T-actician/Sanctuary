@@ -5379,11 +5379,9 @@ function clearLocalState() {
       updateProfileUI();
     }
     checkOnboarding();
-  } else if (!navigator.onLine) {
-    // No session in localStorage AND offline — show offline login UI
-    document.getElementById('auth-screen').style.display = 'none';
-    document.getElementById('main-app').style.visibility = 'visible';
-    _showOfflineGuestBanner();
+  } else {
+    // No session — always show auth screen
+    document.getElementById('auth-screen').style.display = 'flex';
   }
 
   // When back online — sync automatically
