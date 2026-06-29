@@ -1223,16 +1223,16 @@ input[type=range]::-moz-range-progress{background:var(--accent3);border-radius:9
           <div class="card" style="margin-bottom:14px">
             <div class="card-header"><span class="card-title"><i class="ti ti-brand-mastercard"></i> M-Pesa (Kenya)</span></div>
             <div style="text-align:center;padding:10px 0 16px">
-              <div style="font-size:13px;color:var(--text2);margin-bottom:14px">Send via M-Pesa 💰</div>
+              <div style="font-size:13px;color:var(--text2);margin-bottom:14px">Send via M-Pesa Till or Paybill</div>
               <div onclick="openMpesa()" style="display:inline-flex;align-items:center;gap:12px;background:rgba(76,175,110,0.1);border:1px solid rgba(76,175,110,0.3);border-radius:12px;padding:16px 24px;margin-bottom:10px;cursor:pointer;transition:all 0.2s;user-select:none" onmouseover="this.style.background='rgba(76,175,110,0.18)'" onmouseout="this.style.background='rgba(76,175,110,0.1)'">
                 <div style="font-size:32px">📱</div>
                 <div style="text-align:left">
                   <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.8px">Tap to send via M-Pesa</div>
                   <div style="font-size:24px;font-weight:800;color:var(--accent3);letter-spacing:2px">0115 774 307</div>
-                  <div style="font-size:11px;color:var(--text3);margin-top:2px">Name: ~Alex Kariuki~</div>
+                  <div style="font-size:11px;color:var(--text3);margin-top:2px">Name: Sanctuary Dev</div>
                 </div>
               </div>
-              <div style="font-size:11px;color:var(--text3)">Tap above → opens M-Pesa/ Send Money directly 🙏</div>
+              <div style="font-size:11px;color:var(--text3)">Tap above → opens M-Pesa Send Money directly 🙏</div>
             </div>
           </div>
 
@@ -3123,7 +3123,7 @@ async function removeProjAttachment(pid, ai){
 const BREAK_BGS=['#1a3a22','#1a2540','#261a3a','#3a2a10','#3a1a1a','#0d2818'];
 function renderBreaks(){const el=document.getElementById('breaks-grid');if(!el)return;el.innerHTML=state.breaks.map((b,i)=>`<div class="break-card" onclick="${b.link?`window.open('${b.link}','_blank')`:'setTimer(10);toast(\'10 min break started 🌿\')'}"><div class="break-icon-wrap" style="background:${BREAK_BGS[i%BREAK_BGS.length]}">${b.icon}</div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;color:var(--text)">${b.name}</div><div style="font-size:11px;color:var(--text3)">${b.desc}</div></div><div style="display:flex;gap:2px;flex-shrink:0"><button class="btn btn-sm" onclick="event.stopPropagation();openBreakModal(${b.id})" style="opacity:0.55"><i class="ti ti-edit"></i></button><button class="btn btn-sm" onclick="event.stopPropagation();removeBreak(${b.id})" style="opacity:0.55;color:#f09090"><i class="ti ti-x"></i></button></div></div>`).join('')+`<div class="break-card" onclick="openBreakModal()" style="border-style:dashed;background:transparent"><div class="break-icon-wrap" style="background:var(--bg2);color:var(--text3)"><i class="ti ti-plus" style="font-size:18px"></i></div><div><div style="font-size:13px;font-weight:600;color:var(--text3)">Add activity</div></div></div>`;}
 function openBreakModal(editId=null){state.breakModalEditId=editId;if(editId){const b=state.breaks.find(x=>x.id===editId);document.getElementById('break-modal-title').textContent='Edit break';document.getElementById('break-name-input').value=b.name;document.getElementById('break-desc-input').value=b.desc;document.getElementById('break-link-input').value=b.link||'';document.getElementById('break-icon-input').value=b.icon;}else{document.getElementById('break-modal-title').textContent='Add break activity';document.getElementById('break-name-input').value='';document.getElementById('break-desc-input').value='';document.getElementById('break-link-input').value='';document.getElementById('break-icon-input').value='';}openModal('break-modal');}
-function saveBreak(){const name=document.getElementById('break-name-input').value.trim();if(!name){toast('Add a name',true);return;}const desc=document.getElementById('break-desc-input').value.trim();const link=document.getElementById('break-link-input').value.trim();const icon=document.getElementById('break-icon-input').value.trim()||'🌿';if(state.breakModalEditId){const b=state.breaks.find(x=>x.id===state.breakModalEditId);if(b){b.name=name;b.desc=desc;b.link=link;b.icon=icon;}}else state.breaks.push({id:Date.now(),name,desc,link,icon});closeModal('break-modal');renderBreaks();save();toast(state.breakModalEditId?'Activity updated!':'Activity added!');}
+function saveBreak(){const name=document.getElementById('break-name-input').value.trim();if(!name){toast('Add a name',true);return;}const desc=document.getElementById('break-desc-input').value.trim();let link=document.getElementById('break-link-input').value.trim();if(link&&!link.match(/^https?:\/\//i))link='https://'+link;const icon=document.getElementById('break-icon-input').value.trim()||'🌿';if(state.breakModalEditId){const b=state.breaks.find(x=>x.id===state.breakModalEditId);if(b){b.name=name;b.desc=desc;b.link=link;b.icon=icon;}}else state.breaks.push({id:Date.now(),name,desc,link,icon});closeModal('break-modal');renderBreaks();save();toast(state.breakModalEditId?'Activity updated!':'Activity added!');}
 async function removeBreak(id){if(!await confirmDialog('Delete this activity?'))return;const b=state.breaks.find(x=>x.id===id);if(b)moveToTrash('break',b);state.breaks=state.breaks.filter(x=>x.id!==id);renderBreaks();save();}
 function setTimer(mins){if(state.timer.running)toggleTimer();state.timer.remaining=mins*60;updateTimerDisplay();}
 function toggleTimer(){if(state.timer.running){clearInterval(state.timer.interval);state.timer.running=false;document.getElementById('timer-btn').innerHTML='<i class="ti ti-player-play"></i> Start';}else{state.timer.running=true;document.getElementById('timer-btn').innerHTML='<i class="ti ti-player-pause"></i> Pause';state.timer.interval=setInterval(()=>{state.timer.remaining--;updateTimerDisplay();if(state.timer.remaining<=0){clearInterval(state.timer.interval);state.timer.running=false;document.getElementById('timer-btn').innerHTML='<i class="ti ti-player-play"></i> Start';// Fire alarm ring like a real alarm
@@ -3181,11 +3181,11 @@ function saveAAYItem(){
   const key=state.aayCurrentKey;if(!key){closeModal('aay-modal');return;}
   const isEdit=state.aayEditIdx!==undefined;
   if(isEdit){
-    if(key==='links'){state.aay.links[state.aayEditIdx]={label:val,url:document.getElementById('aay-link-input').value.trim()||'#'};}
+    if(key==='links'){let u=document.getElementById('aay-link-input').value.trim();if(u&&!u.match(/^https?:\/\//i))u='https://'+u;state.aay.links[state.aayEditIdx]={label:val,url:u||'#'};}
     else{state.aay[key][state.aayEditIdx]=val;}
     state.aayEditIdx=undefined;
   }else{
-    if(key==='links'){const url=document.getElementById('aay-link-input').value.trim();state.aay.links.push({label:val,url:url||'#'});}
+    if(key==='links'){let u=document.getElementById('aay-link-input').value.trim();if(u&&!u.match(/^https?:\/\//i))u='https://'+u;state.aay.links.push({label:val,url:u||'#'});}
     else if(Array.isArray(state.aay[key]))state.aay[key].push(val);
   }
   closeModal('aay-modal');renderAAY(state.aayFilterMode);save();toast(isEdit?'Updated!':'Added!');
