@@ -2038,13 +2038,21 @@ async function init() {
 
 function setDate() {
   const now = new Date();
-  const s = now.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  // Use explicit locale parts to avoid timezone-shifted weekday bugs
+  const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const weekday = days[now.getDay()];
+  const day = now.getDate();
+  const month = months[now.getMonth()];
+  const year = now.getFullYear();
+  const s = `${weekday}, ${day} ${month} ${year}`;
+  const sShort = `${weekday}, ${day} ${month}`;
   const el = document.getElementById('topbar-date');
   if(el) el.textContent = s;
   const dd = document.getElementById('diary-date-display');
   if(dd) dd.textContent = s;
   const gl = document.getElementById('goals-date-label');
-  if(gl) gl.textContent = now.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
+  if(gl) gl.textContent = sShort;
 }
 
 function setGreeting() {
@@ -2505,6 +2513,26 @@ function openNoteModal(editId=null) {
   openModal('note-modal');
 }
 function openEditNote(id){openNoteModal(id);}
+function saveNote(){
+  const title=document.getElementById('note-title-input').value.trim();
+  if(!title){toast('Add a title',true);return;}
+  const content=document.getElementById('note-content-input').value.trim();
+  const tag=document.getElementById('note-tag-input').value;
+  const now=new Date();
+  const date=now.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+  if(state.noteModalEditId){
+    const n=state.notes.find(x=>x.id===state.noteModalEditId);
+    if(n){n.title=title;n.content=content;n.tag=tag;n.attachments=state.noteModalAttachments.slice();}
+    toast('Note updated!');
+  } else {
+    state.notes.unshift({id:Date.now(),title,content,tag,date,attachments:state.noteModalAttachments.slice()});
+    toast('Note saved! 📝');
+  }
+  closeModal('note-modal');
+  renderNotes();
+  const sn=document.getElementById('stat-notes');if(sn)sn.textContent=state.notes.length;
+  save();
+}
 async function handleNoteAttachment(e){
   const file=e.target.files[0];e.target.value='';if(!file)return;
   const blobKey='note_att_'+Date.now()+'_'+Math.random().toString(36).slice(2);
@@ -3757,43 +3785,37 @@ function onTrackEnded(){
 
 // ── Seek / volume ──
 let _seeking=false;
+// Set seeking on mousedown/touchstart on the element
 ['np-seek','mp-seek-bar','mob-np-seek'].forEach(id=>{
   const el=document.getElementById(id);
   if(el){
-    el.addEventListener('mousedown',()=>_seeking=true,{passive:true});
-    el.addEventListener('touchstart',()=>_seeking=true,{passive:true});
-    el.addEventListener('mouseup',()=>_seeking=false,{passive:true});
-    el.addEventListener('touchend',()=>_seeking=false,{passive:true});
+    el.addEventListener('mousedown',()=>{ _seeking=true; }, {passive:true});
+    el.addEventListener('touchstart',()=>{ _seeking=true; }, {passive:true});
+    el.addEventListener('touchend',()=>{ _seeking=false; }, {passive:true});
   }
 });
-function seekTo(val){ 
-  if(audio.duration){ 
-    audio.currentTime=(val/100)*audio.duration; 
-    audio.play().catch(()=>{}); 
-  } 
+// Clear seeking on mouseup anywhere on the page (fixes PC drag releasing outside element)
+window.addEventListener('mouseup', () => { _seeking=false; }, {passive:true});
+
+function seekTo(val){
+  if(audio.duration){
+    audio.currentTime=(val/100)*audio.duration;
+    // Update time display immediately
+    const cur=fmtTime(audio.currentTime);
+    ['np-cur','mp-cur-time','mob-np-cur'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=cur;});
+    // Update slider fill
+    ['np-seek','mp-seek-bar','mob-np-seek'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.setProperty('--pct',val+'%');});
+  }
 }
 
-// Real-time slider input handlers for all platforms (desktop + mobile)
+// On release: seek and resume
 ['np-seek','mp-seek-bar','mob-np-seek'].forEach(id=>{
   const el=document.getElementById(id);
   if(el){
-    // Input event fires continuously as user drags
-    el.addEventListener('input', (e) => {
-      const val = e.target.value;
-      if(audio.duration){
-        audio.currentTime = (val/100) * audio.duration;
-        // Update display immediately
-        ['np-cur','mp-cur','mob-np-cur'].forEach(cid => {
-          const c = document.getElementById(cid);
-          if(c) c.textContent = formatTime(audio.currentTime);
-        });
-      }
-    }, {passive: true});
-    
-    // When user releases, ensure playback continues
     el.addEventListener('change', (e) => {
+      seekTo(e.target.value);
       if(!audio.paused) audio.play().catch(()=>{});
-    }, {passive: true});
+    }, {passive:true});
   }
 });
 function setVolume(val){
