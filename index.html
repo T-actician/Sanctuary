@@ -3121,7 +3121,7 @@ async function removeProjAttachment(pid, ai){
 // BREAKS + TIMER
 // ─────────────────────────────────────────────
 const BREAK_BGS=['#1a3a22','#1a2540','#261a3a','#3a2a10','#3a1a1a','#0d2818'];
-function renderBreaks(){const el=document.getElementById('breaks-grid');if(!el)return;el.innerHTML=state.breaks.map((b,i)=>`<div class="break-card" onclick="${b.link?`openExternalLink(null,'${b.link}')`:'setTimer(10);toast(\'10 min break started 🌿\')'}"><div class="break-icon-wrap" style="background:${BREAK_BGS[i%BREAK_BGS.length]}">${b.icon}</div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;color:var(--text)">${b.name}</div><div style="font-size:11px;color:var(--text3)">${b.desc}</div></div><div style="display:flex;gap:2px;flex-shrink:0"><button class="btn btn-sm" onclick="event.stopPropagation();openBreakModal(${b.id})" style="opacity:0.55"><i class="ti ti-edit"></i></button><button class="btn btn-sm" onclick="event.stopPropagation();removeBreak(${b.id})" style="opacity:0.55;color:#f09090"><i class="ti ti-x"></i></button></div></div>`).join('')+`<div class="break-card" onclick="openBreakModal()" style="border-style:dashed;background:transparent"><div class="break-icon-wrap" style="background:var(--bg2);color:var(--text3)"><i class="ti ti-plus" style="font-size:18px"></i></div><div><div style="font-size:13px;font-weight:600;color:var(--text3)">Add activity</div></div></div>`;}
+function renderBreaks(){const el=document.getElementById('breaks-grid');if(!el)return;el.innerHTML=state.breaks.map((b,i)=>`<div class="break-card" onclick="${b.link?`window.open('${b.link}','_blank')`:'setTimer(10);toast(\'10 min break started 🌿\')'}"><div class="break-icon-wrap" style="background:${BREAK_BGS[i%BREAK_BGS.length]}">${b.icon}</div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;color:var(--text)">${b.name}</div><div style="font-size:11px;color:var(--text3)">${b.desc}</div></div><div style="display:flex;gap:2px;flex-shrink:0"><button class="btn btn-sm" onclick="event.stopPropagation();openBreakModal(${b.id})" style="opacity:0.55"><i class="ti ti-edit"></i></button><button class="btn btn-sm" onclick="event.stopPropagation();removeBreak(${b.id})" style="opacity:0.55;color:#f09090"><i class="ti ti-x"></i></button></div></div>`).join('')+`<div class="break-card" onclick="openBreakModal()" style="border-style:dashed;background:transparent"><div class="break-icon-wrap" style="background:var(--bg2);color:var(--text3)"><i class="ti ti-plus" style="font-size:18px"></i></div><div><div style="font-size:13px;font-weight:600;color:var(--text3)">Add activity</div></div></div>`;}
 function openBreakModal(editId=null){state.breakModalEditId=editId;if(editId){const b=state.breaks.find(x=>x.id===editId);document.getElementById('break-modal-title').textContent='Edit break';document.getElementById('break-name-input').value=b.name;document.getElementById('break-desc-input').value=b.desc;document.getElementById('break-link-input').value=b.link||'';document.getElementById('break-icon-input').value=b.icon;}else{document.getElementById('break-modal-title').textContent='Add break activity';document.getElementById('break-name-input').value='';document.getElementById('break-desc-input').value='';document.getElementById('break-link-input').value='';document.getElementById('break-icon-input').value='';}openModal('break-modal');}
 function saveBreak(){const name=document.getElementById('break-name-input').value.trim();if(!name){toast('Add a name',true);return;}const desc=document.getElementById('break-desc-input').value.trim();let link=document.getElementById('break-link-input').value.trim();if(link&&!link.match(/^https?:\/\//i))link='https://'+link;const icon=document.getElementById('break-icon-input').value.trim()||'🌿';if(state.breakModalEditId){const b=state.breaks.find(x=>x.id===state.breakModalEditId);if(b){b.name=name;b.desc=desc;b.link=link;b.icon=icon;}}else state.breaks.push({id:Date.now(),name,desc,link,icon});closeModal('break-modal');renderBreaks();save();toast(state.breakModalEditId?'Activity updated!':'Activity added!');}
 async function removeBreak(id){if(!await confirmDialog('Delete this activity?'))return;const b=state.breaks.find(x=>x.id===id);if(b)moveToTrash('break',b);state.breaks=state.breaks.filter(x=>x.id!==id);renderBreaks();save();}
@@ -3161,7 +3161,7 @@ function renderAAY(filter){
   container.innerHTML=cfg.map(c=>{
     const arr=state.aay[c.key]||[];
     let itemsHtml='';
-    if(c.key==='links'){itemsHtml=`<div style="display:flex;flex-direction:column;gap:6px">`+arr.map((l,i)=>`<div style="display:flex;align-items:center;gap:8px"><a href="${l.url}" style="font-size:13px;color:var(--accent);text-decoration:none" target="_blank" onclick="openExternalLink(event,'${l.url}')">${l.label} ↗</a><div style="margin-left:auto;display:flex;gap:4px"><button class="btn btn-sm" style="opacity:0.4;padding:2px 6px" onclick="editAAYItem('links',${i})"><i class="ti ti-edit"></i></button><button class="btn btn-sm" style="opacity:0.4;padding:2px 6px;color:#f09090" onclick="confirmDeleteAAY('links',${i})"><i class="ti ti-x"></i></button></div></div>`).join('')+`</div>`;}
+    if(c.key==='links'){itemsHtml=`<div style="display:flex;flex-direction:column;gap:6px">`+arr.map((l,i)=>`<div style="display:flex;align-items:center;gap:8px"><a href="${l.url}" style="font-size:13px;color:var(--accent);text-decoration:none" target="_blank">${l.label} ↗</a><div style="margin-left:auto;display:flex;gap:4px"><button class="btn btn-sm" style="opacity:0.4;padding:2px 6px" onclick="editAAYItem('links',${i})"><i class="ti ti-edit"></i></button><button class="btn btn-sm" style="opacity:0.4;padding:2px 6px;color:#f09090" onclick="confirmDeleteAAY('links',${i})"><i class="ti ti-x"></i></button></div></div>`).join('')+`</div>`;}
     else if(c.key==='quotes'){itemsHtml=arr.map((q,i)=>`<div class="quote-block"><div class="quote-text">${q}</div><div style="position:absolute;top:8px;right:8px;display:flex;gap:3px"><button class="btn btn-sm" style="padding:2px 6px;opacity:0.4" onclick="editAAYItem('quotes',${i})"><i class="ti ti-edit"></i></button><button class="btn btn-sm" style="padding:2px 6px;opacity:0.4;color:#f09090" onclick="confirmDeleteAAY('quotes',${i})"><i class="ti ti-x"></i></button></div></div>`).join('');}
     else{itemsHtml=`<div style="display:flex;flex-wrap:wrap;gap:6px">`+arr.map((item,i)=>`<div style="display:flex;align-items:center;gap:4px;background:rgba(255,255,255,0.04);padding:6px 10px;border-radius:99px;border:1px solid var(--border)"><span style="font-size:12px">${item}</span><button class="btn btn-sm" onclick="editAAYItem('${c.key}',${i})" style="padding:1px 4px;opacity:0.4;font-size:11px"><i class="ti ti-edit"></i></button><button class="btn btn-sm" onclick="confirmDeleteAAY('${c.key}',${i})" style="padding:1px 4px;opacity:0.4;color:#f09090;font-size:11px"><i class="ti ti-trash"></i></button></div>`).join('')+`</div>`;}
     return `<div class="aay-section"><div class="aay-section-title"><i class="ti ${c.icon}"></i> ${c.label}<button class="btn btn-sm" style="margin-left:auto;padding:2px 7px" onclick="openAAYModal('${c.key}')"><i class="ti ti-plus"></i></button></div>${itemsHtml}</div>`;
@@ -3450,13 +3450,6 @@ async function editAch(id){
 }
 function renderGrowth(){const el=document.getElementById('growth-list');if(!el)return;el.innerHTML=state.growth.map(g=>`<div class="task-row"><div class="chk done" style="cursor:default">✓</div><div class="task-body"><div class="task-text">${g.text}</div><div class="task-meta">${g.date}</div></div><button class="btn btn-sm" onclick="editGrowth(${g.id})" style="opacity:0.5;flex-shrink:0"><i class="ti ti-edit"></i></button><button class="btn btn-sm" onclick="removeGrowth(${g.id})" style="opacity:0.4;flex-shrink:0;color:#f09090"><i class="ti ti-x"></i></button></div>`).join('')||'<div style="font-size:12px;color:var(--text3);padding:8px 0">No growth records yet.</div>';}
 function addGrowth(){const inp=document.getElementById('growth-input');const v=inp.value.trim();if(!v)return;state.growth.unshift({id:Date.now(),text:v,date:'Just now'});inp.value='';renderGrowth();save();toast('Growth recorded!');}
-function openExternalLink(e, url) {
-  if (!url || url === '#') { e && e.preventDefault(); toast('No link saved for this item', true); return; }
-  // Let the browser handle it — if it fails, show friendly message
-  const win = window.open(url, '_blank');
-  if (!win) toast('Could not open link — check your popup blocker', true);
-}
-
 function removeGrowth(id){const g=state.growth.find(x=>x.id===id);if(g)moveToTrash('growth',g);state.growth=state.growth.filter(x=>x.id!==id);renderGrowth();save();}
 async function editGrowth(id){
   const g=state.growth.find(x=>x.id===id);if(!g)return;
@@ -4842,30 +4835,6 @@ function openMpesa() {
 }
 
 // ─────────────────────────────────────────────
-// OFFLINE GUEST BANNER
-// ─────────────────────────────────────────────
-function _showOfflineGuestBanner() {
-  // Already have local data from a previous session
-  const hasLocalData = state.diaryEntries.length || state.goals.length || state.notes.length;
-  if (hasLocalData) {
-    // Show the app with cached data + offline banner
-    const banner = document.createElement('div');
-    banner.id = 'offline-guest-banner';
-    banner.style.cssText = 'position:fixed;top:0;left:0;right:0;background:rgba(240,184,74,0.12);border-bottom:1px solid rgba(240,184,74,0.3);padding:10px 16px;display:flex;align-items:center;gap:10px;z-index:9999;font-size:12px;color:#f0b84a';
-    banner.innerHTML = '<i class="ti ti-wifi-off" style="font-size:16px;flex-shrink:0"></i><span style="flex:1">You're offline — showing your last saved data. Changes won't sync until you're back online.</span><button onclick="document.getElementById('offline-guest-banner').remove()" style="background:none;border:none;color:#f0b84a;cursor:pointer;font-size:18px;padding:0">×</button>';
-    document.body.appendChild(banner);
-  } else {
-    // No local data + offline — show auth screen with offline message
-    document.getElementById('auth-screen').style.display = 'flex';
-    const msg = document.createElement('div');
-    msg.style.cssText = 'position:absolute;bottom:20px;left:20px;right:20px;background:rgba(240,184,74,0.12);border:1px solid rgba(240,184,74,0.3);border-radius:10px;padding:12px 16px;font-size:12px;color:#f0b84a;text-align:center;display:flex;align-items:center;gap:8px;justify-content:center';
-    msg.innerHTML = '<i class="ti ti-wifi-off"></i> You're offline. Connect to the internet to sign in.';
-    document.getElementById('auth-screen').style.position = 'relative';
-    document.getElementById('auth-screen').appendChild(msg);
-  }
-}
-
-// ─────────────────────────────────────────────
 // BOOT
 // ─────────────────────────────────────────────
 init();
@@ -4942,10 +4911,7 @@ init();
   </div>
 </div>
 
-
-<!-- ═══════════════════════════════════════════
-     SUPABASE — loaded first so auth is always ready
-═══════════════════════════════════════════ -->
+<!-- SUPABASE -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <!-- AUTH SCREEN -->
@@ -4978,66 +4944,91 @@ init();
 </div>
 
 <script>
-// ═══════════════════════════════════════════════════════
-// SUPABASE CLIENT
-// ═══════════════════════════════════════════════════════
+// ─────────────────────────────────────────────
+// SUPABASE AUTH + SYNC
+// ─────────────────────────────────────────────
 const _supabase = supabase.createClient(
   'https://hzbcerubdaldvapsajce.supabase.co',
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh6YmNlcnViZGFsZHZhcHNhamNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyMjg1NTAsImV4cCI6MjA5NzgwNDU1MH0.lnd851sqdsVYe5x-736sb8St1XddZGBEVZxjCLrH4qA',
-  { auth: { persistSession: true, storage: window.localStorage, autoRefreshToken: true } }
+  {
+    auth: {
+      // Use localStorage so the session survives the app being swiped away or
+      // backgrounded on mobile. sessionStorage was clearing it on app close.
+      persistSession: true,
+      storage: window.localStorage,
+      autoRefreshToken: true
+    }
+  }
 );
 
-// ═══════════════════════════════════════════════════════
-// R2 STORAGE WORKER
-// ═══════════════════════════════════════════════════════
+// ─────────────────────────────────────────────
+// R2 STORAGE WORKER — replaces Supabase Storage for all files
+// (avatars, gallery photos, place photos, note attachments, music).
+// Supabase still handles auth + the database; this Worker only
+// handles big binary files, so they sync across devices without
+// eating into Supabase's small free file-storage quota.
+// ─────────────────────────────────────────────
+// 1. Replace this with YOUR Worker's URL after you deploy it
+//    (Cloudflare gives you this after `wrangler deploy` — looks like
+//    https://sanctuary-storage.yourname.workers.dev)
 const STORAGE_WORKER_URL = 'https://sanctuary-storage.myapp2026.workers.dev';
+// 2. Replace this with the SAME secret you set as APP_SECRET on the Worker
+//    (see setup guide — this is not a real secret key, just a shared password
+//    between your app and your own Worker)
 const STORAGE_APP_SECRET = 'dde88852407a6efc510e742d4dcb80b2032020a90cf704612cdf2d029556dd81';
 
+// Uploads a File/Blob to R2 via the Worker. Returns the public URL, or null on failure.
 async function storageUpload(file, keyName) {
   if (!_currentUser) return { url: null, error: 'Not signed in' };
   try {
     const safeKey = keyName.replace(/[^a-zA-Z0-9._\-]/g, '_');
     const res = await fetch(`${STORAGE_WORKER_URL}/upload/${_currentUser.id}/${encodeURIComponent(safeKey)}`, {
       method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + STORAGE_APP_SECRET, 'Content-Type': file.type || 'application/octet-stream' },
+      headers: {
+        'Authorization': 'Bearer ' + STORAGE_APP_SECRET,
+        'Content-Type': file.type || 'application/octet-stream'
+      },
       body: file
     });
-    if (!res.ok) return { url: null, error: `HTTP ${res.status}` };
+    if (!res.ok) {
+      const bodyText = await res.text().catch(()=>'');
+      console.warn('Storage upload failed', res.status, bodyText);
+      return { url: null, error: `Upload failed (HTTP ${res.status})${bodyText ? ': ' + bodyText.slice(0,120) : ''}` };
+    }
     const data = await res.json();
-    return { url: data.url || null, error: data.url ? null : 'No URL returned' };
-  } catch (err) { return { url: null, error: err.message }; }
+    return { url: data.url || null, error: data.url ? null : 'Worker returned no URL' };
+  } catch (err) {
+    console.warn('Storage upload error', err);
+    return { url: null, error: err.message || 'Network error reaching storage' };
+  }
 }
 
+// Deletes a file from R2 via the Worker (best-effort — failures are not fatal).
 async function storageDelete(keyName) {
   if (!_currentUser || !keyName) return;
   try {
     const safeKey = keyName.replace(/[^a-zA-Z0-9._\-]/g, '_');
     await fetch(`${STORAGE_WORKER_URL}/file/${_currentUser.id}/${encodeURIComponent(safeKey)}`, {
-      method: 'DELETE', headers: { 'Authorization': 'Bearer ' + STORAGE_APP_SECRET }
+      method: 'DELETE',
+      headers: { 'Authorization': 'Bearer ' + STORAGE_APP_SECRET }
     });
-  } catch(e) {}
+  } catch (err) { console.warn('R2 delete error', err); }
 }
 
-// ═══════════════════════════════════════════════════════
-// AUTH STATE
-// ═══════════════════════════════════════════════════════
+let _authMode = 'login'; // 'login' | 'signup'
 let _currentUser = null;
-let _authMode = 'login';
 let _syncTimeout = null;
-
-function togglePw(id, btn) {
-  const inp = document.getElementById(id); if (!inp) return;
-  inp.type = inp.type === 'password' ? 'text' : 'password';
-  btn.style.color = inp.type === 'text' ? '#4caf6e' : 'rgba(232,245,236,0.4)';
-}
 
 function authSwitchTab(mode) {
   _authMode = mode;
   document.getElementById('auth-login-form').style.display = mode === 'login' ? '' : 'none';
   document.getElementById('auth-signup-form').style.display = mode === 'signup' ? '' : 'none';
-  document.getElementById('tab-login').style.cssText = `flex:1;padding:7px;border:none;font-size:13px;font-weight:600;border-radius:6px;cursor:pointer;font-family:inherit;background:${mode==='login'?'var(--accent2)':'none'};color:${mode==='login'?'#fff':'rgba(232,245,236,0.4)'}`;
-  document.getElementById('tab-signup').style.cssText = `flex:1;padding:7px;border:none;font-size:13px;font-weight:600;border-radius:6px;cursor:pointer;font-family:inherit;background:${mode==='signup'?'var(--accent2)':'none'};color:${mode==='signup'?'#fff':'rgba(232,245,236,0.4)'}`;
-  _authMsg(''); _authMsg('', false, 'signup');
+  document.getElementById('tab-login').style.background = mode === 'login' ? 'var(--accent2)' : 'none';
+  document.getElementById('tab-login').style.color = mode === 'login' ? '#fff' : 'rgba(232,245,236,0.4)';
+  document.getElementById('tab-signup').style.background = mode === 'signup' ? 'var(--accent2)' : 'none';
+  document.getElementById('tab-signup').style.color = mode === 'signup' ? '#fff' : 'rgba(232,245,236,0.4)';
+  document.getElementById('auth-msg').textContent = '';
+  document.getElementById('auth-msg-2').textContent = '';
 }
 
 function _authMsg(msg, isErr, form) {
@@ -5054,94 +5045,84 @@ async function authSubmit() {
     if (!email || !pass) { _authMsg('Enter email and password', true); return; }
     const btn = document.getElementById('auth-btn');
     btn.disabled = true; btn.textContent = 'Signing in…';
-    try {
-      const { error } = await _supabase.auth.signInWithPassword({ email, password: pass });
-      if (error) { _authMsg(error.message, true); }
-      // on success, onAuthStateChange fires and handles everything
-    } catch(e) { _authMsg('Connection error. Check your internet.', true); }
+    const { error } = await _supabase.auth.signInWithPassword({ email, password: pass });
     btn.disabled = false; btn.textContent = 'Sign in';
+    if (error) { _authMsg(error.message, true); return; }
   } else {
     const name  = document.getElementById('auth-name').value.trim();
     const email = document.getElementById('auth-email-2').value.trim();
     const pass  = document.getElementById('auth-password-2').value;
     if (!email || !pass) { _authMsg('Enter email and password', true, 'signup'); return; }
-    if (pass.length < 6) { _authMsg('Password must be at least 6 characters', true, 'signup'); return; }
     const btn = document.getElementById('auth-btn-2');
     btn.disabled = true; btn.textContent = 'Creating account…';
-    try {
-      const { error } = await _supabase.auth.signUp({
-        email, password: pass,
-        options: { data: { name: name || email.split('@')[0] }, emailRedirectTo: window.location.origin }
-      });
-      if (error) { _authMsg(error.message, true, 'signup'); }
-      else { _authMsg('Check your email to confirm your account!', false, 'signup'); }
-    } catch(e) { _authMsg('Connection error. Check your internet.', true, 'signup'); }
+    const { error } = await _supabase.auth.signUp({
+      email, password: pass,
+      options: {
+        data: { name: name || email.split('@')[0] },
+        emailRedirectTo: window.location.origin
+      }
+    });
     btn.disabled = false; btn.textContent = 'Create account';
+    if (error) { _authMsg(error.message, true, 'signup'); return; }
+    _authMsg('Check your email to confirm your account!', false, 'signup');
+    return;
   }
 }
 
 async function authResetPassword() {
   const email = document.getElementById('auth-email').value.trim();
   if (!email) { _authMsg('Enter your email first', true); return; }
-  try {
-    const { error } = await _supabase.auth.resetPasswordForEmail(email);
-    if (error) _authMsg(error.message, true);
-    else _authMsg('Password reset email sent!', false);
-  } catch(e) { _authMsg('Connection error.', true); }
+  const { error } = await _supabase.auth.resetPasswordForEmail(email);
+  if (error) _authMsg(error.message, true);
+  else _authMsg('Password reset email sent!', false);
 }
 
 async function authSignOut() {
-  try { audio.pause(); audio.removeAttribute('src'); audio.load(); } catch(e) {}
+  // Stop everything audio-related before anything else — a track must never
+  // keep playing once the person has signed out, especially on a shared device.
+  try {
+    audio.pause();
+    audio.removeAttribute('src');
+    audio.load();
+  } catch(e) {}
   if (state.music.sleepTimerInterval) { clearInterval(state.music.sleepTimerInterval); state.music.sleepTimerInterval = null; }
+  state.music.sleepTimerEnd = null;
   state.music.currentIndex = -1;
-  updateNowPlayingUI(null); closeMiniPlayer();
+  updateNowPlayingUI(null);
+  closeMiniPlayer();
   document.getElementById('nav-music-badge').style.display = 'none';
+  // Also stop any alarm/reminder that's actively ringing right now (including
+  // a custom-track ringtone, vibration, and screen wake lock), and close its
+  // overlay rather than leaving it ringing at someone who just signed out.
   if (_ringInterval) { clearInterval(_ringInterval); _ringInterval = null; }
-  _stopRingtoneAudio(); _stopVibration(); _releaseWakeLock(); _ringing = null;
+  _stopRingtoneAudio();
+  _stopVibration();
+  _releaseWakeLock();
+  _ringing = null;
   const ringOverlay = document.getElementById('alarm-ring-modal');
   if (ringOverlay) ringOverlay.style.display = 'none';
-  clearTimeout(_syncTimeout);
-  await syncToSupabase().catch(() => {});
-  await _supabase.auth.signOut().catch(() => {});
+
+  await syncToSupabase();
+  await _supabase.auth.signOut();
   clearLocalState();
   _currentUser = null;
   document.getElementById('auth-screen').style.display = 'flex';
+  document.getElementById('auth-email').value = '';
+  document.getElementById('auth-password').value = '';
+  _authMsg('', false);
   setSyncStatus('idle');
 }
 
-// ═══════════════════════════════════════════════════════
-// SYNC STATUS BAR
-// ═══════════════════════════════════════════════════════
+// ── Sync helpers ──
 function setSyncStatus(s) {
   const dot = document.getElementById('sync-dot');
   const lbl = document.getElementById('sync-label');
   if (!dot || !lbl) return;
-  dot.style.background = s === 'err' ? '#f0b84a' : 'var(--accent)';
-  lbl.textContent = s === 'syncing' ? 'Syncing…' : s === 'err' ? 'Offline' : 'Saved';
+  dot.className = 'sync-dot' + (s === 'syncing' ? ' syncing' : s === 'err' ? ' err' : '');
+  lbl.textContent = s === 'syncing' ? 'Syncing…' : s === 'err' ? 'Sync error' : 'Saved';
 }
 
-function injectSyncBar() {
-  if (document.getElementById('sync-status-bar')) return;
-  const topbar = document.querySelector('.topbar');
-  if (!topbar) return;
-  const bar = document.createElement('div');
-  bar.id = 'sync-status-bar';
-  bar.style.cssText = 'display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3)';
-  bar.innerHTML = `
-    <div id="sync-dot" style="width:7px;height:7px;border-radius:50%;background:var(--accent);flex-shrink:0"></div>
-    <span id="sync-label">Saved</span>
-    <button onclick="authSignOut()" style="background:none;border:1px solid var(--border);border-radius:var(--radius-sm);padding:3px 8px;font-size:11px;color:var(--text3);cursor:pointer;margin-left:4px;font-family:inherit">Sign out</button>`;
-  topbar.appendChild(bar);
-  // Online/offline badge
-  function updateBadge() { setSyncStatus(navigator.onLine ? 'idle' : 'err'); }
-  window.addEventListener('online', updateBadge);
-  window.addEventListener('offline', () => { setSyncStatus('err'); toast('Offline — changes saved locally 📦'); });
-  updateBadge();
-}
-
-// ═══════════════════════════════════════════════════════
-// SUPABASE SYNC
-// ═══════════════════════════════════════════════════════
+// Called after every local save() — debounced 2s so we don't hammer Supabase
 function scheduleSyncToSupabase() {
   if (!_currentUser) return;
   clearTimeout(_syncTimeout);
@@ -5150,12 +5131,12 @@ function scheduleSyncToSupabase() {
 }
 
 async function syncToSupabase() {
-  if (!_currentUser || !navigator.onLine) return;
+  if (!_currentUser) return;
   try {
     const payload = {
       id: _currentUser.id,
       goals: state.goals,
-      notes: state.notes.map(n => ({...n, attachments: (n.attachments||[]).map(a => ({name:a.name,type:a.type,blobKey:a.blobKey,storageUrl:a.storageUrl,storageKey:a.storageKey}))})),
+      notes: state.notes.map(n => ({...n, attachments: (n.attachments||[]).map(a => ({name:a.name,type:a.type,blobKey:a.blobKey,storageUrl:a.storageUrl,storageKey:a.storageKey,url:a.storageUrl||undefined}))})),
       diary_entries: state.diaryEntries,
       projects: state.projects,
       breaks: state.breaks,
@@ -5163,70 +5144,94 @@ async function syncToSupabase() {
       achievements: state.achievements,
       growth: state.growth,
       milestones: state.milestones,
-      places: state.places.map(p => ({...p, photos: (p.photos||[]).map(ph => ({blobKey:ph.blobKey,storageUrl:ph.storageUrl,storageKey:ph.storageKey}))})),
-      gallery: {
-        memories: state.gallery.memories.map(i=>({blobKey:i.blobKey,storageUrl:i.storageUrl,storageKey:i.storageKey,caption:i.caption})),
-        visionboard: state.gallery.visionboard.map(i=>({blobKey:i.blobKey,storageUrl:i.storageUrl,storageKey:i.storageKey,caption:i.caption}))
-      },
-      alarms: state.alarms, reminders: state.reminders, trash: state.trash,
+      places: state.places.map(p => ({...p, photos: (p.photos||[]).map(ph => ({blobKey:ph.blobKey, storageUrl:ph.storageUrl, storageKey:ph.storageKey}))})),
+      gallery: { memories: state.gallery.memories.map(i=>({blobKey:i.blobKey,storageUrl:i.storageUrl,storageKey:i.storageKey,caption:i.caption})), visionboard: state.gallery.visionboard.map(i=>({blobKey:i.blobKey,storageUrl:i.storageUrl,storageKey:i.storageKey,caption:i.caption})) },
+      alarms: state.alarms,
+      reminders: state.reminders,
+      trash: state.trash,
       music_tracks: state.music.tracks.map(t=>({...t,blobUrl:undefined})),
       music_playlists: (state.music.playlists||[]).filter(p=>!p.auto),
       streak: state.streak,
       profile: {name:state.profile.name,tagline:state.profile.tagline,initials:state.profile.initials,avatarStorageUrl:state.profile.avatarStorageUrl},
-      app_theme: state.appTheme, hero_theme: state.heroTheme, notes_layout: state.notesLayout,
+      app_theme: state.appTheme,
+      hero_theme: state.heroTheme,
+      notes_layout: state.notesLayout,
       updated_at: new Date().toISOString()
     };
     const { error } = await _supabase.from('sanctuary_data').upsert(payload);
     if (error) { setSyncStatus('err'); console.warn('Sync error', error); }
     else setSyncStatus('idle');
-  } catch(e) { setSyncStatus('err'); }
+  } catch(e) { setSyncStatus('err'); console.warn('Sync failed', e); }
 }
 
 async function loadFromSupabase() {
   if (!_currentUser) return;
   try {
-    const { data, error } = await _supabase.from('sanctuary_data').select('*').eq('id', _currentUser.id).single();
-    if (error || !data) return;
-    if (data.goals?.length)         state.goals = data.goals;
-    if (data.notes?.length)         state.notes = data.notes.map(n=>({...n,attachments:(n.attachments||[]).map(a=>({...a,url:a.storageUrl||a.url}))}));
-    if (data.diary_entries?.length) state.diaryEntries = data.diary_entries;
-    if (data.projects?.length)      state.projects = data.projects.map(p=>{if(!p.steps)p.steps=[];return p;});
-    if (data.breaks?.length)        state.breaks = data.breaks;
-    if (data.aay)                   state.aay = {...state.aay,...data.aay};
-    if (data.achievements?.length)  state.achievements = data.achievements;
-    if (data.growth?.length)        state.growth = data.growth;
-    if (data.milestones?.length)    state.milestones = data.milestones;
-    if (data.places?.length)        state.places = data.places.map(p=>({...p,photos:(p.photos||[]).map(ph=>({...ph,url:ph.storageUrl||ph.url}))}));
-    if (data.gallery) {
-      const r = arr => (arr||[]).map(i=>({...i,img:i.storageUrl||i.img}));
-      state.gallery = {memories:r(data.gallery.memories),visionboard:r(data.gallery.visionboard)};
+    const { data, error } = await _supabase
+      .from('sanctuary_data')
+      .select('*')
+      .eq('id', _currentUser.id)
+      .single();
+    if (error || !data) return; // no remote data yet — use local
+    // Merge remote into state (remote wins for text data; blobs stay local via IDB)
+    if (data.goals?.length)          state.goals = data.goals;
+    if (data.notes?.length)          state.notes = data.notes.map(n => ({...n, attachments: (n.attachments||[]).map(a => ({...a, url: a.storageUrl || a.url}))}));
+    if (data.diary_entries?.length)  state.diaryEntries = data.diary_entries;
+    if (data.projects?.length)       state.projects = data.projects.map(p=>{if(!p.steps)p.steps=[];return p;});
+    if (data.breaks?.length)         state.breaks = data.breaks;
+    if (data.aay)                    state.aay = {...state.aay, ...data.aay};
+    if (data.achievements?.length)   state.achievements = data.achievements;
+    if (data.growth?.length)         state.growth = data.growth;
+    if (data.milestones?.length)     state.milestones = data.milestones;
+    if (data.places?.length) {
+      state.places = data.places.map(p => ({
+        ...p,
+        photos: (p.photos||[]).map(ph => ({...ph, url: ph.storageUrl || ph.url}))
+      }));
     }
-    if (data.alarms?.length)    state.alarms = data.alarms;
-    if (data.reminders?.length) state.reminders = data.reminders;
-    if (data.trash?.length)     state.trash = data.trash;
+    if (data.gallery)                {
+      // Restore storageUrl as img so cross-device photos display immediately
+      const restoreGal = arr => (arr||[]).map(i=>({...i, img: i.storageUrl||i.img}));
+      state.gallery = { memories: restoreGal(data.gallery.memories), visionboard: restoreGal(data.gallery.visionboard) };
+    }
+    if (data.alarms?.length)         state.alarms = data.alarms;
+    if (data.reminders?.length)      state.reminders = data.reminders;
+    if (data.trash?.length)          state.trash = data.trash;
     if (data.profile) {
       if(data.profile.name) state.profile.name = data.profile.name;
       if(data.profile.tagline) state.profile.tagline = data.profile.tagline;
       if(data.profile.initials) state.profile.initials = data.profile.initials;
-      if(data.profile.avatarStorageUrl) { state.profile.avatarStorageUrl=data.profile.avatarStorageUrl; state.profile.avatar=data.profile.avatarStorageUrl; updateAvatarUI(data.profile.avatarStorageUrl); }
+      // Always apply the cloud avatar URL — it is the authoritative cross-device source.
+      // A local blob:/data: URL only works on the device that created it; the cloud URL works everywhere.
+      if(data.profile.avatarStorageUrl) {
+        state.profile.avatarStorageUrl = data.profile.avatarStorageUrl;
+        state.profile.avatar = data.profile.avatarStorageUrl;
+        updateAvatarUI(data.profile.avatarStorageUrl);
+      }
     }
-    if (data.app_theme)    applyAppTheme(data.app_theme, null, true);
-    if (data.hero_theme)   { state.heroTheme=data.hero_theme; applyHeroTheme(data.hero_theme, true); }
-    if (data.notes_layout) { state.notesLayout=data.notes_layout; setNotesLayout(data.notes_layout); }
+    if (data.app_theme)  applyAppTheme(data.app_theme, null, true);
+    if (data.hero_theme) { state.heroTheme = data.hero_theme; applyHeroTheme(data.hero_theme, true); }
+    if (data.notes_layout) { state.notesLayout = data.notes_layout; setNotesLayout(data.notes_layout); }
     if (data.music_tracks?.length) {
-      const localIds=new Set(state.music.tracks.map(t=>t.id));
-      data.music_tracks.forEach(t=>{if(!localIds.has(t.id))state.music.tracks.push(t);});
+      // Merge: keep tracks that exist locally (have blobUrl); add new ones from remote (they'll need re-upload)
+      const localIds = new Set(state.music.tracks.map(t=>t.id));
+      data.music_tracks.forEach(t => { if(!localIds.has(t.id)) state.music.tracks.push(t); });
     }
     if (data.music_playlists?.length) {
-      const auto=state.music.playlists.filter(p=>p.auto);
-      state.music.playlists=[...auto,...data.music_playlists.filter(p=>!p.auto)];
+      const auto = state.music.playlists.filter(p=>p.auto);
+      state.music.playlists = [...auto, ...data.music_playlists.filter(p=>!p.auto)];
     }
+    // Streak is derived from real activity (diary/goals/notes), never trusted
+    // as a stored number — recompute now that cloud activity has merged in,
+    // so a streak built on another device is correctly reflected here too.
     recalculateStreak();
+    // Re-render everything with fresh data
     updateProfileUI(); renderDashTasks(); renderDashProjects(); renderWeekHeatmap('week-heatmap');
     renderGoals(); renderGoalsWeek(); renderNotes(); renderDiary(); renderProjects();
     renderBreaks(); renderAAY(state.aayFilterMode||'all'); renderAchievements();
     renderGrowth(); renderTimeline(); renderAnalytics(); renderAlarms(); renderReminders();
     renderTrash(); rebuildQueue(); renderMusicLibrary(); renderPlaylists();
+    // Restore blobs for remote data (places/gallery/notes will have blobKeys; IDB may or may not have them)
     await restoreGalleryBlobs().catch(()=>{});
     await restorePlacesBlobs().catch(()=>{});
     await restoreNoteAttachmentBlobs().catch(()=>{});
@@ -5235,13 +5240,41 @@ async function loadFromSupabase() {
   } catch(e) { console.warn('loadFromSupabase failed', e); }
 }
 
-// ═══════════════════════════════════════════════════════
-// CLEAR STATE ON SIGN OUT
-// ═══════════════════════════════════════════════════════
+// Hook save() to also schedule a cloud sync
+const _origSave = save;
+window.save = function() {
+  _origSave();
+  scheduleSyncToSupabase();
+};
+
+// Add sync status bar to topbar
+function injectSyncBar() {
+  const topbar = document.querySelector('.topbar');
+  if (!topbar || document.getElementById('sync-status-bar')) return;
+  const bar = document.createElement('div');
+  bar.id = 'sync-status-bar';
+  bar.style.cssText = 'display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3)';
+  bar.innerHTML = `
+    <div id="sync-dot" style="width:7px;height:7px;border-radius:50%;background:var(--accent);flex-shrink:0"></div>
+    <span id="sync-label">Saved</span>
+    <button onclick="authSignOut()" style="background:none;border:1px solid var(--border);border-radius:var(--radius-sm);padding:3px 8px;font-size:11px;color:var(--text3);cursor:pointer;margin-left:4px;font-family:inherit">Sign out</button>`;
+  topbar.appendChild(bar);
+}
+
+function togglePw(id, btn) {
+  const inp = document.getElementById(id);
+  if (!inp) return;
+  if (inp.type === 'password') { inp.type = 'text'; btn.style.color = '#4caf6e'; }
+  else { inp.type = 'password'; btn.style.color = 'rgba(232,245,236,0.4)'; }
+}
+
+// Boot auth
+// Wipes all local state and localStorage — called on sign-out and before
+// loading a different user's data, so no previous session bleeds through.
 function clearLocalState() {
   localStorage.removeItem(LS_KEY);
-  state.goals=[]; state.notes=[]; state.diaryEntries=[]; state.projects=[];
-  state.breaks=[
+  state.goals = []; state.notes = []; state.diaryEntries = []; state.projects = [];
+  state.breaks = [
     {id:1,name:'Evening walk',desc:'20–30 min outside',icon:'🚶',link:''},
     {id:2,name:'Chess',desc:'chess.com · quick game',icon:'♟',link:'https://chess.com'},
     {id:3,name:'Ambient music',desc:'Lofi focus playlist',icon:'🎵',link:''},
@@ -5249,69 +5282,48 @@ function clearLocalState() {
     {id:5,name:'Meditation',desc:'10 min breathwork',icon:'🧘',link:''},
     {id:6,name:'Reading',desc:'Continue current book',icon:'📚',link:''}
   ];
-  state.aay={hobbies:[],books:[],movies:[],games:[],channels:[],websites:[],skills:[],dreams:[],values:[],quotes:[],calming:[],creators:[],routines:[],habits:[],inspirations:[],comfort:[],learning:[],memorable:[],links:[]};
-  state.profile={name:'You',initials:'Y',tagline:'Curious mind. Creative soul.',avatarKey:null,avatar:null,avatarStorageUrl:null};
-  state.streak=0; state.achievements=[]; state.growth=[]; state.milestones=[];
-  state.gallery={memories:[],visionboard:[]}; state.places=[]; state.trash=[];
-  state.alarms=[]; state.reminders=[]; state.pastReminders=[];
-  state.music={tracks:[],playlists:[{id:'all',name:'All tracks',auto:true},{id:'favs',name:'Favourites',auto:true}],activePlaylistId:'all',queue:[],currentIndex:-1,shuffle:false,repeat:'off',volume:0.8,sleepTimerEnd:null,sleepTimerInterval:null};
-  state.gameBest=0; state.heroTheme='night'; state.appTheme='forest';
-  state.notesLayout='grid'; state.miniPlayerVisible=true;
+  state.aay = {hobbies:[],books:[],movies:[],games:[],channels:[],websites:[],skills:[],dreams:[],values:[],quotes:[],calming:[],creators:[],routines:[],habits:[],inspirations:[],comfort:[],learning:[],memorable:[],links:[]};
+  state.profile = {name:'You',initials:'Y',tagline:'Curious mind. Creative soul.',avatarKey:null,avatar:null,avatarStorageUrl:null};
+  state.streak = 0;
+  state.achievements = []; state.growth = []; state.milestones = [];
+  state.gallery = {memories:[],visionboard:[]};
+  state.places = []; state.trash = [];
+  state.alarms = []; state.reminders = []; state.pastReminders = [];
+  state.music = {
+    tracks:[],
+    playlists:[{id:'all',name:'All tracks',auto:true},{id:'favs',name:'Favourites',auto:true}],
+    activePlaylistId:'all',queue:[],currentIndex:-1,
+    shuffle:false,repeat:'off',volume:0.8,
+    sleepTimerEnd:null,sleepTimerInterval:null
+  };
+  state.gameBest = 0; state.heroTheme = 'night'; state.appTheme = 'forest';
+  state.notesLayout = 'grid'; state.miniPlayerVisible = true;
   updateProfileUI();
 }
 
-// ═══════════════════════════════════════════════════════
-// HOOK save() → schedule cloud sync
-// ═══════════════════════════════════════════════════════
-const _origSave = save;
-window.save = function() {
-  _origSave();
-  scheduleSyncToSupabase();
-};
-
-// ═══════════════════════════════════════════════════════
-// BOOT — runs once on page load
-// ═══════════════════════════════════════════════════════
 (async () => {
-  // getSession reads from localStorage — works offline with no network call
-  let session = null;
-  try { const { data } = await _supabase.auth.getSession(); session = data.session; }
-  catch(e) { console.warn('getSession error:', e); }
-
+  const { data: { session } } = await _supabase.auth.getSession();
   document.getElementById('main-app').style.visibility = 'visible';
-
   if (session) {
     _currentUser = session.user;
     document.getElementById('auth-screen').style.display = 'none';
     injectSyncBar();
+    await loadFromSupabase();
+    // Set profile name from auth metadata if not set
     if ((!state.profile.name || state.profile.name === 'You') && _currentUser.user_metadata?.name) {
       state.profile.name = _currentUser.user_metadata.name;
       state.profile.initials = _currentUser.user_metadata.name[0].toUpperCase();
       updateProfileUI();
     }
-    if (navigator.onLine) {
-      await loadFromSupabase().catch(e => console.warn('initial load failed', e));
-    } else {
-      setSyncStatus('err');
-      toast('Offline — showing your saved data 📦');
-    }
-  } else {
-    // No session — show auth screen
-    document.getElementById('auth-screen').style.display = 'flex';
+    checkOnboarding();
   }
 
-  // When coming back online, sync automatically
-  window.addEventListener('online', async () => {
-    if (_currentUser) {
-      setSyncStatus('syncing');
-      await loadFromSupabase().catch(() => setSyncStatus('err'));
-      toast('Back online — synced ✅');
-    }
-  });
-
-  // Auth state changes (sign in / sign out)
+  // Listen for sign-in / sign-out events
   _supabase.auth.onAuthStateChange(async (event, session) => {
     if (event === 'SIGNED_IN' && session) {
+      // Clear any previous user's data before loading the new user's data.
+      // Without this, a new user with no Supabase data yet would see the
+      // previous user's localStorage data still in state.
       clearLocalState();
       _currentUser = session.user;
       document.getElementById('auth-screen').style.display = 'none';
@@ -5321,7 +5333,8 @@ window.save = function() {
         state.profile.initials = _currentUser.user_metadata.name[0].toUpperCase();
         updateProfileUI();
       }
-      await loadFromSupabase().catch(e => console.warn('post-signin load failed', e));
+      await loadFromSupabase();
+      checkOnboarding();
     }
     if (event === 'SIGNED_OUT') {
       clearLocalState();
@@ -5748,6 +5761,297 @@ if ('serviceWorker' in navigator) {
 
 
 // ═══════════════════════════════════════════════════════════
+// OFFLINE SYNC — IndexedDB for complete offline access + sync
+// ═══════════════════════════════════════════════════════════
+(function(){
+  const DB_NAME = 'sanctuary_offline';
+  const DB_VERSION = 2;
+  const STORE_NAME = 'user_data';
+  
+  let db = null;
+
+  async function initDB() {
+    return new Promise((resolve, reject) => {
+      const req = indexedDB.open(DB_NAME, DB_VERSION);
+      
+      req.onerror = () => reject(req.error);
+      req.onsuccess = () => {
+        db = req.result;
+        resolve(db);
+      };
+      
+      req.onupgradeneeded = (e) => {
+        const idb = e.target.result;
+        if (!idb.objectStoreNames.contains(STORE_NAME)) {
+          idb.createObjectStore(STORE_NAME);
+        }
+      };
+    });
+  }
+
+  async function saveOfflineState() {
+    if (!db) await initDB();
+    if (!_currentUser) return;
+    
+    return new Promise((resolve) => {
+      const tx = db.transaction([STORE_NAME], 'readwrite');
+      const store = tx.objectStore(STORE_NAME);
+      
+      const data = {
+        userId: _currentUser.id,
+        email: _currentUser.email,
+        userName: _currentUser.user_metadata?.name || state.profile.name || '',
+        state: state,
+        savedAt: new Date().toISOString(),
+        version: DB_VERSION
+      };
+      
+      store.put(data, 'current_user');
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => resolve();
+    });
+  }
+
+  async function loadOfflineState(userId) {
+    if (!db) await initDB();
+    
+    return new Promise((resolve) => {
+      const tx = db.transaction([STORE_NAME], 'readonly');
+      const store = tx.objectStore(STORE_NAME);
+      const req = store.get('current_user');
+      
+      req.onsuccess = () => {
+        const data = req.result;
+        if (data && (data.userId === userId || !userId)) {
+          resolve(data);
+        } else {
+          resolve(null);
+        }
+      };
+      req.onerror = () => resolve(null);
+    });
+  }
+
+  // Expose functions
+  window._offlineDB = {
+    init: initDB,
+    save: saveOfflineState,
+    load: loadOfflineState
+  };
+
+  // Initialize on load
+  window.addEventListener('load', () => {
+    initDB().catch(e => console.log('IndexedDB init (non-critical):', e));
+  });
+
+  // Hook save to persist offline
+  let _hooked = false;
+  function hookSave() {
+    if (_hooked) return;
+    _hooked = true;
+    const orig = window.save;
+    window.save = function() {
+      orig.apply(this, arguments);
+      saveOfflineState().catch(() => {});
+    };
+  }
+  
+  setTimeout(hookSave, 500);
+})();
+
+// ═══════════════════════════════════════════════════════
+// OFFLINE LOGIN — cache emails for offline access + security
+// ═══════════════════════════════════════════════════════
+(function(){
+  const OFFLINE_USERS_KEY = 'sanctuary_offline_users';
+  const OFFLINE_SESSION_KEY = 'sanctuary_offline_session';
+
+  function saveOfflineUser(user) {
+    try {
+      const existing = JSON.parse(localStorage.getItem(OFFLINE_USERS_KEY) || '[]');
+      if (!existing.find(u => u.id === user.id)) {
+        existing.push({
+          id: user.id,
+          email: user.email,
+          name: user.user_metadata?.name || '',
+          savedAt: Date.now()
+        });
+        localStorage.setItem(OFFLINE_USERS_KEY, JSON.stringify(existing));
+      }
+    } catch(e) {}
+  }
+
+  function getOfflineUsers() {
+    try {
+      return JSON.parse(localStorage.getItem(OFFLINE_USERS_KEY) || '[]');
+    } catch(e) {
+      return [];
+    }
+  }
+
+  window._saveOfflineUser = saveOfflineUser;
+  window._getOfflineUsers = getOfflineUsers;
+
+  async function checkAndShowOfflineOption() {
+    if (navigator.onLine) return;
+    const users = getOfflineUsers();
+    if (!users.length) return;
+
+    let picker = document.getElementById('offline-user-picker');
+    if (picker) return;
+
+    picker = document.createElement('div');
+    picker.id = 'offline-user-picker';
+    picker.style.cssText = 'background:rgba(76,175,110,0.08);border:1px solid rgba(76,175,110,0.2);border-radius:10px;padding:12px;margin-bottom:14px';
+    picker.innerHTML = `<div style="font-size:11px;font-weight:700;color:var(--accent3);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px">📶 Offline mode available</div>` +
+      users.map(u => `
+        <div onclick="offlineSignIn('${u.id}','${u.email}')" style="display:flex;align-items:center;gap:10px;padding:8px;border-radius:8px;cursor:pointer;background:rgba(255,255,255,0.04);margin-bottom:6px;transition:all 0.15s">
+          <div style="width:32px;height:32px;border-radius:8px;background:var(--accent2);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff">${(u.name || u.email)[0].toUpperCase()}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${u.name || u.email}</div>
+            <div style="font-size:11px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${u.email}</div>
+          </div>
+        </div>
+      `).join('');
+
+    const loginForm = document.getElementById('auth-login-form');
+    if (loginForm) loginForm.parentNode.insertBefore(picker, loginForm);
+  }
+
+  window.offlineSignIn = async function(userId, email) {
+    // Load last known state from IndexedDB
+    try {
+      if (window._offlineDB && window._offlineDB.load) {
+        const offlineData = await window._offlineDB.load(userId);
+        if (offlineData && offlineData.state) {
+          // Restore entire state from IndexedDB
+          Object.assign(state, offlineData.state);
+        }
+      }
+    } catch(e) {
+      console.log('IndexedDB load failed, trying localStorage fallback:', e);
+      // Fallback to localStorage if IndexedDB fails
+      const userDataKey = 'sanctuary_offline_' + userId;
+      try {
+        const saved = localStorage.getItem(userDataKey);
+        if (saved) {
+          const data = JSON.parse(saved);
+          state.goals = data.goals || [];
+          state.notes = data.notes || [];
+          state.diaryEntries = data.diaryEntries || [];
+          state.projects = data.projects || [];
+          state.breaks = data.breaks || state.breaks;
+          state.aay = data.aay || state.aay;
+          state.streak = data.streak || 0;
+          state.profile = data.profile || state.profile;
+          state.achievements = data.achievements || [];
+          state.growth = data.growth || [];
+          state.milestones = data.milestones || [];
+          state.gallery = data.gallery || state.gallery;
+          state.places = data.places || [];
+          state.alarms = data.alarms || [];
+          state.reminders = data.reminders || [];
+          state.trash = data.trash || [];
+          state.music = data.music || state.music;
+          if (data.appTheme) applyAppTheme(data.appTheme, null, true);
+          if (data.heroTheme) { state.heroTheme = data.heroTheme; applyHeroTheme(data.heroTheme, true); }
+        }
+      } catch(e2) {}
+    }
+
+    _currentUser = { id: userId, email, user_metadata: { name: localStorage.getItem('sanctuary_uid_name_' + userId) || '' } };
+    document.getElementById('auth-screen').style.display = 'none';
+    injectSyncBar();
+    updateProfileUI();
+    renderDashTasks();
+    renderNotes();
+    renderGoals();
+    renderProjects();
+    renderBreaks();
+    renderAAY('all');
+    renderAchievements();
+    renderGrowth();
+    renderTimeline();
+    renderAnalytics();
+    renderAlarms();
+    renderReminders();
+    renderTrash();
+    renderMusicLibrary();
+    toast('📶 Offline mode — data loaded. Will sync when online.');
+
+    // Try to sync when online again
+    window.addEventListener('online', async () => {
+      try {
+        const { data: { session } } = await _supabase.auth.signInWithPassword({
+          email: email,
+          password: localStorage.getItem('sanctuary_offline_pass_' + userId) || ''
+        }).catch(() => ({ data: { session: null } }));
+
+        if (session) {
+          _currentUser = session.user;
+          await loadFromSupabase();
+          toast('✅ Back online — data synced');
+        }
+      } catch(e) {
+        console.warn('Auto-sync on online failed:', e);
+      }
+    }, { once: true });
+  };
+
+  window.addEventListener('online', () => {
+    const p = document.getElementById('offline-user-picker');
+    if (p) p.remove();
+  });
+
+  window.addEventListener('offline', checkAndShowOfflineOption);
+  setTimeout(checkAndShowOfflineOption, 1000);
+
+  // Hook save() to also cache user data for offline
+  const _origSaveLast = window.save;
+  window.save = function() {
+    _origSaveLast.apply(this, arguments);
+    if (typeof _currentUser !== 'undefined' && _currentUser) {
+      try {
+        localStorage.setItem('sanctuary_uid_name_' + _currentUser.id, state.profile.name || '');
+        const offlineData = {
+          goals: state.goals,
+          notes: state.notes,
+          diaryEntries: state.diaryEntries,
+          projects: state.projects,
+          breaks: state.breaks,
+          aay: state.aay,
+          streak: state.streak,
+          profile: state.profile,
+          achievements: state.achievements,
+          growth: state.growth,
+          milestones: state.milestones,
+          gallery: state.gallery,
+          places: state.places,
+          alarms: state.alarms,
+          reminders: state.reminders,
+          trash: state.trash,
+          music: state.music,
+          appTheme: state.appTheme,
+          heroTheme: state.heroTheme,
+          notesLayout: state.notesLayout,
+          savedAt: new Date().toISOString()
+        };
+        localStorage.setItem('sanctuary_offline_' + _currentUser.id, JSON.stringify(offlineData));
+      } catch(e) {}
+    }
+  };
+
+  // Hook auth to save offline user record on sign-in
+  if (typeof _supabase !== 'undefined' && _supabase.auth) {
+    _supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session && window._saveOfflineUser) {
+        window._saveOfflineUser(session.user);
+      }
+    });
+  }
+})();
+
+// ═══════════════════════════════════════════════════════
 // PWA INSTALL — desktop + Android Chrome/Edge prompt
 // ═══════════════════════════════════════════════════════
 (function(){
