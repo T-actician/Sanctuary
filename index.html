@@ -2766,7 +2766,10 @@ async function showAttachmentInViewer(att) {
     try {
       let imgBlob;
       if (att.blobKey) imgBlob = await idbGet(att.blobKey);
-      if (!imgBlob) imgBlob = await fetch(src).then(r => r.blob());
+      if (!imgBlob) {
+        const res = await fetch(src, {headers: {'Cache-Control': 'no-store'}});
+        imgBlob = await res.blob();
+      }
       if (_attCurrentBlobUrl) URL.revokeObjectURL(_attCurrentBlobUrl);
       _attCurrentBlobUrl = URL.createObjectURL(imgBlob);
       imgEl.style.transform = 'scale(1) translate(0px,0px)';
@@ -2794,21 +2797,19 @@ async function showAttachmentInViewer(att) {
       }
       _attSetProgress(50, 'Parsing PDF…');
       // Try IDB blob first (avoids CORS entirely), fall back to URL for pdfjs
-      let pdfSource;
+      // Always load as ArrayBuffer in memory — never expose raw URL to browser/IDM
+      let pdfData;
       if (att.blobKey) {
         const blob = await idbGet(att.blobKey);
-        if (blob) {
-          if (_attCurrentBlobUrl) URL.revokeObjectURL(_attCurrentBlobUrl);
-          _attCurrentBlobUrl = URL.createObjectURL(blob);
-          pdfSource = {url: _attCurrentBlobUrl};
-        }
+        if (blob) pdfData = await blob.arrayBuffer();
       }
-      if (!pdfSource) {
-        // Pass URL directly to pdfjs — its loader handles CORS better than fetch()
-        pdfSource = {url: src, withCredentials: false};
+      if (!pdfData) {
+        // Fetch into memory — IDM can't intercept an in-memory ArrayBuffer
+        const res = await fetch(src, {headers: {'Cache-Control': 'no-store'}});
+        pdfData = await res.arrayBuffer();
       }
       _attSetProgress(70, 'Rendering…');
-      _attPdfDoc = await window.pdfjsLib.getDocument(pdfSource).promise;
+      _attPdfDoc = await window.pdfjsLib.getDocument({data: pdfData}).promise;
       await _attRenderPdfPage(1);
       _attSetProgress(100);
     } catch(e) { _attHideAllPanels(); fb('📄', 'PDF could not be rendered: ' + e.message); }
@@ -2832,7 +2833,7 @@ async function showAttachmentInViewer(att) {
       } else {
         let xlsAb;
         if (att.blobKey) { const b = await idbGet(att.blobKey); if(b) xlsAb = await b.arrayBuffer(); }
-        if (!xlsAb) xlsAb = await fetch(src).then(r=>r.arrayBuffer());
+        if (!xlsAb) { const res = await fetch(src, {headers: {'Cache-Control': 'no-store'}}); xlsAb = await res.arrayBuffer(); }
         wb = window.XLSX.read(xlsAb, {type:'array'});
       }
       _attSetProgress(80, 'Rendering table…');
@@ -2858,7 +2859,10 @@ async function showAttachmentInViewer(att) {
       _attSetProgress(60, 'Converting…');
       let docxAb;
       if (att.blobKey) { const b = await idbGet(att.blobKey); if(b) docxAb = await b.arrayBuffer(); }
-      if (!docxAb) docxAb = await fetch(src).then(r=>r.arrayBuffer());
+      if (!docxAb) {
+        const res = await fetch(src, {headers: {'Cache-Control': 'no-store'}});
+        docxAb = await res.arrayBuffer();
+      }
       const result = await window.mammoth.convertToHtml({arrayBuffer: docxAb});
       _attSetProgress(90, 'Rendering…');
       docxEl.innerHTML = `<style>
@@ -2889,7 +2893,7 @@ async function showAttachmentInViewer(att) {
     try {
       let txtContent;
       if (att.blobKey) { const b = await idbGet(att.blobKey); if(b) txtContent = await b.text(); }
-      if (!txtContent) txtContent = await fetch(src).then(r=>r.text());
+      if (!txtContent) { const res = await fetch(src, {headers: {'Cache-Control': 'no-store'}}); txtContent = await res.text(); }
       textEl.textContent = txtContent || '(Empty file)';
       _attSetProgress(100);
     } catch(e) { _attHideAllPanels(); fb('📃', 'File could not be loaded: ' + e.message); }
