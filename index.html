@@ -2709,6 +2709,28 @@ async function _attRenderPdfPage(pageNum) {
 async function attPdfPrev() { if(_attPdfPage>1){_attPdfPage--;await _attRenderPdfPage(_attPdfPage);} }
 async function attPdfNext() { if(_attPdfDoc&&_attPdfPage<_attPdfDoc.numPages){_attPdfPage++;await _attRenderPdfPage(_attPdfPage);} }
 
+function _attInitPdfSwipe() {
+  const panel = document.getElementById('att-panel-pdf');
+  if (!panel || panel._swipeInited) return;
+  panel._swipeInited = true;
+  let _startX = 0, _startY = 0, _startTime = 0;
+  panel.addEventListener('touchstart', e => {
+    _startX = e.touches[0].clientX;
+    _startY = e.touches[0].clientY;
+    _startTime = Date.now();
+  }, {passive: true});
+  panel.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - _startX;
+    const dy = e.changedTouches[0].clientY - _startY;
+    const dt = Date.now() - _startTime;
+    // Only register as swipe if: fast enough, mostly horizontal, moved enough
+    if (dt < 400 && Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+      if (dx < 0) attPdfNext(); // swipe left = next page
+      else attPdfPrev();        // swipe right = prev page
+    }
+  }, {passive: true});
+}
+
 async function showAttachmentInViewer(att) {
   if (!att) return;
   _attViewerCurrentAtt = att;
@@ -2778,6 +2800,7 @@ async function showAttachmentInViewer(att) {
 
   } else if (isPdf) {
     _attShowPanel('att-panel-pdf');
+    _attInitPdfSwipe();
     const nav = document.getElementById('att-viewer-pdf-nav');
     if (nav) nav.style.display = 'flex';
     const page_lbl = document.getElementById('att-viewer-pdf-page');
